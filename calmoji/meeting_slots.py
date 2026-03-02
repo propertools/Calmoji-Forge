@@ -15,7 +15,8 @@ MEETING_SLOTS = [
     ("Mecca",        11,  5, 11, 30,  "14:05–14:30 AST"),   # Slot B
     ("Brussels",     11, 35, 12,  0,  "13:35–14:00 CEST"),  # Slot A
     ("Brussels",     12,  5, 12, 30,  "14:05–14:30 CEST"),  # Slot B
-    ("Havana",       17, 35, 18,  0,  "13:35–14:00 EDT"),
-    ("Havana",       18, 5,  18, 30,  "14:05–14:30 EDT"),    ("Seattle",      20, 35, 21, 0,  "13:35–14:00 PDT"),   # Slot A
+    ("Havana",       17, 35, 18,  0,  "13:35–14:00 EDT"),   # Slot A
+    ("Havana",       18, 5,  18, 30,  "14:05–14:30 EDT"),   # Slot B
+    ("Seattle", 20, 35, 21, 0,  "13:35–14:00 PDT"),         # Slot A
     ("Seattle",      21,  5, 21, 30,  "14:05–14:30 PDT"),   # Slot B
 ]
