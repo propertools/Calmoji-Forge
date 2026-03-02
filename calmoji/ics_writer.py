@@ -285,35 +285,3 @@ def write_ebi48_layer(
         comments=comments,
         sort_by_start=True,
     )
-
-
-
-def generate_ics_file(start: datetime.datetime, output) -> None:
-    """
-    Backwards-compatible stream writer.
-
-    Writes a full VCALENDAR to a writable text stream (e.g. io.StringIO).
-    This function CLIPS output to the calendar year [Jan 1, Jan 1 next year).
-    """
-    from datetime import timezone
-    from calmoji.calendar_phases import get_semester_phases
-    from calmoji.generator import get_all_events
-
-    # Normalize to UTC + derive year window
-    year = start.year
-    year_start = datetime.datetime(year, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
-    year_end = datetime.datetime(year + 1, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
-
-    phases = get_semester_phases(year, alignment="calendar")
-    events = get_all_events(phases)
-
-    # ✅ Clip by DTSTART window to satisfy test_2039 semantics
-    events = [e for e in events if (e.start >= year_start and e.start < year_end)]
-
-    output.write(fold_lines(create_ics_header(calname="🧿 calmoji calendar")) + "\r\n")
-    for i, event in enumerate(sorted(events, key=lambda e: e.start)):
-        try:
-            output.write(fold_lines(event.to_ics()) + "\r\n")
-        except Exception as e:
-            raise ValueError(f"Failed to render event at index {i}: {event}") from e
-    output.write(fold_lines(create_ics_footer()) + "\r\n")
