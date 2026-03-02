@@ -91,7 +91,7 @@ def _get_first_meeting_phase(year: int = 2025, alignment: str = DEFAULT_ALIGNMEN
 
 def get_mecca_events(year: int = 2025, alignment: str = DEFAULT_ALIGNMENT):
     phase = _get_first_meeting_phase(year, alignment)
-    events = generate_meeting_slots(phase, interval_weeks=1, include_oceania=False)
+    events = generate_meeting_slots(phase, include_oceania=False)
     return [e for e in events if e.summary.startswith("Mecca ")]
 
 
