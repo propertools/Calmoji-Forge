@@ -34,8 +34,6 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--no-ebi48", action="store_true", help="Do not emit EBI48 overlay")
 
     # Meeting slot cadence knobs (stabilized API)
-    p.add_argument("--meeting-interval-weeks", type=int, default=3, help="Emit meeting slots every N weeks (default: 3)")
-    p.add_argument("--meeting-max-cycles", type=int, default=None, help="Cap meeting slot cycles (default: unlimited)")
     p.add_argument("--include-oceania", action="store_true", help="Include Auckland/Oceania slots")
 
     p.add_argument("--version", action="version", version="calmoji v2025.1")
@@ -87,8 +85,6 @@ def main() -> None:
             events = generate_meeting_slots(
                 phase,
                 include_oceania=bool(args.include_oceania),
-                interval_weeks=int(args.meeting_interval_weeks),
-                max_cycles=args.meeting_max_cycles,
             )
             all_meeting_events.extend(events)
 
