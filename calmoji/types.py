@@ -153,15 +153,14 @@ class Phase:
 
 
 PhaseName = Literal[
-    "Seed",
-    "Flame",
-    "Downtime A→B",
+    "Semester A (Seed)",
     "Winter Break",
+    "Semester A (cont.)",
+    "Downtime A→B",
+    "Semester B (Flame)",
     "Summer Rest",
     "Deep Work Phase",
-    "Semester A (Seed)",
-    "Semester A (cont.)",
-    "Semester B (Flame)",
+    "Autumn Drift",
 ]
 
 
