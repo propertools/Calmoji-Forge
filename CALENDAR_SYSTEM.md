@@ -7,6 +7,7 @@
 | 📅 Semester Phases | Seasonal arc — know what mode you're in |
 | 🧠 Focus Blocks | Daily palette — copy into 🎯 to claim time |
 | 🕒 Meeting Slots | Bookable windows by city/tz — copy into 🤝 or 🔄 to book |
+| 🧿 EBI48 Clock | Symbolic time layer — 48 half-hour emoji anchors, UTC-fixed |
 
 ## Working Calendars
 
