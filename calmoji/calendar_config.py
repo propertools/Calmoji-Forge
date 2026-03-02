@@ -24,7 +24,7 @@ ALIGNMENTS = {
 
 # 🎯 Constants derived from the keys
 ALIGNMENT_MODES = set(ALIGNMENTS.keys())
-DEFAULT_ALIGNMENT = "calendar"
+DEFAULT_ALIGNMENT = "academic"
 
 
 def get_year_start_date(year: int, alignment: str = DEFAULT_ALIGNMENT) -> datetime:
