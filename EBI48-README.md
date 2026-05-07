@@ -35,7 +35,7 @@ Example:
 🦊 Fox Face
 ⛰️ Mountain Face
 
-````
+```
 
 Every slot has exactly one symbol.  
 Every symbol corresponds to exactly one half-hour.
@@ -155,7 +155,7 @@ In Python:
 from calmoji.ebi48 import get_emoji_for_time
 
 emoji, label = get_emoji_for_time(dt_utc)
-````
+```
 
 The mapping table is exposed as:
 
@@ -202,8 +202,6 @@ EBI48 v2025
 UTC-only.
 Deterministic.
 Canonical.
-
-```
 
 ---
 

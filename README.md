@@ -198,12 +198,25 @@ Clone:
 
 ```bash
 git clone https://github.com/propertools/Calmoji-Forge.git
-cd calmoji
+cd Calmoji-Forge
 ```
 
-Generate:
+Install (editable, with dev extras):
 
 ```bash
+pip install -e '.[dev]'
+```
+
+Or install directly from GitHub without cloning:
+
+```bash
+pip install 'calmoji @ git+https://github.com/propertools/Calmoji-Forge.git'
+```
+
+Generate (either form works once installed):
+
+```bash
+calmoji --year=2039
 python3 calmoji.py --year=2039
 ```
 
@@ -225,11 +238,10 @@ Disable layers:
 
 ## 🧪 Test Discipline
 
-Current status:
+Run the suite:
 
-```
-51 passed
-0 failed
+```bash
+pytest --cov=calmoji --cov-report=term-missing
 ```
 
 Coverage includes:
