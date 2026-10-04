@@ -18,9 +18,6 @@ ALIGNMENTS: dict[str, Callable[[int], datetime]] = {
     "fiscal_eu": lambda year: datetime(year, 1, 1, tzinfo=UTC),
     "japanese_school": lambda year: datetime(year, 4, 1, tzinfo=UTC),
     "indian_fiscal": lambda year: datetime(year, 4, 1, tzinfo=UTC),
-    # TODO: placeholder anchors (still UTC-aware)
-    "chinese_lunar": lambda year: datetime(year, 2, 10, tzinfo=UTC),
-    "islamic_hijri": lambda year: datetime(year, 7, 7, tzinfo=UTC),
 }
 
 # 🎯 Constants derived from the keys

@@ -5,8 +5,8 @@ End-to-end checks on the monthly files the CLI writes.
 Focus blocks and meeting slots are written one file per UTC month under focus/ and
 meetings/. These tests generate real files through the CLI and read them back, for
 the two common alignments over consecutive years that include leap years (2027
-academic spans 29 Feb 2028; 2028 calendar is itself a leap year), and for the two
-placeholder alignments whose years start mid-month.
+academic spans 29 Feb 2028; 2028 calendar is itself a leap year), and for a test-only
+alignment (see tests/conftest.py) whose years start mid-month, on 10 February.
 """
 
 from __future__ import annotations
@@ -32,6 +32,7 @@ DAY = datetime.timedelta(days=1)
 
 ALIGNMENTS = ["academic", "calendar"]
 MARKER = OUTPUT_MARKER_NAME
+MIDMONTH = "_test_midmonth"  # injected by the midmonth_alignment fixture, anchored on 10 February
 YEARS = [2026, 2027, 2028, 2029]
 BLOCKS_PER_DAY = len(FOCUS_BLOCKS)
 MONTH_FILE_RE = re.compile(r"^(focus|meetings)_(\d{4})-(\d{2})\.ics$")
@@ -44,10 +45,10 @@ def run_cli(outdir: Path, year: int, alignment: str, *extra: str) -> None:
 
 
 @pytest.fixture(scope="module")
-def outputs(tmp_path_factory: pytest.TempPathFactory) -> Outputs:
+def outputs(tmp_path_factory: pytest.TempPathFactory, midmonth_alignment: str) -> Outputs:
     """Run the CLI once per (alignment, year) with default options."""
     result: Outputs = {}
-    for alignment in ["academic", "calendar", "chinese_lunar", "islamic_hijri"]:
+    for alignment in ["academic", "calendar", MIDMONTH]:
         for year in YEARS:
             outdir = tmp_path_factory.mktemp(f"{alignment}-{year}")
             run_cli(outdir, year, alignment)
@@ -92,7 +93,7 @@ def all_events(outdir: Path, kind: str) -> List[Tuple[str, Ics]]:
 # -----------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize("alignment", ["academic", "calendar", "chinese_lunar", "islamic_hijri"])
+@pytest.mark.parametrize("alignment", ["academic", "calendar", MIDMONTH])
 @pytest.mark.parametrize("year", YEARS)
 def test_layout(outputs, alignment, year):
     outdir = outputs[(alignment, year)]
@@ -144,7 +145,7 @@ def test_calendar_names_are_constant_per_layer(outputs, alignment):
 # -----------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize("alignment", ["academic", "calendar", "chinese_lunar", "islamic_hijri"])
+@pytest.mark.parametrize("alignment", ["academic", "calendar", MIDMONTH])
 @pytest.mark.parametrize("year", YEARS)
 @pytest.mark.parametrize("kind", ["focus", "meetings"])
 def test_every_event_is_in_the_file_of_its_utc_month(outputs, alignment, year, kind):
@@ -154,7 +155,7 @@ def test_every_event_is_in_the_file_of_its_utc_month(outputs, alignment, year, k
         assert start_of(event).strftime("%Y-%m") == month, f"{kind}_{month}: {event['SUMMARY']} {event.get('DTSTART')}"
 
 
-@pytest.mark.parametrize("alignment", ["academic", "calendar", "chinese_lunar", "islamic_hijri"])
+@pytest.mark.parametrize("alignment", ["academic", "calendar", MIDMONTH])
 @pytest.mark.parametrize("year", YEARS[:-1])
 def test_no_event_appears_in_two_files(outputs, alignment, year):
     # Within a year's folder, and across the folders of consecutive years (where a mid-month
@@ -171,7 +172,7 @@ def test_no_event_appears_in_two_files(outputs, alignment, year):
     assert max(starts.values()) == 1
 
 
-@pytest.mark.parametrize("alignment", ["chinese_lunar", "islamic_hijri"])
+@pytest.mark.parametrize("alignment", [MIDMONTH])
 def test_a_mid_month_anchor_splits_the_edge_month_between_two_folders(outputs, alignment):
     anchor = get_year_start_date(2028, alignment)
     assert anchor.day != 1

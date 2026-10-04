@@ -226,8 +226,7 @@ python3 calmoji.py --year=2027 --calendar-alignment=academic
 ```
 
 Alignments: `academic`, `calendar`, `fiscal_us`, `fiscal_eu`,
-`japanese_school`, `indian_fiscal` (plus `chinese_lunar` and
-`islamic_hijri`, which currently use placeholder anchor dates).
+`japanese_school`, `indian_fiscal`.
 
 Options:
 
