@@ -40,12 +40,7 @@ The engine works. The CLI layer is evolving.
 
 Planned:
 
-* [ ] `--calendar-mode` (academic / gregorian)
-* [ ] `--output-dir` override
-* [ ] `--dry-run` enforcement tests
-* [ ] `--version` flag (wired to package metadata)
-* [ ] Optional config file (`calmoji.yml`)
-* [ ] Combined vs per-phase export toggle
+* [ ] Optional config file (in a format the standard library can read)
 
 CLI changes must not alter core deterministic logic.
 
@@ -55,9 +50,7 @@ CLI changes must not alter core deterministic logic.
 
 * [ ] Replace residual `print()` calls with structured logging
 * [ ] Add docstrings to all public APIs
-* [ ] Ensure full type coverage (strict `mypy`)
 * [ ] Confirm no hidden local-time usage
-* [ ] Remove any hardcoded year constants
 * [ ] Expand module-level `__all__` clarity
 
 Core modules must remain import-safe and side-effect-free.
@@ -67,10 +60,16 @@ Core modules must remain import-safe and side-effect-free.
 ## 🛡 Robustness & Safety
 
 * [ ] Atomic file writes (temp + rename)
-* [ ] Explicit output directory validation
 * [ ] Harden malformed config parsing
 * [ ] Guard against malformed phase definitions
 * [ ] Validate user-supplied year bounds
+* [ ] **v0.1.3:** `unfold_ics_lines` uses `str.splitlines()`, which also
+  splits on characters iCalendar doesn't treat as line breaks (such as
+  U+2028 and U+0085). Split on CRLF only. This matters only for reading
+  files back in, not for writing them.
+* [ ] **v0.1.3:** RFC 5545 doesn't allow most control characters in TEXT
+  values, so `escape_ics_text` should reject them (raise `ValueError`)
+  instead of passing them through.
 
 Calmoji should fail loudly and clearly — never silently drift.
 
@@ -114,11 +113,14 @@ The following are already covered:
 * [x] ISO week grouping across year boundaries
 * [x] RFC folding / unfolding
 * [x] Slot generation boundary enforcement
+* [x] RFC 5545 TEXT escaping (no property injection)
+* [x] Output folders: ownership marker, clean re-runs, refusals
+* [x] The size budget, for every alignment and year 2026–2039
+* [x] `--version` from an installed package and from a source checkout
 
 Future expansion:
 
 * [ ] Simulated file write failures
-* [ ] CLI argument validation tests
 * [ ] Config parsing edge cases
 * [ ] Large-year performance sanity checks
 

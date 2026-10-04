@@ -16,17 +16,47 @@ toggle them on to plan and off to work. When you want to use a block, you
 **claim** it by copying it into your own calendar. You never build a
 schedule from scratch, and you never break the structure underneath.
 
+![A week in Proton Calendar with calmoji's layers switched on: brown open focus blocks every two hours, green meeting slots for six cities, and blue claimed focus blocks marked 🎯 for planned and ✅ for done](docs/img/planning.png)
+*The Map on: a made-up week of open focus blocks (brown), meeting slots
+(green) and the blocks already claimed (blue).*
+
+![The same week with calmoji's layers switched off: only the claimed focus blocks, a few meetings and everyday commitments remain](docs/img/working.png)
+*The Map off: the same week, showing only what was chosen.*
+
 No app, no account, no subscription fee. Just `.ics` files that work in
-Apple Calendar, Google Calendar, Outlook, Fastmail, Thunderbird, and
-anything else that speaks the iCalendar standard.
+Apple Calendar, Google Calendar, Outlook, Proton Calendar, Fastmail,
+Thunderbird, and anything else that speaks the iCalendar standard.
+
+**About as much data sovereignty as paper.** calmoji never sees your
+calendar. It makes files; you import them; everything you plan stays in
+your own calendars, with whichever provider you choose. And since almost
+every calendar app can import and export `.ics`, there's no lock-in:
+change apps whenever you like, and take your structure and your plans
+with you.
 
 ---
 
 ## 🚀 Get the calendars
 
+**In four steps:**
+
+1. Download **`calmoji-artifacts-vX.Y.Z.zip`** from the
+   [latest release](https://github.com/propertools/Calmoji-Forge/releases/latest)
+   and unzip it.
+2. In your calendar app, create a calendar for each layer (🌗 Seasons,
+   🧠 Focus — Open, 🕒 Meetings — Open, 🧿 Emoji Clock), plus one of your
+   own for what you claim, such as 🎯 Focus — Claimed.
+3. Import each file into its layer's calendar: the year's 🌗 and 🧿 files,
+   and this month's and next month's 🧠 and 🕒 files.
+4. Claim time for this week's meetings, projects and tasks by copying open
+   blocks and slots into your own calendars.
+
+The details follow.
+
 Download the ready-made calendars for **2026–2036** from the
 [latest release](https://github.com/propertools/Calmoji-Forge/releases/latest):
-grab **`calmoji-artifacts-v0.1.1.zip`** and unzip it.
+grab **`calmoji-artifacts-vX.Y.Z.zip`** (X.Y.Z is the release's version
+number) and unzip it.
 
 Inside, pick an alignment and stick with it:
 
@@ -114,6 +144,9 @@ The full pattern, with a suggested set of calendars and the weekly loop,
 is in **[docs/PLAYBOOK.md](docs/PLAYBOOK.md)**. It's a starting point, not a
 rulebook: start small and adapt it.
 
+Prefer to plan with an AI assistant? See the
+[playbook](docs/PLAYBOOK.md#optional-an-ai-agenda-steward).
+
 ---
 
 ## 🗂 What's in each layer
@@ -162,6 +195,8 @@ Like everything in calmoji, slots are fixed in UTC all year, and your
 calendar app shows them in your local time. Each slot's description says
 exactly when it falls locally.
 
+<img src="docs/img/slot-details.png" alt="An open meeting slot, Havana 🦉 Owl Face Slot, at 17:35 to 18:00 UTC. Its description reads: Early afternoon in Havana: 13:35–14:00 CDT in summer and 12:35–13:00 CST in winter. Fixed at 17:35 UTC." width="400">
+
 ### 🧿 Emoji Clock
 
 I designed EBI48 after years of watching global technical standards
@@ -175,6 +210,10 @@ moment everywhere, anchored at :05 and :35 UTC. Your calendar shows each
 one at your local time, so nobody converts anything out loud. Instead of
 doing sums, you **pick a day and look for free animals at acceptable
 times**. See [EBI48-README.md](EBI48-README.md).
+
+![A day in Proton Calendar with the Emoji Clock and open meeting slots: each half-hour has its animal, and each city's meeting slot carries the same animal as the clock at that moment](docs/img/emoji-clock.png)
+*Thursday, seen from Brussels. Delhi's 🐐 slot sits beside the 🐐 on the
+clock, because 🐐 is 08:05 UTC everywhere.*
 
 ### ⚠️ Known limitations
 
@@ -204,7 +243,11 @@ math, no off-by-one errors, clean boundaries, and deterministic tests.
 
 Stable UIDs, stable emoji mappings, stable file structure. The same inputs
 always produce byte-identical files, on any machine and any supported
-Python version. CI checks this on every commit.
+Python version. CI checks this on every commit: it generates a sample year
+twice, and on Python 3.9 and 3.13, and compares the files byte for byte.
+
+Even `DTSTAMP`, which RFC 5545 requires on every event, is a fixed,
+documented constant rather than "now", so that files stay reproducible.
 
 ---
 
@@ -225,15 +268,20 @@ newer works, including the `python3` that ships with macOS.
 python3 calmoji.py --year=2027 --calendar-alignment=academic
 ```
 
+By default the files go to `output/<year>/<alignment>/`, so different years
+and alignments never mix. calmoji only writes into a folder that is empty or
+that it made itself (it leaves a `.calmoji-output` file there), and re-running
+replaces its own files in that folder. Any other non-empty folder is refused,
+untouched.
+
 Alignments: `academic`, `calendar`, `fiscal_us`, `fiscal_eu`,
-`japanese_school`, `indian_fiscal` (plus `chinese_lunar` and
-`islamic_hijri`, which currently use placeholder anchor dates).
+`japanese_school`, `indian_fiscal`.
 
 Options:
 
 ```bash
 --year=YYYY          # required
---output-dir=DIR     # default: output/
+--output-dir=DIR     # default: output/<year>/<alignment>/
 --dry-run            # preview what would be written, month by month
 --no-meetings        # skip meeting slots
 --no-focus           # skip focus blocks
@@ -241,10 +289,11 @@ Options:
 --include-oceania    # add Auckland meeting slots
 ```
 
-Output for one year:
+Output for one year (the files are in `output/2027/academic/` here):
 
 ```
-output/
+output/2027/academic/
+├── .calmoji-output                     ← marks the folder as calmoji's
 ├── seasons_2027.ics
 ├── emoji_clock_2027.ics
 ├── focus/
@@ -265,8 +314,10 @@ calmoji --year=2027
 ```
 
 Working on calmoji itself? `python3 -m pip install -e '.[dev]'` adds the
-test, lint and type-check tools, and `bash scripts/preflight.sh` runs every
-check CI runs.
+test, lint and type-check tools, and `bash scripts/preflight.sh` runs CI's
+main checks on your machine (tests with coverage, ruff, black, mypy) plus a
+reproducible release-bundle build. CI also tests Python 3.9 through 3.13,
+compares output across Python versions, and runs on stock macOS.
 
 If you regenerate a year we publish and get a different file, that's a
 bug. Please open an issue.
@@ -286,6 +337,15 @@ for v0.2, in no promised order:
   archive.
 * **Releases built automatically** from a git tag, with byte-identical
   output checked in CI.
+
+Small fixes planned for v0.1.3 (they touch only the Python API, not the
+calendar files):
+
+* **Reading `.ics` files back in** (`unfold_ics_lines`) splits lines on more
+  characters than the iCalendar format does. It doesn't affect the files
+  calmoji writes.
+* **Control characters in text.** RFC 5545 doesn't allow most of them in text
+  values, so the escaper should reject them.
 
 Ideas and calendar-app quirks are very welcome in
 [issues](https://github.com/propertools/Calmoji-Forge/issues).

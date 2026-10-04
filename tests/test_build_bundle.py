@@ -28,7 +28,7 @@ import pytest
 import calmoji
 from calmoji.calendar_phases import get_semester_phases
 from calmoji.cli import main as calmoji_main
-from calmoji.constants import MAX_BYTES_PER_FILE, MAX_EVENTS_PER_FILE
+from calmoji.constants import MAX_BYTES_PER_FILE, MAX_EVENTS_PER_FILE, OUTPUT_MARKER_NAME
 from calmoji.ics_writer import IcsBudgetError
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -156,7 +156,12 @@ def test_main_refuses_an_uninstalled_calmoji(tmp_path, monkeypatch, capsys):
 
 
 def _tree(root: Path) -> dict:
-    return {p.relative_to(root).as_posix(): p.read_bytes() for p in sorted(root.rglob("*")) if p.is_file()}
+    """Every file under root, minus the ownership marker the CLI adds to the folders it writes."""
+    return {
+        p.relative_to(root).as_posix(): p.read_bytes()
+        for p in sorted(root.rglob("*"))
+        if p.is_file() and p.name != OUTPUT_MARKER_NAME
+    }
 
 
 def test_bundle_layout_matches_the_cli(built, tmp_path):
@@ -567,3 +572,65 @@ def test_main_reports_the_budget_and_the_largest_files(tmp_path, capsys):
     assert f"Budget per file: {MAX_EVENTS_PER_FILE} events and {MAX_BYTES_PER_FILE:,} bytes" in shown
     assert re.search(r"^Largest file by events: \d+ events, [\d,]+ bytes \(.+\.ics\)$", shown, re.M)
     assert re.search(r"^Largest file by size: \d+ events, [\d,]+ bytes \(.+\.ics\)$", shown, re.M)
+
+
+# -----------------------------------------------------------------------------
+# The ownership marker stays out of the release
+# -----------------------------------------------------------------------------
+
+
+def test_the_bundle_and_its_archives_contain_no_ownership_marker(built):
+    result, _ = built
+    assert not list(result.bundle_dir.rglob(OUTPUT_MARKER_NAME))
+    with zipfile.ZipFile(result.zip_path) as zf:
+        assert not [n for n in zf.namelist() if n.endswith(OUTPUT_MARKER_NAME)]
+    with tarfile.open(result.tar_path, mode="r:gz") as tar:
+        assert not [n for n in tar.getnames() if n.endswith(OUTPUT_MARKER_NAME)]
+    manifest = (result.bundle_dir / bb.MANIFEST_NAME).read_text(encoding="utf-8")
+    assert OUTPUT_MARKER_NAME not in manifest
+
+
+def test_the_file_list_of_a_year_folder_is_the_published_one(built):
+    result, _ = built
+    year_dir = result.bundle_dir / "2027" / "academic"
+    names = sorted(p.relative_to(year_dir).as_posix() for p in year_dir.rglob("*") if p.is_file())
+    months = [
+        "2027-09",
+        "2027-10",
+        "2027-11",
+        "2027-12",
+        "2028-01",
+        "2028-02",
+        "2028-03",
+        "2028-04",
+        "2028-05",
+        "2028-06",
+        "2028-07",
+        "2028-08",
+    ]
+    assert names == sorted(
+        ["emoji_clock_2027.ics", "seasons_2027.ics"]
+        + [f"focus/focus_{m}.ics" for m in months]
+        + [f"meetings/meetings_{m}.ics" for m in months]
+    )
+
+
+@pytest.mark.skipif(shutil.which("diff") is None, reason="no diff available")
+def test_the_readmes_verification_recipe_really_reports_no_difference(built, tmp_path):
+    """Follow the bundle README's 'regenerate and compare' steps literally."""
+    result, _ = built
+    readme = (result.bundle_dir / bb.README_NAME).read_text(encoding="utf-8")
+    assert "diff -r --exclude=.calmoji-output check /path/to/this/folder/2027/academic" in readme
+
+    check = tmp_path / "check"
+    calmoji_main(["--year=2027", "--calendar-alignment=academic", f"--output-dir={check}"])
+    published = result.bundle_dir / "2027" / "academic"
+
+    with_exclude = subprocess.run(
+        ["diff", "-r", "--exclude=.calmoji-output", str(check), str(published)], capture_output=True, text=True
+    )
+    assert with_exclude.returncode == 0, with_exclude.stdout
+
+    # without the exclude the marker would show up as a difference, which is why the README says to
+    without = subprocess.run(["diff", "-r", str(check), str(published)], capture_output=True, text=True)
+    assert without.returncode == 1 and OUTPUT_MARKER_NAME in without.stdout

@@ -23,6 +23,7 @@ from calmoji.dry_run import dry_run_months
 from calmoji.focus_blocks import generate_focus_blocks_for_phases
 from calmoji.ics_writer import write_ebi48_layer, write_semester_blocks
 from calmoji.monthly import month_rows, write_monthly_files
+from calmoji.output_dir import OutputDirError, check_output_dir, default_output_dir, prepare_output_dir
 from calmoji.slot_generator import generate_meeting_slots
 from calmoji.types import Event
 
@@ -43,8 +44,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p.add_argument(
         "--output-dir",
         type=Path,
-        default=Path("output"),
-        help="Output directory (default: output/)",
+        default=None,
+        help=(
+            "Output directory (default: output/<year>/<alignment>/). "
+            "calmoji only writes into a folder that is empty or that it made itself (it holds a "
+            ".calmoji-output file), and replaces its own files there on every run"
+        ),
     )
 
     p.add_argument("--dry-run", action="store_true", help="Preview (no file writes)")
@@ -64,7 +69,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 def main(argv: list[str] | None = None) -> None:
     args = parse_args(argv)
 
-    outdir: Path = args.output_dir
+    outdir: Path = (
+        args.output_dir if args.output_dir is not None else default_output_dir(args.year, args.calendar_alignment)
+    )
+
+    # Refuse before doing anything else. (--dry-run only reports it: it never touches the filesystem.)
+    problem = check_output_dir(outdir)
+    if problem is not None and not args.dry_run:
+        raise SystemExit(f"error: {problem}")
 
     print("🦊 calmoji — Initiating Ritual Sequence")
     print("=" * 50)
@@ -73,6 +85,8 @@ def main(argv: list[str] | None = None) -> None:
     print(f"Alignment: {args.calendar_alignment}")
     print(f"Output: {outdir}/")
     print(f"Mode: {'DRY RUN' if args.dry_run else 'WRITE'}")
+    if problem is not None:
+        print(f"⚠️  A real run would refuse: {problem}")
 
     # Build phase plan (UTC-aware datetimes inside each Phase)
     phases = get_semester_phases(args.year, args.calendar_alignment)
@@ -104,7 +118,10 @@ def main(argv: list[str] | None = None) -> None:
                 month_rows(focus_events, meeting_events), focus=not args.no_focus, meetings=not args.no_meetings
             )
     else:
-        outdir.mkdir(parents=True, exist_ok=True)
+        try:
+            prepare_output_dir(outdir)
+        except OutputDirError as exc:
+            raise SystemExit(f"error: {exc}") from exc
 
         # 1) Seasons (one all-day marker per phase)
         phases_path = outdir / f"seasons_{args.year}.ics"

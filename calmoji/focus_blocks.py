@@ -148,9 +148,9 @@ def _focus_blocks_for_day(day: datetime, *, label: str, phase_emoji: str) -> lis
     for bd in _get_focus_block_defs():
         summary = f"{bd.emoji} Focus Block {bd.number} — {label}"
         description = (
-            f"{phase_emoji} — {label}\\n"
+            f"{phase_emoji} — {label}\n"
             f"{bd.emoji} Focus Block {bd.number} "
-            f"({bd.start_hour:02d}:{bd.start_minute:02d}–{bd.end_hour:02d}:{bd.end_minute:02d} UTC)\\n"
+            f"({bd.start_hour:02d}:{bd.start_minute:02d}–{bd.end_hour:02d}:{bd.end_minute:02d} UTC)\n"
             f"Week: {week_label} (UTC)"
         )
 

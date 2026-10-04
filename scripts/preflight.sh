@@ -199,9 +199,16 @@ for f in ${FAILED[@]+"${FAILED[@]}"}; do echo "  ❌ $f"; done
 
 if [[ ${#FAILED[@]} -eq 0 ]]; then
     echo
-    echo "🎉 All gates passed. Safe to push:"
-    echo "    git push -u origin $CURRENT_BRANCH"
-    echo "    gh pr create --base main --head $CURRENT_BRANCH --fill"
+    if [[ "$CURRENT_BRANCH" == "main" ]]; then
+        echo "🎉 All gates passed on main. To release, tag it, push the tag, build the archives:"
+        echo "    git tag vX.Y.Z"
+        echo "    git push origin vX.Y.Z"
+        echo "    python3 scripts/build_bundle.py --out dist"
+    else
+        echo "🎉 All gates passed. Safe to push:"
+        echo "    git push -u origin $CURRENT_BRANCH"
+        echo "    gh pr create --base main --head $CURRENT_BRANCH --fill"
+    fi
     exit 0
 else
     echo

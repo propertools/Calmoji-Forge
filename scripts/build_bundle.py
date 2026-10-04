@@ -55,7 +55,7 @@ try:
     from calmoji import __version__
     from calmoji.calendar_config import ALIGNMENT_MODES
     from calmoji.cli import main as calmoji_main
-    from calmoji.constants import MAX_BYTES_PER_FILE, MAX_EVENTS_PER_FILE
+    from calmoji.constants import MAX_BYTES_PER_FILE, MAX_EVENTS_PER_FILE, OUTPUT_MARKER_NAME
     from calmoji.ics_writer import IcsBudgetError
 except ImportError as exc:  # pragma: no cover -- only when calmoji isn't installed
     raise SystemExit(
@@ -348,6 +348,11 @@ def build_bundle(
     for year in years:
         for alignment in alignments:
             generate_year(year, alignment, bundle_dir / str(year) / alignment)
+
+    # The CLI marks each folder it writes as its own. The marker is for people who generate by
+    # hand; it is not part of the release, so it never gets into the manifest or the archives.
+    for marker in sorted(bundle_dir.rglob(OUTPUT_MARKER_NAME)):
+        marker.unlink()
 
     stats = measure_files(bundle_dir)
     check_budget(stats)

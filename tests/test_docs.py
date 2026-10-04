@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import pytest
@@ -202,3 +203,147 @@ def test_the_emoji_clock_section_and_where_ebi48_came_from():
 def test_bundle_readme_and_readme_explain_that_every_time_is_utc():
     assert "Every time in these files is in **UTC**" in read("scripts/bundle_README.md.in")
     assert "All times are fixed in **UTC**; your calendar app shows them in your" in read("README.md")
+
+
+# -----------------------------------------------------------------------------
+# v0.1.2: docs that say only true things
+# -----------------------------------------------------------------------------
+
+
+def test_readme_does_not_claim_preflight_runs_every_ci_check():
+    text = " ".join(read("README.md").split())
+    assert "runs every check CI runs" not in text
+    assert "runs CI's main checks on your machine" in text
+    assert (
+        "CI also tests Python 3.9 through 3.13, compares output across Python versions, and runs on stock macOS" in text
+    )
+
+
+def test_the_download_is_named_by_pattern_so_it_needs_no_edit_each_release():
+    assert "calmoji-artifacts-vX.Y.Z.zip" in read("README.md")
+    assert "releases/latest" in read("README.md")
+    for name in ("README.md", "scripts/bundle_README.md.in"):
+        assert not re.search(r"calmoji-artifacts-v\d", read(name)), f"{name} names a specific release"
+
+
+def test_readme_documents_the_output_folder_and_the_rerun_rule():
+    text = " ".join(read("README.md").split())
+    assert "output/<year>/<alignment>/" in text
+    assert ".calmoji-output" in text
+    assert "re-running replaces its own files" in text
+    assert "refused, untouched" in text
+    assert "--output-dir=DIR     # default: output/<year>/<alignment>/" in read("README.md")
+
+
+def test_readme_says_dtstamp_is_a_fixed_documented_constant():
+    text = " ".join(read("README.md").split())
+    assert "`DTSTAMP`" in text and "fixed, documented constant" in text and "files stay reproducible" in text
+
+
+def test_the_dtstamp_constant_is_explained_next_to_it():
+    source = read("calmoji/constants.py")
+    comment = source[: source.index("DTSTAMP =")]
+    assert "fixed, documented constant" in comment and "reproducible" in comment
+
+
+def test_contributing_roadmap_no_longer_lists_finished_work():
+    text = read("CONTRIBUTING.md")
+    roadmap = text[text.index("# 🔧 Roadmap") : text.index("# 🧪 Testing Standards")]
+    for done in (
+        "`--output-dir` override",
+        "`--dry-run` enforcement tests",
+        "`--version` flag",
+        "--calendar-mode",
+        "Combined vs per-phase",
+        "Explicit output directory validation",
+    ):
+        assert done not in roadmap, done
+    for open_item in ("Optional config file", "Atomic file writes", "structured logging"):
+        assert open_item in roadmap, open_item
+
+
+def test_the_coverage_claim_is_enforced():
+    pyproject = read("pyproject.toml")
+    section = pyproject[pyproject.index("[tool.coverage.report]") :]
+    assert re.search(r"^fail_under = 90\b", section, re.M)
+    assert "Coverage threshold ≥ 90%" in read("CONTRIBUTING.md")
+
+
+def test_test_strategy_claims_only_what_is_implemented():
+    text = read("TEST_STRATEGY.md")
+    assert "Codecov" not in text
+    assert "coverage.xml" in text  # what CI actually does
+    assert "**targets**, not gates" in text
+    for unimplemented in (
+        "Any critical deterministic module drops below",
+        "Branch coverage regresses",
+        "rely on local timezone",
+    ):
+        assert unimplemented not in text
+    assert "fail_under" in text and "90%" in text
+
+
+def test_ci_really_measures_coverage_so_fail_under_applies():
+    ci = read(".github/workflows/ci.yml")
+    assert "--cov=calmoji" in ci and "--cov-branch" in ci
+
+
+# -----------------------------------------------------------------------------
+# The optional AI agenda steward
+# -----------------------------------------------------------------------------
+
+STEWARD_HEADING = "## Optional: an AI agenda steward"
+
+
+def github_slug(heading: str) -> str:
+    """GitHub's heading anchor: lowercase, punctuation dropped, spaces to hyphens."""
+    text = heading.lstrip("#").strip().lower()
+    return re.sub(r"[^\w\- ]", "", text).replace(" ", "-")
+
+
+def test_the_steward_section_ends_the_playbook_and_its_code_block_is_closed():
+    text = read("docs/PLAYBOOK.md")
+    lines = text.splitlines()
+    assert lines.count(STEWARD_HEADING) == 1
+    section = text[text.index(STEWARD_HEADING) :]
+    assert section.rstrip().endswith("become more machine-like.\n```")
+    assert section.count("```") == 2  # one block, opened and closed
+    assert text.count("```") % 2 == 0  # no fence left open anywhere in the playbook
+    assert "```text\nYou're my agenda steward. I plan my time with calmoji." in section
+
+
+def test_the_steward_prompt_uses_the_current_layer_names():
+    section = read("docs/PLAYBOOK.md")
+    section = section[section.index(STEWARD_HEADING) :]
+    for name in ("🌗 Seasons", "🧠 Focus — Open", "🕒 Meetings — Open", "🧿 Emoji Clock", "🎯 Focus — Claimed"):
+        assert name in section, name
+    assert "calmoji needs no AI, no account and no cloud service" in section
+    assert "Never make commitments, cancel plans, contact anyone or change my calendar" in section
+
+
+def test_the_readme_points_at_the_steward_section_and_the_anchor_resolves():
+    readme = read("README.md")
+    how_to_use = readme[readme.index("## 🧭 How to use it") : readme.index("## 🗂 What's in each layer")]
+    assert (
+        "Prefer to plan with an AI assistant? See the\n[playbook](docs/PLAYBOOK.md#optional-an-ai-agenda-steward)."
+        in how_to_use
+    )
+
+    headings = [line for line in read("docs/PLAYBOOK.md").splitlines() if line.startswith("#")]
+    slugs = [github_slug(h) for h in headings]
+    assert slugs.count("optional-an-ai-agenda-steward") == 1
+    assert github_slug(STEWARD_HEADING) == "optional-an-ai-agenda-steward"
+
+
+def test_the_v0_1_3_todos_are_written_down_where_future_work_lives():
+    readme = " ".join(read("README.md").split())
+    contributing = " ".join(read("CONTRIBUTING.md").split())
+
+    assert "Small fixes planned for v0.1.3" in readme
+    assert "`unfold_ics_lines`) splits lines on more characters than the iCalendar format does" in readme
+    assert "RFC 5545 doesn't allow most of them in text values, so the escaper should reject them" in readme
+
+    assert "**v0.1.3:** `unfold_ics_lines` uses `str.splitlines()`" in contributing
+    assert "**v0.1.3:** RFC 5545 doesn't allow most control characters in TEXT values" in contributing
+    # the existing roadmap entries are still there
+    assert "Subscribable calendars" in readme and "Atomic file writes" in contributing
