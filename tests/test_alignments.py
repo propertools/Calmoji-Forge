@@ -51,7 +51,8 @@ def test_help_lists_only_the_real_alignments(capsys):
 
 def test_removed_alignments_are_gone_from_the_package_and_every_doc():
     package = Path(calmoji.__file__).parent
-    files = [*package.glob("*.py"), *ROOT.glob("*.md"), *(ROOT / "docs").glob("*.md"), *(ROOT / "scripts").glob("*")]
+    scripts = [p for p in (ROOT / "scripts").glob("*") if p.is_file()]  # not scripts/__pycache__
+    files = [*package.glob("*.py"), *ROOT.glob("*.md"), *(ROOT / "docs").glob("*.md"), *scripts]
     assert len(files) > 15
     for path in files:
         if path.name == "CHANGELOG.md":
