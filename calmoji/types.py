@@ -24,6 +24,7 @@ from datetime import datetime, timedelta, timezone
 from hashlib import sha256
 from typing import DefaultDict, List, Literal, Optional
 
+from calmoji.constants import DTSTAMP
 from calmoji.uid import generate_uid
 
 UTC = timezone.utc
@@ -106,6 +107,7 @@ class Event:
         lines: list[str] = [
             "BEGIN:VEVENT",
             f"UID:{self.uid}",
+            f"DTSTAMP:{DTSTAMP}",
             f"SUMMARY:{summary}",
             self.dtstart(),
             self.dtend(),
