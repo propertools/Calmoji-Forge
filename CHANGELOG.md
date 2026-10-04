@@ -29,13 +29,14 @@ archives are built by a script.
   so a week that straddles two phases is no longer emitted twice. Events
   keep the same summaries, descriptions and UIDs as in v0.1.0. If you
   imported v0.1.0's weekly focus files, delete that focus calendar and
-  import the new files. Each year's output drops from 65–68 `.ics` files to
-  17.
+  import the new files. If you re-run the generator into an existing output
+  folder, delete the old `focus_weeks/` folder there. Each year's output
+  drops from 65–68 `.ics` files to 17.
 - `calmoji --dry-run` now previews focus blocks per phase, the way it
   previews meeting slots.
 - `scripts/preflight.sh` reads the expected version from `pyproject.toml`
-  instead of hardcoding it, and its bundle gate (9) now builds the release
-  bundle twice and checks that the archives are byte-identical and the
+  instead of hardcoding it, and its bundle gate (9) now builds a two-year
+  release bundle twice and checks that the archives are byte-identical and the
   manifest verifies, instead of checking a local, gitignored folder.
   It also no longer insists on seven commits ahead of `main`, a rule left
   over from the one-off OSS-release branch.
@@ -48,7 +49,8 @@ archives are built by a script.
 - `scripts/build_bundle.py` builds the release archives
   (`calmoji-artifacts-v<version>.zip` and `.tar.gz`) for 2026–2039 in both
   alignments, with a `MANIFEST.sha256` and a README, and prints their
-  checksums. Running it twice gives byte-identical archives.
+  checksums. Running it twice on the same machine gives byte-identical
+  archives.
 - A "Releasing" section in `CONTRIBUTING.md`.
 
 ### Removed

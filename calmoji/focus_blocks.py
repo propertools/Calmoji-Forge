@@ -213,7 +213,9 @@ def generate_focus_blocks_for_phase(
     """
     Generate all focus block events for a Phase, clipped to the Phase.
 
-    Same clipping rule as meeting slots:
+    Clipped like meeting slots (identical for midnight-aligned phases, which is
+    every phase calmoji builds; meeting slots round phase bounds to whole days,
+    this applies the literal rule to the exact times):
     - Emits exactly the blocks whose start falls in [phase.start, phase.end),
       on ACTIVE_WEEKDAYS (or default 7 days).
     - A week that straddles two phases is split between them (each phase gets

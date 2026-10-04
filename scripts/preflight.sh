@@ -159,8 +159,8 @@ if python3 scripts/build_bundle.py --out "$BUNDLE_TMP/a" --years "$BUNDLE_YEARS"
             bad "manifest check passed but verified $VERIFIED of $MANIFEST_ENTRIES entries"
         fi
     else
-        bad "manifest verification failed (see $BUNDLE_TMP/verify.log)"
-        tail -5 "$BUNDLE_TMP/verify.log"
+        bad "manifest verification failed"
+        grep -v ': OK$' "$BUNDLE_TMP/verify.log" | head -10
     fi
 else
     bad "build_bundle.py failed"

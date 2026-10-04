@@ -3,8 +3,8 @@
 Tests for scripts/build_bundle.py, the release-archive builder.
 
 The script lives outside the package, so it is loaded by path. Bundles are built
-for a couple of years only; the full 2026-2039 build is exercised by
-scripts/preflight.sh and by the release process.
+for a couple of years only; scripts/preflight.sh builds two years (2026-2027),
+and only the release process runs the full 2026-2039 build.
 """
 
 from __future__ import annotations

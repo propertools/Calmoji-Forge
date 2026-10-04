@@ -208,7 +208,9 @@ PRs that modify:
 2. Run `bash scripts/preflight.sh`. Every gate must be green.
 3. Merge to `main` and tag it `vX.Y.Z`.
 4. Build the release archives, from the virtual environment calmoji is
-   installed into (`python3 -m pip install -e .`):
+   installed into (`python3 -m pip install -e .`). Re-run that install after
+   bumping the version: the bundle is named after the installed package's
+   version, not after `pyproject.toml`.
 
    ```bash
    python3 scripts/build_bundle.py --out dist
