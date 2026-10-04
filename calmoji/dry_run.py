@@ -16,6 +16,7 @@ from calmoji.types import Event
 
 #     print(f"\nTotal: {len(events)} meeting slots\n")
 
+
 def dry_run(events: list[Event], label: str = "Event Preview", kind: str = "slots") -> None:
     """
     Print a dry-run preview of a set of calendar events.
@@ -29,7 +30,7 @@ def dry_run(events: list[Event], label: str = "Event Preview", kind: str = "slot
     print("─" * (12 + len(label)))
 
     for event in events:
-        start_str = event.start.strftime('%a %Y-%m-%d %H:%M')
+        start_str = event.start.strftime("%a %Y-%m-%d %H:%M")
         summary_str = event.summary or "(No Summary)"
         print(f"{summary_str.ljust(48)}  [{start_str}]")
 

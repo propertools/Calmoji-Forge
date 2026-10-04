@@ -1,14 +1,12 @@
 # tests/test_focus_blocks_writer.py
 
 import datetime
-import os
-from pathlib import Path
 
-from calmoji.types import Phase, PhaseWeekSpan
 from calmoji.focus_blocks import generate_focus_blocks_for_week
+from calmoji.focus_blocks_config import ACTIVE_WEEKDAYS, DEFAULT_ACTIVE_WEEKDAYS, FOCUS_BLOCKS
 from calmoji.focus_blocks_writer import write_focus_blocks_weekly
-from calmoji.focus_blocks_config import FOCUS_BLOCKS, ACTIVE_WEEKDAYS, DEFAULT_ACTIVE_WEEKDAYS
 from calmoji.ics_writer import unfold_ics_lines
+from calmoji.types import Phase, PhaseWeekSpan
 
 UTC = datetime.timezone.utc
 
@@ -144,8 +142,7 @@ def test_glyph_key_event_written_for_single_day(tmp_path):
     unfolded = unfold_ics_lines(content)
 
     glyph_summary_lines = [
-        line for line in unfolded
-        if line.upper().startswith("SUMMARY:") and "GLYPH KEY" in line.upper()
+        line for line in unfolded if line.upper().startswith("SUMMARY:") and "GLYPH KEY" in line.upper()
     ]
 
     assert len(glyph_summary_lines) == 1, f"Expected 1 Glyph Key SUMMARY, found {len(glyph_summary_lines)}"

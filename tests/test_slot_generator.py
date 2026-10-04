@@ -1,7 +1,7 @@
 # tests/test_slot_generator.py
 
-from calmoji.slot_generator import generate_meeting_slots
 from calmoji.calendar_phases import get_semester_phases
+from calmoji.slot_generator import generate_meeting_slots
 from calmoji.types import Event
 
 

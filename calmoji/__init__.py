@@ -7,7 +7,8 @@ and deterministic emoji clocks. See README.md for the full design philosophy.
 
 from __future__ import annotations
 
-from importlib.metadata import PackageNotFoundError, version as _pkg_version
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version as _pkg_version
 
 try:
     __version__: str = _pkg_version("calmoji")

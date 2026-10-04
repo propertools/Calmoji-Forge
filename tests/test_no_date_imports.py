@@ -1,9 +1,10 @@
 # tests/test_no_date_imports.py
 
-import os
 import ast
+import os
 
 CALMOJI_DIR = os.path.join(os.path.dirname(__file__), "..", "calmoji")
+
 
 def test_no_date_imports():
     offending = []
@@ -14,7 +15,7 @@ def test_no_date_imports():
                 continue
 
             filepath = os.path.join(root, fname)
-            with open(filepath, "r", encoding="utf-8") as f:
+            with open(filepath, encoding="utf-8") as f:
                 tree = ast.parse(f.read(), filename=filepath)
 
                 for node in ast.walk(tree):
@@ -28,7 +29,6 @@ def test_no_date_imports():
                             if alias.name == "datetime.date":
                                 offending.append((filepath, node.lineno, "import datetime.date"))
 
-    assert not offending, (
-        "Found disallowed 'date' imports:\n" +
-        "\n".join(f"{file}:{line} — {code}" for file, line, code in offending)
+    assert not offending, "Found disallowed 'date' imports:\n" + "\n".join(
+        f"{file}:{line} — {code}" for file, line, code in offending
     )

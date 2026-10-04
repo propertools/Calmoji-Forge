@@ -1,11 +1,12 @@
 # tests/test_utils.py
 
 import datetime
+
 import pytest
 
+from calmoji.ics_writer import fold_ics_line, unfold_ics_lines
 from calmoji.types import Phase, PhaseWeekSpan
 from calmoji.utils import get_first_monday_on_or_after, get_first_weekday_of_year, group_phase_days_by_week
-from calmoji.ics_writer import fold_ics_line, unfold_ics_lines
 
 UTC = datetime.timezone.utc
 
@@ -35,6 +36,7 @@ def test_first_weekday_of_year_by_abbr():
     assert get_first_weekday_of_year(2025, "fri").weekday() == 4  # Friday
     assert get_first_weekday_of_year(2025, "thu").weekday() == 3  # Thursday
     assert get_first_weekday_of_year(2025, "wed").weekday() == 2  # Wednesday
+
 
 def test_first_weekday_of_year_by_int():
     for i in range(7):

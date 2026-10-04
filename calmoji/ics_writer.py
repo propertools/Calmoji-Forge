@@ -4,17 +4,17 @@ from __future__ import annotations
 
 import datetime
 from pathlib import Path
-from typing import Optional, Sequence, Iterable
+from typing import Iterable, Optional, Sequence
 
 from calmoji.ebi48 import get_emoji_for_time
 from calmoji.types import Event, Phase
 from calmoji.uid import generate_uid
 from calmoji.utils import get_first_weekday_of_year
 
-
 # =============================================================================
 # VCALENDAR helpers
 # =============================================================================
+
 
 def create_ics_header(
     *,
@@ -46,6 +46,7 @@ def create_ics_footer() -> list[str]:
 # RFC 5545 line folding (75 octets)
 # =============================================================================
 
+
 def fold_ics_line(line: str, limit_octets: int = 75) -> str:
     """
     Fold one logical iCalendar content line per RFC 5545 §3.1 (75 octets max).
@@ -72,7 +73,7 @@ def fold_ics_line(line: str, limit_octets: int = 75) -> str:
                 raise ValueError("Unable to fold ICS line safely (limit too small).")
 
         out.append(prefix)
-        remaining = remaining[len(prefix):]
+        remaining = remaining[len(prefix) :]
         if remaining:
             remaining = " " + remaining  # RFC continuation marker
 
@@ -107,6 +108,7 @@ def unfold_ics_lines(content: str) -> list[str]:
 # File writer
 # =============================================================================
 
+
 def write_events_to_ics(
     events: Sequence[Event],
     filename: str | Path,
@@ -137,10 +139,7 @@ def write_events_to_ics(
 
     with path.open("w", encoding="utf-8", newline="") as f:
         if header:
-            f.write(
-                fold_lines(create_ics_header(calname=calname, version=version, comments=comments))
-                + "\r\n"
-            )
+            f.write(fold_lines(create_ics_header(calname=calname, version=version, comments=comments)) + "\r\n")
 
         for i, event in enumerate(seq):
             try:
@@ -155,6 +154,7 @@ def write_events_to_ics(
 # =============================================================================
 # Higher-level outputs
 # =============================================================================
+
 
 def write_semester_blocks(phases: Sequence[Phase], filename: Optional[str] = None) -> None:
     """
@@ -179,7 +179,7 @@ def write_semester_blocks(phases: Sequence[Phase], filename: Optional[str] = Non
         events.append(
             Event(
                 start=phase.start,
-                end=phase.end, # exclusive
+                end=phase.end,  # exclusive
                 summary=phase.name,
                 description=f"{phase.emoji} — {phase.name}",
                 emoji=phase.emoji,

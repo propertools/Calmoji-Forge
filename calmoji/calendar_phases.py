@@ -7,8 +7,8 @@ from typing import List
 
 from calmoji.calendar_config import (
     DEFAULT_ALIGNMENT,
-    get_year_start_date,
     get_semester_phase_definitions,
+    get_year_start_date,
 )
 from calmoji.types import Phase
 
@@ -60,4 +60,3 @@ def get_semester_phases(year: int, alignment: str = DEFAULT_ALIGNMENT) -> List[P
         )
 
     return enriched
-    

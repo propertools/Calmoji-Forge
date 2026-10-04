@@ -5,7 +5,6 @@ from __future__ import annotations
 import datetime
 from typing import Mapping
 
-
 """
 EBI48_CLOCK — The Canonical Emoji Time Table
 
@@ -21,16 +20,16 @@ This matches Calmoji meeting cadence (25 minutes + decompression buffer) cleanly
 """
 
 EBI48_CLOCK: Mapping[int, tuple[str, str]] = {
-    0:  ("🐶", "Dog Face"),
-    1:  ("🦨", "Skunk Face"),
-    2:  ("🐱", "Cat Face"),
-    3:  ("🐦", "Bird Face"),
-    4:  ("🐭", "Mouse Face"),
-    5:  ("🦬", "Bison Face"),
-    6:  ("🦝", "Raccoon Face"),
-    7:  ("🦚", "Peacock Face"),
-    8:  ("🐰", "Bunny Face"),
-    9:  ("🦦", "Otter Face"),
+    0: ("🐶", "Dog Face"),
+    1: ("🦨", "Skunk Face"),
+    2: ("🐱", "Cat Face"),
+    3: ("🐦", "Bird Face"),
+    4: ("🐭", "Mouse Face"),
+    5: ("🦬", "Bison Face"),
+    6: ("🦝", "Raccoon Face"),
+    7: ("🦚", "Peacock Face"),
+    8: ("🐰", "Bunny Face"),
+    9: ("🦦", "Otter Face"),
     10: ("🦊", "Fox Face"),
     11: ("🦫", "Beaver Face"),
     12: ("🐻", "Bear Face"),
@@ -91,10 +90,7 @@ def get_slot_index_for_time(dt: datetime.datetime) -> int:
     if minute == 35:
         return hour * 2 + 1
 
-    raise ValueError(
-        f"Invalid start minute for EBI48 mapping: {dt.isoformat()} "
-        "(expected minute == 5 or 35)"
-    )
+    raise ValueError(f"Invalid start minute for EBI48 mapping: {dt.isoformat()} " "(expected minute == 5 or 35)")
 
 
 def get_emoji_for_slot(slot: int) -> tuple[str, str]:

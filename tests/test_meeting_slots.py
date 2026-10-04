@@ -6,9 +6,9 @@ from collections import defaultdict
 
 from calmoji.calendar_config import DEFAULT_ALIGNMENT
 from calmoji.calendar_phases import get_semester_phases
-from calmoji.slot_generator import generate_meeting_slots, is_valid_slot_day
 from calmoji.ebi48 import get_emoji_for_time
 from calmoji.meeting_slots import MEETING_SLOTS
+from calmoji.slot_generator import generate_meeting_slots, is_valid_slot_day
 
 UTC = datetime.timezone.utc
 
@@ -21,6 +21,7 @@ def to_datetime(hour: int, minute: int) -> datetime.datetime:
 # -----------------------------------------------------------------------------
 # Slot config validation
 # -----------------------------------------------------------------------------
+
 
 def test_all_slot_labels_are_present():
     for slot in MEETING_SLOTS:
@@ -83,6 +84,7 @@ def test_all_meeting_slots_map_to_valid_emoji():
 # Mecca behavior tests (new API)
 # -----------------------------------------------------------------------------
 
+
 def _get_first_meeting_phase(year: int = 2025, alignment: str = DEFAULT_ALIGNMENT):
     phases = get_semester_phases(year, alignment)
     # first phase should allow meetings in your current heuristic model
@@ -103,7 +105,7 @@ def _unicode_name_lower(s: str) -> str:
     names = []
     for ch in s:
         # skip variation selectors / joiners
-        if ch in ("\uFE0F", "\u200D"):
+        if ch in ("\ufe0f", "\u200d"):
             continue
         try:
             names.append(unicodedata.name(ch).lower())
@@ -145,13 +147,24 @@ def test_mecca_slots_use_geometric_or_symbolic_emoji_names():
     ensure the emoji's unicode name contains at least one "safe" keyword.
     """
     safe_keywords = {
-        "circle", "square", "diamond", "star", "moon", "sun", "globe", "symbol", "sparkle",
-        "black", "white", "large", "small",
+        "circle",
+        "square",
+        "diamond",
+        "star",
+        "moon",
+        "sun",
+        "globe",
+        "symbol",
+        "sparkle",
+        "black",
+        "white",
+        "large",
+        "small",
     }
     for evt in get_mecca_events():
         emoji_char = evt.summary.split(" ")[1]
         assert emoji_char != "❓", f"Mecca slot maps to unknown emoji: {evt.summary}"
         name_blob = _unicode_name_lower(emoji_char)
-        assert any(kw in name_blob for kw in safe_keywords), (
-            f"Mecca slot emoji does not look 'symbolic/geometric' by name: {emoji_char!r} ({name_blob})"
-        )
+        assert any(
+            kw in name_blob for kw in safe_keywords
+        ), f"Mecca slot emoji does not look 'symbolic/geometric' by name: {emoji_char!r} ({name_blob})"

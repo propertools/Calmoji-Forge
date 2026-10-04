@@ -3,9 +3,9 @@
 import unittest
 from datetime import datetime, timezone
 
-from calmoji.utils import format_datetime, group_phase_days_by_week
 from calmoji.ics_writer import create_ics_header, fold_ics_line
 from calmoji.types import Phase, PhaseWeekSpan
+from calmoji.utils import format_datetime, group_phase_days_by_week
 
 UTC = timezone.utc
 
