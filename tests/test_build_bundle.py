@@ -613,3 +613,24 @@ def test_the_file_list_of_a_year_folder_is_the_published_one(built):
         + [f"focus/focus_{m}.ics" for m in months]
         + [f"meetings/meetings_{m}.ics" for m in months]
     )
+
+
+@pytest.mark.skipif(shutil.which("diff") is None, reason="no diff available")
+def test_the_readmes_verification_recipe_really_reports_no_difference(built, tmp_path):
+    """Follow the bundle README's 'regenerate and compare' steps literally."""
+    result, _ = built
+    readme = (result.bundle_dir / bb.README_NAME).read_text(encoding="utf-8")
+    assert "diff -r --exclude=.calmoji-output check /path/to/this/folder/2027/academic" in readme
+
+    check = tmp_path / "check"
+    calmoji_main(["--year=2027", "--calendar-alignment=academic", f"--output-dir={check}"])
+    published = result.bundle_dir / "2027" / "academic"
+
+    with_exclude = subprocess.run(
+        ["diff", "-r", "--exclude=.calmoji-output", str(check), str(published)], capture_output=True, text=True
+    )
+    assert with_exclude.returncode == 0, with_exclude.stdout
+
+    # without the exclude the marker would show up as a difference, which is why the README says to
+    without = subprocess.run(["diff", "-r", str(check), str(published)], capture_output=True, text=True)
+    assert without.returncode == 1 and OUTPUT_MARKER_NAME in without.stdout

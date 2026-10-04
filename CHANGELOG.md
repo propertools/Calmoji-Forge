@@ -53,7 +53,8 @@ review.
   2027 `academic` and then `calendar` into one folder left 20 monthly focus
   files, and re-running with `--no-meetings` left the old `meetings/` behind.
   `--dry-run` never touches the filesystem, and macOS's `.DS_Store` is
-  ignored. The release bundle doesn't contain the marker.
+  ignored. The release bundle doesn't contain the marker, and the bundle
+  README's "regenerate and compare" recipe now excludes it.
 
 ### Removed
 

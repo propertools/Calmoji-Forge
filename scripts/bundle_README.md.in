@@ -98,14 +98,15 @@ shasum -a 256 -c MANIFEST.sha256
 end in `OK`.
 
 You can also regenerate any year yourself and compare. The output is
-byte-identical:
+byte-identical (calmoji also leaves a small `.calmoji-output` marker in the
+folders it fills, which isn't part of this release, hence the `--exclude`):
 
 ```bash
 git clone https://github.com/propertools/Calmoji-Forge.git
 cd Calmoji-Forge
 git checkout v@VERSION@
 python3 calmoji.py --year=2027 --calendar-alignment=academic --output-dir=check
-diff -r check /path/to/this/folder/2027/academic
+diff -r --exclude=.calmoji-output check /path/to/this/folder/2027/academic
 ```
 
 ---
