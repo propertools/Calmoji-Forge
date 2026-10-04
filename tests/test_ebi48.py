@@ -8,7 +8,7 @@ def test_ebi48_unique_emojis():
     assert len(set(emojis)) == 48, "All EBI48 emojis must be unique"
 
 def test_ebi48_all_labels_are_strings():
-    for emoji, label in EBI48_CLOCK.values():
+    for _emoji, label in EBI48_CLOCK.values():
         assert isinstance(label, str)
         assert len(label) > 3
 
@@ -16,7 +16,7 @@ def validate_ebi48_clock():
     assert len(EBI48_CLOCK) == 48, "EBI48_CLOCK must have exactly 48 slots"
     emoji_set = set()
     # Yes, this test overlaps test_ebi48_unique_emojis(), this is a feature and not a bug!
-    for k, (emoji, name) in EBI48_CLOCK.items():
+    for k, (emoji, _name) in EBI48_CLOCK.items():
         assert emoji not in emoji_set, f"Duplicate emoji: {emoji} at slot {k}"
         emoji_set.add(emoji)
 

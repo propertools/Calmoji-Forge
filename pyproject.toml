@@ -89,7 +89,6 @@ branch = true
 source = ["calmoji"]
 omit = [
     "tests/*",
-    "calmoji/legacy_config.py",
 ]
 
 [tool.coverage.report]

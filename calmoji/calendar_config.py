@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from datetime import datetime, timezone
 from typing import List
 
@@ -10,7 +11,7 @@ from calmoji.types import Phase
 UTC = timezone.utc  # stdlib tzinfo
 
 # 🧭 Alignment definitions — single source of truth
-ALIGNMENTS = {
+ALIGNMENTS: dict[str, Callable[[int], datetime]] = {
     "calendar": lambda year: datetime(year, 1, 1, tzinfo=UTC),
     "academic": lambda year: datetime(year, 9, 1, tzinfo=UTC),
     "fiscal_us": lambda year: datetime(year, 10, 1, tzinfo=UTC),
