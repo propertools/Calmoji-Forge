@@ -19,7 +19,8 @@ from calmoji import __version__
 from calmoji.calendar_config import ALIGNMENT_MODES, DEFAULT_ALIGNMENT
 from calmoji.calendar_phases import get_semester_phases
 from calmoji.dry_run import dry_run
-from calmoji.focus_blocks_writer import write_focus_blocks_weekly
+from calmoji.focus_blocks import generate_focus_blocks_for_phase
+from calmoji.focus_blocks_writer import write_focus_blocks
 from calmoji.ics_writer import write_ebi48_layer, write_events_to_ics, write_semester_blocks
 from calmoji.slot_generator import generate_meeting_slots
 from calmoji.utils import format_range_slug, slugify
@@ -124,14 +125,14 @@ def main(argv: list[str] | None = None) -> None:
             )
             print(f"✅ Wrote: {consolidated}")
 
-    # 3) Focus blocks (weekly files)
+    # 3) Focus blocks (one file per phase, plus one consolidated file for the year)
     if not args.no_focus:
-        focus_dir = outdir / "focus_weeks"
         if args.dry_run:
-            print("\n🧠 Focus blocks: (skipping file writes in dry-run)")
+            for phase in phases:
+                dry_run(generate_focus_blocks_for_phase(phase), label=phase.name, kind="focus blocks")
         else:
-            write_focus_blocks_weekly(phases, focus_dir)
-            print(f"✅ Wrote weekly focus blocks in: {focus_dir}/")
+            for path in write_focus_blocks(phases, outdir, args.year):
+                print(f"✅ Wrote: {path}")
 
     # 4) EBI48 overlay
     if not args.no_ebi48:
