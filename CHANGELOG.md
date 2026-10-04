@@ -9,7 +9,7 @@ they do.
 
 ## [Unreleased]
 
-## [0.1.1] — YYYY-MM-DD
+## [0.1.1] — 2026-10-04
 
 **Upgrading from v0.1.0: delete the old calmoji calendars and import fresh.**
 Event times and identifiers changed, so importing over the old events would
