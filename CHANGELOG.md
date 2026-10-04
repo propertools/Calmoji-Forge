@@ -9,11 +9,7 @@ they do.
 
 ## [Unreleased]
 
-### Added
-
-- TBD.
-
-## [0.1.0] — 2026-05-07
+## [0.1.0] — 2026-10-04
 
 First public release. The engine has been in private use for some time;
 this release is the cleanup pass that makes it safe to read, install, and
