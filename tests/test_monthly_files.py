@@ -15,7 +15,7 @@ import datetime
 import re
 from collections import Counter
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, Iterator, List, Tuple
 
 import pytest
 
@@ -25,6 +25,7 @@ from calmoji.cli import main
 from calmoji.constants import CALNAME_FOCUS, CALNAME_MEETINGS, OUTPUT_MARKER_NAME
 from calmoji.focus_blocks_config import FOCUS_BLOCKS
 from calmoji.meeting_slots import MEETING_SLOTS
+from tests.alignment_helpers import injected_midmonth
 from tests.ics_helpers import Ics, header_lines, is_all_day, read_events, start_of
 
 UTC = datetime.timezone.utc
@@ -42,6 +43,13 @@ Outputs = Dict[Tuple[str, int], Path]
 
 def run_cli(outdir: Path, year: int, alignment: str, *extra: str) -> None:
     main([f"--year={year}", f"--calendar-alignment={alignment}", f"--output-dir={outdir}", *extra])
+
+
+@pytest.fixture(scope="module")
+def midmonth_alignment() -> Iterator[str]:
+    """Overrides the per-test fixture: this module's tests all read what one set of runs wrote."""
+    with injected_midmonth() as name:
+        yield name
 
 
 @pytest.fixture(scope="module")

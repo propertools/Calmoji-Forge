@@ -84,3 +84,54 @@ def test_mid_month_years_fit_together(midmonth_alignment):
 def test_cli_runs_with_the_injected_alignment(midmonth_alignment, tmp_path):
     main(["--year=2027", f"--calendar-alignment={TEST_ONLY}", f"--output-dir={tmp_path / 'out'}"])
     assert (tmp_path / "out" / "seasons_2027.ics").is_file()
+
+
+# -----------------------------------------------------------------------------
+# Unknown alignments fail loudly
+# -----------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("bad", ["acadmeic", "Academic", "", " academic", "chinese_lunar", "calendar ", "fiscal"])
+def test_get_year_start_date_rejects_unknown_alignments(bad):
+    with pytest.raises(ValueError) as excinfo:
+        get_year_start_date(2027, bad)
+    message = str(excinfo.value)
+    assert repr(bad) in message  # names the bad value
+    for name in sorted(REAL_ALIGNMENTS):
+        assert name in message  # lists the valid ones
+
+
+def test_the_error_lists_the_valid_alignments_in_order():
+    with pytest.raises(
+        ValueError, match="valid alignments: academic, calendar, fiscal_eu, fiscal_us, indian_fiscal, japanese_school"
+    ):
+        get_year_start_date(2027, "nope")
+
+
+@pytest.mark.parametrize("bad", ["acadmeic", "chinese_lunar"])
+def test_everything_built_on_it_raises_too(bad, tmp_path):
+    from calmoji.ics_writer import write_ebi48_layer
+
+    with pytest.raises(ValueError, match="Unknown alignment"):
+        get_semester_phases(2027, bad)
+    with pytest.raises(ValueError, match="Unknown alignment"):
+        write_ebi48_layer(tmp_path / "x.ics", 2027, bad)
+    assert not (tmp_path / "x.ics").exists()
+
+
+def test_the_default_alignment_is_still_used_when_none_is_given():
+    assert get_year_start_date(2027) == datetime.datetime(2027, 9, 1, tzinfo=UTC)
+    assert get_semester_phases(2027)[0].start == datetime.datetime(2027, 9, 1, tzinfo=UTC)
+
+
+def test_every_real_alignment_still_resolves():
+    for name in REAL_ALIGNMENTS:
+        assert get_year_start_date(2027, name).year == 2027
+
+
+def test_no_other_alignment_lookup_falls_back_silently():
+    # the only place that resolves an alignment name is get_year_start_date; nothing else defaults it
+    package = Path(calmoji.__file__).parent
+    for path in package.glob("*.py"):
+        text = path.read_text(encoding="utf-8")
+        assert "ALIGNMENTS.get(" not in text, path.name

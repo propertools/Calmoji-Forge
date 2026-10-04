@@ -35,8 +35,16 @@ def get_year_start_date(year: int, alignment: str = DEFAULT_ALIGNMENT) -> dateti
 
     Returns:
         UTC datetime at midnight for the given alignment's start-of-year.
+
+    Raises:
+        ValueError: if alignment isn't one of ALIGNMENTS. (It never falls back to a default:
+            a misspelt alignment would silently produce a different calendar.)
     """
-    fn = ALIGNMENTS.get(alignment, ALIGNMENTS[DEFAULT_ALIGNMENT])
+    try:
+        fn = ALIGNMENTS[alignment]
+    except KeyError:
+        valid = ", ".join(sorted(ALIGNMENTS))
+        raise ValueError(f"Unknown alignment {alignment!r}; valid alignments: {valid}") from None
     return fn(year)
 
 
