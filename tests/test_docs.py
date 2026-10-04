@@ -414,3 +414,18 @@ def test_the_bundle_readme_template_makes_no_claim_about_deleting_calmojis_folde
     text = read("scripts/bundle_README.md.in")
     assert "deletes" not in text and "recognises its own files" not in text
     assert "--exclude=.calmoji-output" in text  # the marker is still explained where it matters
+
+
+def test_the_changelog_says_who_could_have_been_affected_and_who_could_not():
+    text = " ".join(read("CHANGELOG.md").split())
+    section = text[text.index("## [0.1.3]") : text.index("## [0.1.2]")]
+    assert "## [0.1.3] — YYYY-MM-DD" in section
+    assert "The calendar files are unchanged" in section
+    assert "family.ics" in section and "symlink" in section
+    assert "only people who generate files themselves with v0.1.2" in section
+    assert "The downloadable calendars and the release bundle are unaffected" in section
+    assert "`macOS /usr/bin/python3`" in section and "required check" in section
+    assert "an external review" in section
+    for tool in ("ChatGPT", "Claude", "Codex", "Copilot", "Gemini", "GPT"):
+        assert tool not in section
+    assert "[0.1.3]: https://github.com/propertools/Calmoji-Forge/compare/v0.1.2...v0.1.3" in text
