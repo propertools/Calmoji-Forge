@@ -140,7 +140,7 @@ def main(argv: list[str] | None = None) -> None:
         if args.dry_run:
             print("\n🧿 EBI48 overlay: (skipping file writes in dry-run)")
         else:
-            write_ebi48_layer(ebi48_path, args.year, recurring=True, expanded=False)
+            write_ebi48_layer(ebi48_path, args.year, args.calendar_alignment)
             print(f"✅ Wrote: {ebi48_path}")
 
     print("\n🎉 Ritual complete. Time is now encoded.\n")
