@@ -52,7 +52,9 @@ echo "Current branch: $CURRENT_BRANCH"
 echo "Commits on this branch (vs main):"
 git log --oneline main..HEAD || true
 COMMIT_COUNT=$(git log --oneline main..HEAD | wc -l | tr -d ' ')
-if [[ "$COMMIT_COUNT" -ge 1 ]]; then
+if [[ "$CURRENT_BRANCH" == "main" ]]; then
+    ok "on main (release check)"
+elif [[ "$COMMIT_COUNT" -ge 1 ]]; then
     ok "$COMMIT_COUNT commits ahead of main"
 else
     bad "no commits ahead of main — are you on the branch you meant to check?"
