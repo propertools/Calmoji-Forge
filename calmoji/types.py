@@ -24,6 +24,7 @@ from datetime import datetime, timedelta, timezone
 from hashlib import sha256
 from typing import DefaultDict, List, Literal, Optional
 
+from calmoji.constants import DTSTAMP
 from calmoji.uid import generate_uid
 
 UTC = timezone.utc
@@ -106,6 +107,7 @@ class Event:
         lines: list[str] = [
             "BEGIN:VEVENT",
             f"UID:{self.uid}",
+            f"DTSTAMP:{DTSTAMP}",
             f"SUMMARY:{summary}",
             self.dtstart(),
             self.dtend(),
@@ -177,7 +179,12 @@ class PhaseWeekSpan:
     - phase_name: Phase label (string, kept flexible)
     - week_index: zero-based week index within the Phase
     - ritual_type: optional tag for future routing (default 'focus')
-    Emits full ISO weeks whose start occurs in the phase’s covered-week set (weeks discovered by iterating days in [phase.start, phase.end)). Does not clip within-week.
+
+    This is a week-grouping helper: from_phase() returns every ISO week that
+    touches the Phase (weeks discovered by iterating days in
+    [phase.start, phase.end)), as whole weeks. It does not clip to the Phase.
+    Focus-block generation does not build on it; focus blocks are clipped to
+    the Phase's own dates.
     """
 
     start: datetime

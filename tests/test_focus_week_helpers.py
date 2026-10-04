@@ -1,11 +1,10 @@
-# tests/test_focus_blocks_writer.py
+# tests/test_focus_week_helpers.py
+# The whole-ISO-week helpers (generate_focus_blocks_for_week, PhaseWeekSpan). Phases use neither.
 
 import datetime
 
 from calmoji.focus_blocks import generate_focus_blocks_for_week
 from calmoji.focus_blocks_config import ACTIVE_WEEKDAYS, DEFAULT_ACTIVE_WEEKDAYS, FOCUS_BLOCKS
-from calmoji.focus_blocks_writer import write_focus_blocks_weekly
-from calmoji.ics_writer import unfold_ics_lines
 from calmoji.types import Phase, PhaseWeekSpan
 
 UTC = datetime.timezone.utc
@@ -122,27 +121,3 @@ def test_last_focus_block_is_block_12_with_torii_in_summary():
     final_event = sorted(events, key=lambda e: e.start)[-1]
     assert "Focus Block 12" in final_event.summary
     assert "⛩️" in final_event.summary, f"Expected ⛩️ in summary, got: {final_event.summary!r}"
-
-
-def test_glyph_key_event_written_for_single_day(tmp_path):
-    # Single day: 2025-01-04 (inclusive) => end exclusive 2025-01-05
-    phase = make_phase("Glyph Test Phase", "2025-01-04", "2025-01-04", emoji="🧪")
-
-    output_dir = tmp_path / "output"
-    output_dir.mkdir()
-
-    # Writer writes to output_dir you pass in
-    write_focus_blocks_weekly([phase], output_dir)
-
-    # This phase intersects ISO week 2025-W01
-    expected = output_dir / "glyph_test_phase__2025-W01.ics"
-    assert expected.exists(), f"Expected .ics file not found: {expected}"
-
-    content = expected.read_text(encoding="utf-8")
-    unfolded = unfold_ics_lines(content)
-
-    glyph_summary_lines = [
-        line for line in unfolded if line.upper().startswith("SUMMARY:") and "GLYPH KEY" in line.upper()
-    ]
-
-    assert len(glyph_summary_lines) == 1, f"Expected 1 Glyph Key SUMMARY, found {len(glyph_summary_lines)}"

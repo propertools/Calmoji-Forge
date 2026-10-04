@@ -4,12 +4,19 @@ from __future__ import annotations
 
 import datetime
 from pathlib import Path
-from typing import Iterable, Optional, Sequence
+from typing import Optional, Sequence
 
+from calmoji.calendar_config import get_year_start_date
+from calmoji.constants import (
+    CALNAME_EBI48,
+    CALNAME_PHASES,
+    EBI48_URL,
+    MAX_BYTES_PER_FILE,
+    MAX_EVENTS_PER_FILE,
+)
 from calmoji.ebi48 import get_emoji_for_time
 from calmoji.types import Event, Phase
 from calmoji.uid import generate_uid
-from calmoji.utils import get_first_weekday_of_year
 
 # =============================================================================
 # VCALENDAR helpers
@@ -109,6 +116,10 @@ def unfold_ics_lines(content: str) -> list[str]:
 # =============================================================================
 
 
+class IcsBudgetError(ValueError):
+    """An .ics file would exceed MAX_EVENTS_PER_FILE or MAX_BYTES_PER_FILE."""
+
+
 def write_events_to_ics(
     events: Sequence[Event],
     filename: str | Path,
@@ -129,26 +140,36 @@ def write_events_to_ics(
         header/footer: Whether to include VCALENDAR wrapper.
         calname/version/comments: Metadata for VCALENDAR.
         sort_by_start: If True, writes events in start-time order (diff stability).
+
+    Raises:
+        IcsBudgetError: if the file would hold more than MAX_EVENTS_PER_FILE events
+            or be larger than MAX_BYTES_PER_FILE bytes. Nothing is written then.
     """
     path = Path(filename)
+
+    seq: Sequence[Event] = sorted(events, key=lambda e: e.start) if sort_by_start else events
+    if len(seq) > MAX_EVENTS_PER_FILE:
+        raise IcsBudgetError(f"{path}: {len(seq)} events is over the budget of {MAX_EVENTS_PER_FILE} per file.")
+
+    parts: list[str] = []
+    if header:
+        parts.append(fold_lines(create_ics_header(calname=calname, version=version, comments=comments)) + "\r\n")
+
+    for i, event in enumerate(seq):
+        try:
+            parts.append(fold_lines(event.to_ics()) + "\r\n")
+        except Exception as e:
+            raise ValueError(f"Failed to render event at index {i}: {event}") from e
+
+    if footer:
+        parts.append(fold_lines(create_ics_footer()) + "\r\n")
+
+    data = "".join(parts).encode("utf-8")
+    if len(data) > MAX_BYTES_PER_FILE:
+        raise IcsBudgetError(f"{path}: {len(data):,} bytes is over the budget of {MAX_BYTES_PER_FILE:,} per file.")
+
     path.parent.mkdir(parents=True, exist_ok=True)
-
-    seq: Iterable[Event] = events
-    if sort_by_start:
-        seq = sorted(events, key=lambda e: e.start)
-
-    with path.open("w", encoding="utf-8", newline="") as f:
-        if header:
-            f.write(fold_lines(create_ics_header(calname=calname, version=version, comments=comments)) + "\r\n")
-
-        for i, event in enumerate(seq):
-            try:
-                f.write(fold_lines(event.to_ics()) + "\r\n")
-            except Exception as e:
-                raise ValueError(f"Failed to render event at index {i}: {event}") from e
-
-        if footer:
-            f.write(fold_lines(create_ics_footer()) + "\r\n")
+    path.write_bytes(data)
 
 
 # =============================================================================
@@ -169,7 +190,7 @@ def write_semester_blocks(phases: Sequence[Phase], filename: Optional[str] = Non
 
     if filename is None:
         anchor_year = phases[0].start.year if phases[0].start else "unknown"
-        filename = f"output/semester_phases_{anchor_year}.ics"
+        filename = f"output/seasons_{anchor_year}.ics"
 
     events: list[Event] = []
     for phase in phases:
@@ -190,36 +211,33 @@ def write_semester_blocks(phases: Sequence[Phase], filename: Optional[str] = Non
     write_events_to_ics(
         events,
         filename,
-        calname="🧿 calmoji — Semester Phases (UTC)",
+        calname=CALNAME_PHASES,
         sort_by_start=True,
     )
 
 
-def write_ebi48_layer(
-    target_path: str | Path,
-    year: int,
-    *,
-    recurring: bool = True,
-    expanded: bool = False,
-) -> None:
+def write_ebi48_layer(target_path: str | Path, year: int, alignment: str) -> None:
     """
-    Write the EBI48 symbolic emoji layer as an .ics file.
+    Write the EBI48 symbolic emoji clock as an .ics file: the same 48 events
+    every day of the aligned year.
 
-    Modes:
-      - recurring=True: one event per slot with weekly RRULE COUNT=52
-      - expanded=True: emit 52 explicit instances per slot (bigger file)
+    - 48 timed events, one per half-hour slot, 25 minutes long, starting at
+      HH:05 or HH:35 UTC on the alignment's anchor date for the year.
+    - Each repeats daily: RRULE:FREQ=DAILY;UNTIL=<next anchor minus one second>.
+      No COUNT, so the repeat limit some calendar apps impose never applies.
+    - One all-day 🗝️ EBI48 Glyph Key event on the anchor date.
 
     EBI48 is UTC-fixed. It should not shift with local time.
     """
-    if recurring and expanded:
-        raise ValueError("Choose either recurring or expanded mode, not both.")
-
-    ref_day = get_first_weekday_of_year(year, weekday=5)  # Saturday anchor (UTC)
+    anchor = get_year_start_date(year, alignment)
+    next_anchor = get_year_start_date(year + 1, alignment)
+    until = (next_anchor - datetime.timedelta(seconds=1)).strftime("%Y%m%dT%H%M%SZ")
+    rule = f"FREQ=DAILY;UNTIL={until}"
 
     comments = [
-        "EBI48 is a deterministic, symbolic emoji-based time layer.",
-        "It recurs weekly and does not shift with local time.",
-        "See: https://ebi48.org/",
+        "EBI48 is a deterministic and symbolic emoji time layer.",
+        "It repeats every day and does not shift with local time.",
+        f"See: {EBI48_URL}",
     ]
 
     events: list[Event] = []
@@ -227,61 +245,45 @@ def write_ebi48_layer(
     # All-day glyph key marker
     events.append(
         Event(
-            start=ref_day,
-            end=ref_day + datetime.timedelta(days=1),
-            summary="Glyph Key — this week (EBI48)",
+            start=anchor,
+            end=anchor + datetime.timedelta(days=1),
+            summary="EBI48 Glyph Key",
             description="Symbolic marker: this calendar encodes canonical EBI48 slot glyphs (UTC-fixed).",
             emoji="🗝️",
             all_day=True,
-            uid=generate_uid(dt=ref_day, label="glyph-key", namespace="ebi48"),
+            uid=generate_uid(dt=anchor, label="glyph-key", namespace="ebi48"),
         )
     )
 
     for hour in range(24):
         for minute in (5, 35):
-            base_start = ref_day.replace(hour=hour, minute=minute, second=0, microsecond=0)
-            base_end = base_start + datetime.timedelta(minutes=25)
-            emoji, label = get_emoji_for_time(base_start)
+            start = anchor.replace(hour=hour, minute=minute, second=0, microsecond=0)
+            end = start + datetime.timedelta(minutes=25)
+            emoji, label = get_emoji_for_time(start)
 
-            summary = f"{emoji} {label} — EBI48"
             description = (
                 f"{emoji} {label} — Canonical EBI48 time at {hour:02d}:{minute:02d} UTC\\n"
                 "This slot is part of the EBI48 symbolic clock.\\n"
                 "🕒 UTC only — times do not shift with local time.\\n"
-                f"v{year} — https://ebi48.org"
+                f"{EBI48_URL}"
             )
 
-            if expanded:
-                for w in range(52):
-                    inst_start = base_start + datetime.timedelta(weeks=w)
-                    inst_end = base_end + datetime.timedelta(weeks=w)
-                    events.append(
-                        Event(
-                            start=inst_start,
-                            end=inst_end,
-                            summary=summary,
-                            description=description,
-                            emoji=emoji,
-                            uid=generate_uid(dt=inst_start, label=summary, namespace="ebi48"),
-                        )
-                    )
-            else:
-                events.append(
-                    Event(
-                        start=base_start,
-                        end=base_end,
-                        summary=summary,
-                        description=description,
-                        emoji=emoji,
-                        recurrence=("FREQ=WEEKLY;COUNT=52" if recurring else None),
-                        uid=generate_uid(dt=base_start, label=summary, namespace="ebi48"),
-                    )
+            events.append(
+                Event(
+                    start=start,
+                    end=end,
+                    summary=label,
+                    description=description,
+                    emoji=emoji,
+                    recurrence=rule,
+                    uid=generate_uid(dt=start, label=f"{emoji} {label}", namespace="ebi48"),
                 )
+            )
 
     write_events_to_ics(
         events,
         target_path,
-        calname=f"🧿 calmoji — EBI48 Clock (UTC) v{year}",
+        calname=CALNAME_EBI48,
         comments=comments,
         sort_by_start=True,
     )

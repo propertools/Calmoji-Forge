@@ -1,0 +1,119 @@
+# calmoji v@VERSION@ — calendar files
+
+Ready-made `.ics` calendar layers from
+[calmoji](https://github.com/propertools/Calmoji-Forge), for **@YEARS@**,
+in two alignments:
+
+* `academic`: each year runs September → August
+* `calendar`: each year runs January → December
+
+Pick one alignment and stick with it.
+
+Every time in these files is in **UTC**, and your calendar app shows it in
+your local time. That's why the calendar names don't say "UTC".
+
+---
+
+## What's in each year's folder
+
+```
+<year>/<alignment>/
+├── seasons_<year>.ics            ← 🌗 Seasons (all-day markers)
+├── emoji_clock_<year>.ics        ← 🧿 Emoji Clock, every day
+├── focus/
+│   └── focus_<YYYY-MM>.ics       ← 🧠 Focus — Open, one file per month
+└── meetings/
+    └── meetings_<YYYY-MM>.ics    ← 🕒 Meetings — Open, one file per month
+```
+
+Each file names its calendar for you: the calendar name inside is exactly
+the name above (🌗 Seasons, 🧠 Focus — Open, 🕒 Meetings — Open, 🧿 Emoji
+Clock), so apps that create a calendar on import get it right.
+
+Months are in **UTC**. If you're west of UTC, an event late in the evening
+on the last day of a month may be in the next month's file.
+
+Every file is kept under @MAX_EVENTS@ events and @MAX_KIB@ KB, so it fits the
+import limits reported for Google, Outlook and Proton. This bundle covers
+@YEARS@, and stops at 2036 because Proton accepts events only up to 2037.
+
+---
+
+## Importing
+
+Import each layer into **its own calendar** (for example "🧠 Focus — Open",
+"🕒 Meetings — Open"), so you can colour it and switch it on and
+off on its own. The calmoji
+[playbook](https://github.com/propertools/Calmoji-Forge/blob/main/docs/PLAYBOOK.md)
+explains how to use the layers day to day.
+
+* **Apple Calendar:** File → Import → choose the file → choose the
+  calendar.
+* **Google Calendar:** Settings → Import & export → choose the file and
+  the destination calendar.
+* **Outlook, Fastmail, Thunderbird and others:** use your app's "Import"
+  option.
+
+**Start with this month and next.** Focus blocks and meeting slots come one
+file per month; add more months as you go. It's a gentler start anyway, and
+each event is in exactly one file, so nothing is imported twice.
+
+To refresh a layer later, delete that calendar, recreate it, and import
+again. Your own events, in your own calendars, are untouched.
+
+### Upgrading from v0.1.0
+
+Delete the old calmoji calendars and import fresh. Event times and
+identifiers changed (see the
+[changelog](https://github.com/propertools/Calmoji-Forge/blob/main/CHANGELOG.md)),
+so importing over the old ones would leave you with duplicates.
+
+---
+
+## Good to know in v@VERSION@
+
+* **Meeting slots are fixed in UTC all year.** Your calendar app shows
+  them in your local time. In cities with daylight saving time (Brussels,
+  Havana, Seattle) a slot's local time is an hour earlier in winter than in
+  summer. Each slot's description says exactly when it falls locally.
+* **The 🧿 Emoji Clock (EBI48) appears every day**, one event per half-hour
+  that repeats daily through the year.
+* **Months are in UTC**, as above.
+
+More is planned for v0.2. See the
+[roadmap](https://github.com/propertools/Calmoji-Forge#-roadmap).
+
+---
+
+## Verifying the files
+
+`MANIFEST.sha256` lists the SHA-256 hash of every `.ics` file. From
+inside this folder:
+
+```bash
+shasum -a 256 -c MANIFEST.sha256
+```
+
+(On Linux, `sha256sum -c MANIFEST.sha256` works too.) Every line should
+end in `OK`.
+
+You can also regenerate any year yourself and compare. The output is
+byte-identical:
+
+```bash
+git clone https://github.com/propertools/Calmoji-Forge.git
+cd Calmoji-Forge
+git checkout v@VERSION@
+python3 calmoji.py --year=2027 --calendar-alignment=academic --output-dir=check
+diff -r check /path/to/this/folder/2027/academic
+```
+
+---
+
+## Provenance and license
+
+* Generator: [calmoji v@VERSION@](https://github.com/propertools/Calmoji-Forge/releases/tag/v@VERSION@)
+* Publisher: Proper Tools SRL, Brussels
+* Generator code: MIT. EBI48 mapping table and these `.ics` files: CC0 1.0.
+
+Problems or ideas: <https://github.com/propertools/Calmoji-Forge/issues>

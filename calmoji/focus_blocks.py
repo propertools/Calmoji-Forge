@@ -90,7 +90,7 @@ def _get_focus_block_defs() -> list[FocusBlockDef]:
 
 
 # -----------------------------------------------------------------------------
-# Week window helpers
+# Window helpers
 # -----------------------------------------------------------------------------
 
 
@@ -102,13 +102,68 @@ def _ensure_utc(dt: datetime) -> datetime:
     return dt
 
 
+def _day_start(dt: datetime) -> datetime:
+    """Return 00:00 UTC of the day containing dt."""
+    return _ensure_utc(dt).replace(hour=0, minute=0, second=0, microsecond=0)
+
+
 def _week_window(week: PhaseWeekSpan) -> tuple[datetime, datetime]:
     """
     Return [week_start, week_end_exclusive) where week_start is Monday 00:00 UTC.
     """
-    start = _ensure_utc(week.start).replace(hour=0, minute=0, second=0, microsecond=0)
+    start = _day_start(week.start)
     end_exclusive = start + timedelta(days=7)
     return start, end_exclusive
+
+
+def _iso_week_label(dt: datetime) -> str:
+    """ISO week label such as '2027-W49' for the week containing dt."""
+    iso_year, iso_week, _ = dt.isocalendar()
+    return f"{iso_year}-W{iso_week:02d}"
+
+
+# -----------------------------------------------------------------------------
+# Event builders (pure: no I/O)
+# -----------------------------------------------------------------------------
+
+
+def _glyph_key_event(monday: datetime, *, label: str, phase_emoji: str) -> Event:
+    """All-day 🗝️ Glyph Key marker for the week starting on the given Monday."""
+    week_label = _iso_week_label(monday)
+    return Event(
+        start=monday,
+        end=monday + timedelta(days=1),
+        summary=f"Glyph Key — {label} — {week_label}",
+        description=f"{phase_emoji} — {label} — focus blocks for {week_label} (UTC).",
+        emoji="🗝️",
+        all_day=True,
+    )
+
+
+def _focus_blocks_for_day(day: datetime, *, label: str, phase_emoji: str) -> list[Event]:
+    """Every focus block of one day (00:00 UTC), in block order. Ignores ACTIVE_WEEKDAYS."""
+    week_label = _iso_week_label(day)
+    events: list[Event] = []
+
+    for bd in _get_focus_block_defs():
+        summary = f"{bd.emoji} Focus Block {bd.number} — {label}"
+        description = (
+            f"{phase_emoji} — {label}\\n"
+            f"{bd.emoji} Focus Block {bd.number} "
+            f"({bd.start_hour:02d}:{bd.start_minute:02d}–{bd.end_hour:02d}:{bd.end_minute:02d} UTC)\\n"
+            f"Week: {week_label} (UTC)"
+        )
+
+        events.append(
+            Event(
+                start=day.replace(hour=bd.start_hour, minute=bd.start_minute),
+                end=day.replace(hour=bd.end_hour, minute=bd.end_minute),
+                summary=summary,
+                description=description,
+            )
+        )
+
+    return events
 
 
 # -----------------------------------------------------------------------------
@@ -124,60 +179,28 @@ def generate_focus_blocks_for_week(
     include_glyph_key: bool = True,
 ) -> list[Event]:
     """
-    Generate focus block events for a single ISO week span.
+    Generate focus block events for one whole ISO week span (Monday to Sunday).
 
     Notes:
     - Emits blocks only on ACTIVE_WEEKDAYS (or default 7 days).
     - UTC-only.
     - Returns Event objects only.
+    - The week is *not* clipped to any Phase. Phase-level generation
+      (generate_focus_blocks_for_phase) does not use this function; it clips
+      to the phase's own dates.
     """
-    week_start, week_end_excl = _week_window(week)
+    week_start, _ = _week_window(week)
     weekdays = set(_get_active_weekdays())
-    defs = _get_focus_block_defs()
 
     events: list[Event] = []
 
     if include_glyph_key:
-        events.append(
-            Event(
-                start=week_start,
-                end=week_start + timedelta(days=1),
-                summary=f"Glyph Key — {label} — {week.iso_week_label}",
-                description=f"{phase_emoji} — {label} — focus blocks for {week.iso_week_label} (UTC).",
-                emoji="🗝️",
-                all_day=True,
-            )
-        )
+        events.append(_glyph_key_event(week_start, label=label, phase_emoji=phase_emoji))
 
     for day_offset in range(7):
         day = week_start + timedelta(days=day_offset)
-        if day.weekday() not in weekdays:
-            continue
-
-        for bd in defs:
-            start_dt = day.replace(hour=bd.start_hour, minute=bd.start_minute)
-            end_dt = day.replace(hour=bd.end_hour, minute=bd.end_minute)
-
-            # Sanity guard (should always be true if PhaseWeekSpan.start is correct)
-            if not (week_start <= start_dt < week_end_excl):
-                continue
-
-            summary = f"{bd.emoji} Focus Block {bd.number} — {label}"
-            description = (
-                f"{phase_emoji} — {label}\\n"
-                f"{bd.emoji} Focus Block {bd.number} "
-                f"({bd.start_hour:02d}:{bd.start_minute:02d}–{bd.end_hour:02d}:{bd.end_minute:02d} UTC)\\n"
-                f"Week: {week.iso_week_label} (UTC)"
-            )
-
-            events.append(
-                Event(
-                    start=start_dt,
-                    end=end_dt,
-                    summary=summary,
-                    description=description,
-                )
-            )
+        if day.weekday() in weekdays:
+            events.extend(_focus_blocks_for_day(day, label=label, phase_emoji=phase_emoji))
 
     return sorted(events, key=lambda e: e.start)
 
@@ -188,29 +211,38 @@ def generate_focus_blocks_for_phase(
     include_weekly_glyph_keys: bool = True,
 ) -> list[Event]:
     """
-    Generate all focus block events for an entire Phase.
+    Generate all focus block events for a Phase, clipped to the Phase.
 
-    Design choice (coherence > precision):
-    - Emits *whole-week* focus blocks for each ISO week intersecting the Phase.
-    - Does not clip partial weeks to phase boundaries.
+    Clipped like meeting slots (identical for midnight-aligned phases, which is
+    every phase calmoji builds; meeting slots round phase bounds to whole days,
+    this applies the literal rule to the exact times):
+    - Emits exactly the blocks whose start falls in [phase.start, phase.end),
+      on ACTIVE_WEEKDAYS (or default 7 days).
+    - A week that straddles two phases is split between them (each phase gets
+      only its own days), so no block is emitted by more than one phase.
+    - Emits the all-day 🗝️ Glyph Key marker on each Monday that falls inside
+      the Phase, if include_weekly_glyph_keys is True.
     """
     if phase.start is None or phase.end is None:
         raise ValueError(f"Phase {phase.name} is missing start/end datetimes.")
 
-    weeks = PhaseWeekSpan.from_phase(phase)
-    events: list[Event] = []
+    phase_start = _ensure_utc(phase.start)
+    phase_end_excl = _ensure_utc(phase.end)
+    weekdays = set(_get_active_weekdays())
 
-    for w in weeks:
-        events.extend(
-            generate_focus_blocks_for_week(
-                w,
-                label=phase.name,
-                phase_emoji=phase.emoji,
-                include_glyph_key=include_weekly_glyph_keys,
-            )
-        )
+    candidates: list[Event] = []
 
-    return sorted(events, key=lambda e: e.start)
+    day = _day_start(phase_start)
+    while day < phase_end_excl:
+        if include_weekly_glyph_keys and day.weekday() == 0:
+            candidates.append(_glyph_key_event(day, label=phase.name, phase_emoji=phase.emoji))
+        if day.weekday() in weekdays:
+            candidates.extend(_focus_blocks_for_day(day, label=phase.name, phase_emoji=phase.emoji))
+        day += timedelta(days=1)
+
+    # The one place the clipping rule lives: start in [phase.start, phase.end).
+    clipped = [e for e in candidates if phase_start <= e.start < phase_end_excl]
+    return sorted(clipped, key=lambda e: e.start)
 
 
 def generate_focus_blocks_for_phases(

@@ -1,37 +1,34 @@
 # calmoji/dry_run.py
 
-from calmoji.types import Event
+from __future__ import annotations
 
-# def dry_run(events: list[Event], phase_name: str):
-#     """
-#     Print a dry-run preview of meeting events for a given phase.
-#     """
-#     print(f"\n📆 Phase: {phase_name}")
-#     print("─" * (12 + len(phase_name)))
+from typing import Sequence
 
-#     for event in events:
-#         start_str = event.start.strftime('%a %Y-%m-%d %H:%M')
-#         summary_str = event.summary or "(No Summary)"
-#         print(f"{summary_str.ljust(48)}  [{start_str}]")
-
-#     print(f"\nTotal: {len(events)} meeting slots\n")
+from calmoji.monthly import MonthRow
 
 
-def dry_run(events: list[Event], label: str = "Event Preview", kind: str = "slots") -> None:
+def dry_run_months(rows: Sequence[MonthRow], *, focus: bool = True, meetings: bool = True) -> None:
     """
-    Print a dry-run preview of a set of calendar events.
+    Print what a real run would write: one row per month (UTC), with the counts of
+    focus blocks, Glyph Keys and meeting slots in that month's files.
 
-    Args:
-        events (list[Event]): List of events to preview.
-        label (str): Title for this batch of events (e.g., phase name or week slug).
-        kind (str): Event type (e.g., 'slots', 'blocks', 'rituals') for reporting.
+    A layer that was switched off (--no-focus / --no-meetings) shows '-'.
     """
-    print(f"\n📆 {label}")
-    print("─" * (12 + len(label)))
 
-    for event in events:
-        start_str = event.start.strftime("%a %Y-%m-%d %H:%M")
-        summary_str = event.summary or "(No Summary)"
-        print(f"{summary_str.ljust(48)}  [{start_str}]")
+    def cell(value: int, shown: bool) -> str:
+        return str(value) if shown else "-"
 
-    print(f"\nTotal: {len(events)} {kind}\n")
+    print("\n📆 Monthly files (UTC): focus/focus_<YYYY-MM>.ics and meetings/meetings_<YYYY-MM>.ics")
+    print(f"{'Month':<9}{'Focus blocks':>14}{'Glyph Keys':>12}{'Meeting slots':>15}")
+    print("─" * 50)
+    for row in rows:
+        print(
+            f"{row.month:<9}{cell(row.focus_blocks, focus):>14}"
+            f"{cell(row.glyph_keys, focus):>12}{cell(row.meeting_slots, meetings):>15}"
+        )
+    print("─" * 50)
+    print(
+        f"{'Total':<9}{cell(sum(r.focus_blocks for r in rows), focus):>14}"
+        f"{cell(sum(r.glyph_keys for r in rows), focus):>12}{cell(sum(r.meeting_slots for r in rows), meetings):>15}"
+    )
+    print(f"{len(rows)} months\n")

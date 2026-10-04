@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 #
-# preflight.sh — run all the gates locally before pushing the
-# polish/oss-release branch.
+# preflight.sh — run all the gates locally before pushing a branch.
 #
 # Each gate is independent. If one fails, fix it, commit the fix, then
 # re-run preflight. We do not auto-fix anything: every formatter / linter
@@ -53,10 +52,12 @@ echo "Current branch: $CURRENT_BRANCH"
 echo "Commits on this branch (vs main):"
 git log --oneline main..HEAD || true
 COMMIT_COUNT=$(git log --oneline main..HEAD | wc -l | tr -d ' ')
-if [[ "$COMMIT_COUNT" -ge 7 ]]; then
-    ok "$COMMIT_COUNT commits ahead of main (expected ≥7)"
+if [[ "$CURRENT_BRANCH" == "main" ]]; then
+    ok "on main (release check)"
+elif [[ "$COMMIT_COUNT" -ge 1 ]]; then
+    ok "$COMMIT_COUNT commits ahead of main"
 else
-    bad "only $COMMIT_COUNT commits ahead of main — did finish-oss-release.sh complete?"
+    bad "no commits ahead of main — are you on the branch you meant to check?"
 fi
 
 step "Gate 2: no tracked-file modifications"
@@ -86,13 +87,19 @@ gate "pip upgrade" \
 gate "pip install -e .[dev]" \
     pip install --quiet -e '.[dev]'
 
-step "Gate 4: calmoji --version reports 0.1.0"
+# The expected version is whatever pyproject.toml says: the first top-level
+# `version = "..."` line, which is the one under [project].
+EXPECTED_VERSION=$(sed -n 's/^version[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p' pyproject.toml | head -n 1)
+
+step "Gate 4: calmoji --version matches pyproject.toml (${EXPECTED_VERSION:-unreadable})"
 VERSION_OUT=$(calmoji --version 2>&1 || true)
 echo "Output: $VERSION_OUT"
-if [[ "$VERSION_OUT" == "calmoji 0.1.0" ]]; then
-    ok "console_script reports calmoji 0.1.0"
+if [[ -z "$EXPECTED_VERSION" ]]; then
+    bad "could not read the version from pyproject.toml"
+elif [[ "$VERSION_OUT" == "calmoji $EXPECTED_VERSION" ]]; then
+    ok "console_script reports calmoji $EXPECTED_VERSION"
 else
-    bad "expected 'calmoji 0.1.0', got: $VERSION_OUT"
+    bad "expected 'calmoji $EXPECTED_VERSION', got: $VERSION_OUT"
 fi
 
 step "Gate 5: pytest"
@@ -111,17 +118,57 @@ step "Gate 8: mypy strict"
 gate "mypy calmoji" \
     mypy calmoji
 
-step "Gate 9: bundle integrity"
-if [[ -f release-bundle/v0.1.0/MANIFEST.sha256 ]]; then
-    if (cd release-bundle/v0.1.0 && if command -v sha256sum >/dev/null; then sha256sum -c MANIFEST.sha256; else shasum -a 256 -c MANIFEST.sha256; fi >/tmp/preflight-manifest.log 2>&1); then
-        ok "all 1873 bundle entries verified against MANIFEST.sha256"
+step "Gate 9: release bundle is reproducible"
+# Build the bundle twice, for two years only (the release itself builds
+# 2026-2036), into two temporary directories. The archives must match byte
+# for byte, and the manifest must verify.
+verify_manifest() {
+    # Run from inside the bundle folder, as the bundle's own README tells users to.
+    local dir="$1"
+    if command -v shasum >/dev/null 2>&1; then
+        (cd "$dir" && shasum -a 256 -c MANIFEST.sha256)
+    elif command -v sha256sum >/dev/null 2>&1; then
+        (cd "$dir" && sha256sum -c MANIFEST.sha256)
     else
-        bad "manifest verification failed (see /tmp/preflight-manifest.log)"
-        tail -5 /tmp/preflight-manifest.log
+        echo "neither shasum nor sha256sum is installed"
+        return 1
+    fi
+}
+
+BUNDLE_TMP_BASE="${TMPDIR:-/tmp}"
+BUNDLE_TMP=$(mktemp -d "${BUNDLE_TMP_BASE%/}/calmoji-preflight-bundle.XXXXXX")
+BUNDLE_YEARS="2026-2027"
+BUNDLE_ZIP="calmoji-artifacts-v${EXPECTED_VERSION}.zip"
+BUNDLE_TAR="calmoji-artifacts-v${EXPECTED_VERSION}.tar.gz"
+
+if python3 scripts/build_bundle.py --out "$BUNDLE_TMP/a" --years "$BUNDLE_YEARS" >"$BUNDLE_TMP/build-a.log" 2>&1 \
+    && python3 scripts/build_bundle.py --out "$BUNDLE_TMP/b" --years "$BUNDLE_YEARS" >"$BUNDLE_TMP/build-b.log" 2>&1; then
+    ok "build_bundle.py built $BUNDLE_YEARS twice"
+
+    if cmp "$BUNDLE_TMP/a/$BUNDLE_ZIP" "$BUNDLE_TMP/b/$BUNDLE_ZIP" \
+        && cmp "$BUNDLE_TMP/a/$BUNDLE_TAR" "$BUNDLE_TMP/b/$BUNDLE_TAR"; then
+        ok "zip and tar.gz are byte-identical across the two builds"
+    else
+        bad "archives differ between two builds of the same bundle"
+    fi
+
+    MANIFEST_ENTRIES=$(wc -l <"$BUNDLE_TMP/a/v${EXPECTED_VERSION}/MANIFEST.sha256" | tr -d ' ')
+    if verify_manifest "$BUNDLE_TMP/a/v${EXPECTED_VERSION}" >"$BUNDLE_TMP/verify.log" 2>&1; then
+        VERIFIED=$(grep -c ': OK$' "$BUNDLE_TMP/verify.log" || true)
+        if [[ "$MANIFEST_ENTRIES" -gt 0 && "$VERIFIED" -eq "$MANIFEST_ENTRIES" ]]; then
+            ok "all $VERIFIED manifest entries verified"
+        else
+            bad "manifest check passed but verified $VERIFIED of $MANIFEST_ENTRIES entries"
+        fi
+    else
+        bad "manifest verification failed"
+        grep -v ': OK$' "$BUNDLE_TMP/verify.log" | head -10
     fi
 else
-    bad "release-bundle/v0.1.0/MANIFEST.sha256 not found"
+    bad "build_bundle.py failed"
+    tail -10 "$BUNDLE_TMP/build-a.log" "$BUNDLE_TMP/build-b.log" 2>/dev/null
 fi
+rm -rf "$BUNDLE_TMP"
 
 step "Gate 10: install-from-git smoke test"
 SMOKE_VENV="${VENV_DIR}-smoke"
@@ -133,8 +180,8 @@ source "$SMOKE_VENV/bin/activate"
 pip install --quiet --upgrade pip
 if pip install --quiet "calmoji @ git+file://$REPO_ROOT@$CURRENT_BRANCH" >/tmp/preflight-pipgit.log 2>&1; then
     SMOKE_VERSION=$(calmoji --version 2>&1)
-    if [[ "$SMOKE_VERSION" == "calmoji 0.1.0" ]]; then
-        ok "pip install git+file://...@$CURRENT_BRANCH produces working calmoji 0.1.0"
+    if [[ "$SMOKE_VERSION" == "calmoji $EXPECTED_VERSION" ]]; then
+        ok "pip install git+file://...@$CURRENT_BRANCH produces working calmoji $EXPECTED_VERSION"
     else
         bad "git-installed calmoji reports wrong version: $SMOKE_VERSION"
     fi
@@ -154,7 +201,7 @@ if [[ ${#FAILED[@]} -eq 0 ]]; then
     echo
     echo "🎉 All gates passed. Safe to push:"
     echo "    git push -u origin $CURRENT_BRANCH"
-    echo "    gh pr create --base main --head $CURRENT_BRANCH --title 'Polish for OSS release'"
+    echo "    gh pr create --base main --head $CURRENT_BRANCH --fill"
     exit 0
 else
     echo
