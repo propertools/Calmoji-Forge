@@ -81,6 +81,13 @@ review.
 - The playbook ends with an optional section on using an AI assistant as an
   agenda steward, with a starting prompt, and the README points to it. calmoji
   itself still needs no AI, account or cloud service.
+- Screenshots in the README and the playbook: a made-up week with The Map on
+  and off, claiming a block, the calendar list and its colours, the Emoji
+  Clock beside the meeting slots, and a slot's description.
+- The README says plainly what calmoji means for your data: it never sees
+  your calendar, and because almost every calendar app imports and exports
+  `.ics`, there's no lock-in. Its download section now opens with four quick
+  steps.
 
 ## [0.1.1] — 2026-10-04
 

@@ -108,6 +108,10 @@ their own palettes, so pick the nearest match to each hex value.
 | ⚖️ Hard Deadlines | Raspberry | `#AB2F56` |
 | 🧪 Sandbox | Olive | `#7E7323` |
 
+In Proton Calendar, the whole set looks like this:
+
+<img src="img/layers.png" alt="A calendar list in Proton Calendar: the Map, Commitments, Life and Sandbox calendars, each with its emoji and colour" width="247">
+
 The thinking behind it, if you'd rather choose your own:
 
 * **The Map is earthy and quiet** (greens, a soft brown). They're
@@ -167,6 +171,10 @@ later that the afternoon has gone.
 Switch on 🌗 Seasons, 🧠 Focus — Open and 🕒 Meetings — Open. Look
 at the week ahead and notice what season you're in.
 
+![A week with The Map switched on: the season across the top, brown open focus blocks, green meeting slots, and blue claimed blocks among them](img/planning.png)
+*A made-up week in January 2027, in Proton Calendar, with Brussels time
+and UTC side by side.*
+
 ### Claim focus
 Pick an open focus block in your waking hours and **duplicate** it into
 🎯 Focus — Claimed. Rename it to the task, starting with 🎯:
@@ -176,6 +184,11 @@ Pick an open focus block in your waking hours and **duplicate** it into
 calmoji's events are marked *free*, so they don't make you look busy. Your
 app may copy that setting when you duplicate; if you want others to see
 you as unavailable, set the claimed copy to *busy*.
+
+![One day with The Map on: the open 09:00 focus block beside its claimed copy, renamed 🎯 Write the volunteer onboarding guide, and the Havana 🦉 meeting slot beside the call booked from it](img/claiming.png)
+*Claiming: the open 09:00 block has been duplicated into
+🎯 Focus — Claimed and renamed to the task. The Havana 🦉 slot at 18:35
+has been booked the same way.*
 
 ### Book a meeting
 Duplicate an open meeting slot into 🤝 Meetings — One-off or
@@ -187,6 +200,9 @@ when it falls in that city, summer and winter.
 ### Work
 Switch The Map off. Your calendar now shows only what you've
 committed to.
+
+![The same week with The Map switched off: only claimed focus blocks, meetings and life commitments remain](img/working.png)
+*The same week with The Map off. What's left is what you chose.*
 
 ### Close out
 When a task is done, change its 🎯 to ✅:

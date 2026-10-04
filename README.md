@@ -16,13 +16,42 @@ toggle them on to plan and off to work. When you want to use a block, you
 **claim** it by copying it into your own calendar. You never build a
 schedule from scratch, and you never break the structure underneath.
 
+![A week in Proton Calendar with calmoji's layers switched on: brown open focus blocks every two hours, green meeting slots for six cities, and blue claimed focus blocks marked 🎯 for planned and ✅ for done](docs/img/planning.png)
+*The Map on: a made-up week of open focus blocks (brown), meeting slots
+(green) and the blocks already claimed (blue).*
+
+![The same week with calmoji's layers switched off: only the claimed focus blocks, a few meetings and everyday commitments remain](docs/img/working.png)
+*The Map off: the same week, showing only what was chosen.*
+
 No app, no account, no subscription fee. Just `.ics` files that work in
-Apple Calendar, Google Calendar, Outlook, Fastmail, Thunderbird, and
-anything else that speaks the iCalendar standard.
+Apple Calendar, Google Calendar, Outlook, Proton Calendar, Fastmail,
+Thunderbird, and anything else that speaks the iCalendar standard.
+
+**About as much data sovereignty as paper.** calmoji never sees your
+calendar. It makes files; you import them; everything you plan stays in
+your own calendars, with whichever provider you choose. And since almost
+every calendar app can import and export `.ics`, there's no lock-in:
+change apps whenever you like, and take your structure and your plans
+with you.
 
 ---
 
 ## 🚀 Get the calendars
+
+**In four steps:**
+
+1. Download **`calmoji-artifacts-vX.Y.Z.zip`** from the
+   [latest release](https://github.com/propertools/Calmoji-Forge/releases/latest)
+   and unzip it.
+2. In your calendar app, create a calendar for each layer (🌗 Seasons,
+   🧠 Focus — Open, 🕒 Meetings — Open, 🧿 Emoji Clock), plus one of your
+   own for what you claim, such as 🎯 Focus — Claimed.
+3. Import each file into its layer's calendar: the year's 🌗 and 🧿 files,
+   and this month's and next month's 🧠 and 🕒 files.
+4. Claim time for this week's meetings, projects and tasks by copying open
+   blocks and slots into your own calendars.
+
+The details follow.
 
 Download the ready-made calendars for **2026–2036** from the
 [latest release](https://github.com/propertools/Calmoji-Forge/releases/latest):
@@ -166,6 +195,8 @@ Like everything in calmoji, slots are fixed in UTC all year, and your
 calendar app shows them in your local time. Each slot's description says
 exactly when it falls locally.
 
+<img src="docs/img/slot-details.png" alt="An open meeting slot, Havana 🦉 Owl Face Slot, at 17:35 to 18:00 UTC. Its description reads: Early afternoon in Havana: 13:35–14:00 CDT in summer and 12:35–13:00 CST in winter. Fixed at 17:35 UTC." width="400">
+
 ### 🧿 Emoji Clock
 
 I designed EBI48 after years of watching global technical standards
@@ -179,6 +210,10 @@ moment everywhere, anchored at :05 and :35 UTC. Your calendar shows each
 one at your local time, so nobody converts anything out loud. Instead of
 doing sums, you **pick a day and look for free animals at acceptable
 times**. See [EBI48-README.md](EBI48-README.md).
+
+![A day in Proton Calendar with the Emoji Clock and open meeting slots: each half-hour has its animal, and each city's meeting slot carries the same animal as the clock at that moment](docs/img/emoji-clock.png)
+*Thursday, seen from Brussels. Delhi's 🐐 slot sits beside the 🐐 on the
+clock, because 🐐 is 08:05 UTC everywhere.*
 
 ### ⚠️ Known limitations
 
