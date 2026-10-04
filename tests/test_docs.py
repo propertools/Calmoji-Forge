@@ -215,7 +215,8 @@ def test_readme_does_not_claim_preflight_runs_every_ci_check():
     assert "runs every check CI runs" not in text
     assert "runs CI's main checks on your machine" in text
     assert (
-        "CI also tests Python 3.9 through 3.13, compares output across Python versions, and runs on stock macOS" in text
+        "CI also tests Python 3.9 through 3.13, compares output across Python versions, "
+        "and runs on macOS's `/usr/bin/python3`" in text
     )
 
 
@@ -347,3 +348,56 @@ def test_the_v0_1_3_todos_are_written_down_where_future_work_lives():
     assert "**v0.1.3:** RFC 5545 doesn't allow most control characters in TEXT values" in contributing
     # the existing roadmap entries are still there
     assert "Subscribable calendars" in readme and "Atomic file writes" in contributing
+
+
+# -----------------------------------------------------------------------------
+# Where macOS's python3 really comes from (v0.1.3)
+# -----------------------------------------------------------------------------
+
+OLD_MACOS_WORDING = (
+    "ships with macOS",
+    "ship with macOS",
+    "stock macOS",
+    "stock Mac",
+    "macOS ships",
+    "every Mac already has",
+)
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "README.md",
+        "TEST_STRATEGY.md",
+        "CONTRIBUTING.md",
+        ".github/workflows/ci.yml",
+        "scripts/bundle_README.md.in",
+        "docs/PLAYBOOK.md",
+    ],
+)
+def test_no_file_claims_python_ships_with_macos(name):
+    text = " ".join(read(name).split())
+    for old in OLD_MACOS_WORDING:
+        assert old not in text, f"{name} still says {old!r}"
+
+
+def test_readme_says_the_python3_comes_from_apples_command_line_tools():
+    text = " ".join(read("README.md").split())
+    assert (
+        "including the `python3` from Apple's Command Line Tools (a Mac offers to install them the first time you run `python3`)"
+        in text
+    )
+    assert "upgrade pip first (the pip that comes with Apple's Python is old)" in text
+    assert "runs on macOS's `/usr/bin/python3`" in text
+
+
+def test_the_ci_job_is_named_for_what_it_really_tests():
+    ci = read(".github/workflows/ci.yml")
+    assert "name: macOS /usr/bin/python3" in ci
+    assert "stock macOS python3" not in ci and "stock-macos" not in ci
+    assert "Apple's Command Line Tools" in ci
+    assert "/usr/bin/python3 calmoji.py --year=2030" in ci  # and it still runs that interpreter
+
+
+def test_test_strategy_names_the_macos_interpreter_exactly():
+    assert "on macOS's `/usr/bin/python3`" in read("TEST_STRATEGY.md")

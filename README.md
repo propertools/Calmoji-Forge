@@ -262,7 +262,8 @@ cd Calmoji-Forge
 ```
 
 Generate. Nothing to install, no third-party packages: any Python 3.9 or
-newer works, including the `python3` that ships with macOS.
+newer works, including the `python3` from Apple's Command Line Tools (a Mac
+offers to install them the first time you run `python3`).
 
 ```bash
 python3 calmoji.py --year=2027 --calendar-alignment=academic
@@ -303,7 +304,8 @@ output/2027/academic/
 ```
 
 Optionally, install it as a package to get a `calmoji` command. Use a
-virtual environment, and upgrade pip first (macOS ships an old one):
+virtual environment, and upgrade pip first (the pip that comes with Apple's
+Python is old):
 
 ```bash
 python3 -m venv .venv
@@ -317,7 +319,7 @@ Working on calmoji itself? `python3 -m pip install -e '.[dev]'` adds the
 test, lint and type-check tools, and `bash scripts/preflight.sh` runs CI's
 main checks on your machine (tests with coverage, ruff, black, mypy) plus a
 reproducible release-bundle build. CI also tests Python 3.9 through 3.13,
-compares output across Python versions, and runs on stock macOS.
+compares output across Python versions, and runs on macOS's `/usr/bin/python3`.
 
 If you regenerate a year we publish and get a different file, that's a
 bug. Please open an issue.
