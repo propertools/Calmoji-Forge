@@ -96,14 +96,20 @@ def fold_lines(lines: Sequence[str]) -> str:
 
 def unfold_ics_lines(content: str) -> list[str]:
     """
-    Unfold ICS text by joining continuation lines.
-    Lines beginning with a single space are continuations of the prior line.
-    """
-    raw_lines = content.splitlines()
-    unfolded: list[str] = []
+    Unfold ICS text into logical lines (RFC 5545 §3.1).
 
-    for i, line in enumerate(raw_lines):
-        if line.startswith(" "):
+    Lines are split where iCalendar splits them: on CRLF, and, for leniency, on a bare LF.
+    Nothing else is a line break, whatever Python's str.splitlines() thinks: a value may
+    safely contain U+2028, U+2029, U+0085, and so on. A line that starts with a single space
+    or tab is a continuation of the previous line, and that one character is dropped.
+    """
+    physical = content.replace("\r\n", "\n").split("\n")
+    if physical and physical[-1] == "":
+        physical.pop()  # the newline that ends the last line doesn't start another
+
+    unfolded: list[str] = []
+    for i, line in enumerate(physical):
+        if line.startswith((" ", "\t")):
             if not unfolded:
                 raise ValueError(f"Malformed ICS: continuation line on line {i + 1} with no prior content.")
             unfolded[-1] += line[1:]
