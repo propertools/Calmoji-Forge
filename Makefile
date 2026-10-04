@@ -7,7 +7,7 @@ lint:
 	ruff check .
 
 type:
-	mypy forge
+	mypy calmoji
 
 format:
 	black .

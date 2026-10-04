@@ -3,9 +3,10 @@
 import unittest
 from datetime import datetime
 
+from calmoji.ebi48 import EBI48_CLOCK, get_emoji_for_time
 from calmoji.uid import generate_uid
 from calmoji.utils import slugify
-from calmoji.ebi48 import get_emoji_for_time, EBI48_CLOCK
+
 
 class TestUtilsKeyCases(unittest.TestCase):
 

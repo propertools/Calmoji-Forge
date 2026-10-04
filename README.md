@@ -2,6 +2,10 @@
 
 ## Ritual Calendar Generator — UTC, Deterministic, Glyph-Aligned
 
+[![CI](https://github.com/propertools/Calmoji-Forge/actions/workflows/ci.yml/badge.svg)](https://github.com/propertools/Calmoji-Forge/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
+
 > A symbolic scheduling engine built on UTC discipline, exclusive time semantics, and deterministic emoji clocks.
 
 ---
@@ -22,6 +26,53 @@ It is a **semantic calendar compiler**.
 
 You give it a year and alignment.
 It produces canonical, UTC-stable calendar artifacts.
+
+---
+
+## 🚀 Quick start — just give me the calendars
+
+Most people don't need to run anything. We pre-generate the calendars and
+publish them.
+
+**Get the bundle:**
+
+* 🌐 [ebi48.org](https://ebi48.org) — canonical home of the EBI48 emoji
+  time protocol and the calmoji `.ics` artifacts. Pick a year, subscribe
+  or download.
+* 📦 [GitHub Releases](https://github.com/propertools/Calmoji-Forge/releases)
+  — every tagged version ships a `calmoji-artifacts-vX.Y.Z.tar.gz` bundle
+  containing all years, both alignments, and a `MANIFEST.sha256` for
+  verification.
+
+**What you get for each year:**
+
+```
+<year>/
+├── academic/
+│   ├── semester_phases_<year>.ics       ← season markers
+│   ├── meeting_all_<year>.ics           ← meeting slot grid
+│   ├── focus_weeks/                     ← weekly focus blocks
+│   └── ebi48_layer_<year>.ics           ← EBI48 emoji clock overlay
+└── calendar/
+    └── … same shape, January-anchored
+```
+
+**To import into your calendar:**
+
+* **Apple Calendar:** File → Import → select the `.ics`. For ongoing
+  subscription, File → New Calendar Subscription with the ebi48.org URL.
+* **Google Calendar:** Settings → Add calendar → From URL (subscription)
+  or Import (one-shot).
+* **Thunderbird / others:** subscribe to the ebi48.org URL via
+  `webcal://`.
+
+The files are deterministic and re-import-safe: re-importing won't create
+duplicates, only updates.
+
+If you want the generator itself — to produce calendars for a year we
+haven't published, change the alignment, or add new layers — see
+[Regenerating the calendars yourself](#-regenerating-the-calendars-yourself)
+below.
 
 ---
 
@@ -192,20 +243,45 @@ ICS output conforms to RFC 5545 folding rules.
 
 ---
 
-## 🛠 Usage
+## 🛠 Regenerating the calendars yourself
+
+You only need this section if the pre-generated bundle on
+[ebi48.org](https://ebi48.org) doesn't cover what you want — a year we
+haven't published, a different alignment, or a custom layer toggle.
 
 Clone:
 
 ```bash
 git clone https://github.com/propertools/Calmoji-Forge.git
-cd calmoji
+cd Calmoji-Forge
 ```
 
-Generate:
+Generate. Nothing to install, no third-party packages: any Python 3.9
+or newer works, including the `python3` that ships with macOS.
 
 ```bash
 python3 calmoji.py --year=2039
 ```
+
+Optionally, install it as a package to get a `calmoji` command. Use a
+virtual environment, and upgrade pip first (macOS ships an old one):
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install --upgrade pip
+python3 -m pip install -e .
+calmoji --year=2039
+```
+
+Or install directly from GitHub without cloning (same setup, then):
+
+```bash
+python3 -m pip install 'calmoji @ git+https://github.com/propertools/Calmoji-Forge.git'
+```
+
+Working on calmoji itself? `python3 -m pip install -e '.[dev]'` adds the
+test, lint and type-check tools.
 
 Preview only:
 
@@ -221,15 +297,19 @@ Disable layers:
 --no-ebi48
 ```
 
+Reproducibility note: the same `--year` and `--calendar-alignment` always
+produce byte-identical output. CI verifies this on every commit, across Python versions. So if
+you regenerate `2030 / academic` locally, you should get exactly the
+files we shipped. If you don't, that's a bug — please open an issue.
+
 ---
 
 ## 🧪 Test Discipline
 
-Current status:
+Run the suite:
 
-```
-51 passed
-0 failed
+```bash
+pytest --cov=calmoji --cov-report=term-missing
 ```
 
 Coverage includes:
@@ -270,7 +350,22 @@ If nothing survives but glyphs and dates, it still makes sense.
 * Ritual Design: Trey Darley
 * Engineering Discipline: Trey Darley
 * AI Pair Engineering: ChatGPT, Claude
-* Glyph Architecture: EBI48.org
+* Glyph Architecture: [EBI48.org](https://ebi48.org)
+
+---
+
+## 🔐 Security
+
+See [SECURITY.md](SECURITY.md) for the coordinated-disclosure policy and
+contact channel. Reports of output non-determinism, RFC 5545 drift, or
+malformed-input handling are explicitly in scope.
+
+---
+
+## 📜 License
+
+* Code: [MIT License](LICENSE)
+* EBI48 mapping table: CC0 1.0 (public domain where possible)
 
 ---
 

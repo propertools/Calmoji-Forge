@@ -35,6 +35,7 @@ DEFAULT_WEEKDAYS: Set[int] = {0, 1, 2, 3, 4}  # Monday–Friday
 
 # ── Slot definition ─────────────────────────────────────────────────────────
 
+
 @dataclass(frozen=True)
 class MeetingSlot:
     city: str
@@ -51,6 +52,7 @@ def is_valid_slot_day(city: str, weekday: int) -> bool:
 
 
 # ── Internal helpers ────────────────────────────────────────────────────────
+
 
 def _normalize_day_start(dt: datetime) -> datetime:
     """Force a datetime to 00:00 UTC of its date."""
@@ -80,6 +82,7 @@ def _slots_from_config() -> List[MeetingSlot]:
 
 
 # ── Generator ───────────────────────────────────────────────────────────────
+
 
 def generate_meeting_slots(
     phase: Phase,

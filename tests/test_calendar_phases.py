@@ -2,8 +2,8 @@
 
 import datetime
 
+from calmoji.calendar_config import get_semester_phase_definitions, get_year_start_date
 from calmoji.calendar_phases import get_semester_phases
-from calmoji.calendar_config import get_year_start_date, get_semester_phase_definitions
 from calmoji.types import Phase
 
 

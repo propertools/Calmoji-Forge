@@ -53,13 +53,20 @@ def get_first_weekday_of_year(year: int, weekday: Union[str, int]) -> datetime:
       - str: 'mon'/'monday' ... 'sun'/'sunday'
     """
     weekday_map = {
-        "monday": 0, "mon": 0,
-        "tuesday": 1, "tue": 1,
-        "wednesday": 2, "wed": 2,
-        "thursday": 3, "thu": 3,
-        "friday": 4, "fri": 4,
-        "saturday": 5, "sat": 5,
-        "sunday": 6, "sun": 6,
+        "monday": 0,
+        "mon": 0,
+        "tuesday": 1,
+        "tue": 1,
+        "wednesday": 2,
+        "wed": 2,
+        "thursday": 3,
+        "thu": 3,
+        "friday": 4,
+        "fri": 4,
+        "saturday": 5,
+        "sat": 5,
+        "sunday": 6,
+        "sun": 6,
     }
 
     if isinstance(weekday, str):

@@ -1,13 +1,9 @@
 # tests/test_ics_output.py
 
 import datetime
-from calmoji.calendar_phases import get_semester_phases
-from calmoji.slot_generator import generate_meeting_slots
-from calmoji.ics_writer import create_ics_header, create_ics_footer
-from calmoji.calendar_config import get_year_start_date
-from calmoji.types import Event
-from calmoji.generator import get_all_events
 
+from calmoji.ics_writer import create_ics_footer, create_ics_header
+from calmoji.types import Event
 
 
 def make_test_event() -> Event:
@@ -28,9 +24,7 @@ def test_ics_file_line_count(tmp_path):
     # Compose .ics content
     event = make_test_event()
     ics_content = (
-        "\n".join(create_ics_header()) + "\n" +
-        "\n".join(event.to_ics()) + "\n" +
-        "\n".join(create_ics_footer()) + "\n"
+        "\n".join(create_ics_header()) + "\n" + "\n".join(event.to_ics()) + "\n" + "\n".join(create_ics_footer()) + "\n"
     )
     testfile.write_text(ics_content, encoding="utf-8")
 

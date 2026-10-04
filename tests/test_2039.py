@@ -1,10 +1,12 @@
 # tests/test_2039.py
 
+from __future__ import annotations
+
 import datetime
 
 from calmoji.calendar_phases import get_semester_phases
 from calmoji.generator import get_all_events
-from calmoji.ics_writer import create_ics_header, create_ics_footer, fold_lines
+from calmoji.ics_writer import create_ics_footer, create_ics_header, fold_lines
 
 UTC = datetime.timezone.utc
 
@@ -67,8 +69,5 @@ def test_only_2039_events_appear_in_calendar_output():
     bad_starts = [v for v in dtstarts if _year_from_value(v) != 2039]
     assert not bad_starts, f"Found DTSTART values outside 2039: {bad_starts[:10]}"
 
-    bad_ends = [
-        v for v in dtends
-        if (_year_from_value(v) != 2039 and not _is_exclusive_year_boundary(v))
-    ]
+    bad_ends = [v for v in dtends if (_year_from_value(v) != 2039 and not _is_exclusive_year_boundary(v))]
     assert not bad_ends, f"Found DTEND values outside allowed range: {bad_ends[:10]}"

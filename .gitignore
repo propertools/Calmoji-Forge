@@ -9,4 +9,6 @@ build/
 .ruff_cache/
 .DS_Store
 output/
+release-bundle/
 *.ics
+.venv*/

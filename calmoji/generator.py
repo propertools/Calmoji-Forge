@@ -16,9 +16,9 @@ from __future__ import annotations
 
 from typing import List
 
-from calmoji.types import Event, Phase
 from calmoji.focus_blocks import generate_focus_blocks_for_phase
 from calmoji.slot_generator import generate_meeting_slots
+from calmoji.types import Event, Phase
 
 
 def generate_focus_blocks(phase: Phase) -> List[Event]:

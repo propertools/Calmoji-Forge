@@ -1,9 +1,9 @@
 # tests/test_focus_blocks.py
 
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 
 from calmoji.focus_blocks import generate_focus_blocks_for_week
-from calmoji.focus_blocks_config import FOCUS_BLOCKS, ACTIVE_WEEKDAYS, DEFAULT_ACTIVE_WEEKDAYS
+from calmoji.focus_blocks_config import ACTIVE_WEEKDAYS, DEFAULT_ACTIVE_WEEKDAYS, FOCUS_BLOCKS
 from calmoji.types import PhaseWeekSpan
 
 UTC = timezone.utc

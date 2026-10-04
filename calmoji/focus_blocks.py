@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
-from typing import List, Sequence
+from typing import Sequence
 
-from calmoji.focus_blocks_config import FOCUS_BLOCKS, ACTIVE_WEEKDAYS, DEFAULT_ACTIVE_WEEKDAYS
+from calmoji.focus_blocks_config import ACTIVE_WEEKDAYS, DEFAULT_ACTIVE_WEEKDAYS, FOCUS_BLOCKS
 from calmoji.types import Event, Phase, PhaseWeekSpan
 
 UTC = timezone.utc
@@ -15,6 +15,7 @@ UTC = timezone.utc
 @dataclass(frozen=True)
 class FocusBlockDef:
     """Canonical definition for a daily focus block."""
+
     number: int
     start_hour: int
     start_minute: int
@@ -92,6 +93,7 @@ def _get_focus_block_defs() -> list[FocusBlockDef]:
 # Week window helpers
 # -----------------------------------------------------------------------------
 
+
 def _ensure_utc(dt: datetime) -> datetime:
     if dt.tzinfo is None:
         return dt.replace(tzinfo=UTC)
@@ -112,6 +114,7 @@ def _week_window(week: PhaseWeekSpan) -> tuple[datetime, datetime]:
 # -----------------------------------------------------------------------------
 # Generators (pure: no I/O)
 # -----------------------------------------------------------------------------
+
 
 def generate_focus_blocks_for_week(
     week: PhaseWeekSpan,

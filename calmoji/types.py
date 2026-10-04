@@ -33,6 +33,7 @@ UTC = timezone.utc
 # Event
 # =============================================================================
 
+
 @dataclass
 class Event:
     start: datetime
@@ -67,10 +68,7 @@ class Event:
                     raise ValueError("All-day event end must be after start.")
 
                 is_midnight_input = (
-                    self.end.hour == 0
-                    and self.end.minute == 0
-                    and self.end.second == 0
-                    and self.end.microsecond == 0
+                    self.end.hour == 0 and self.end.minute == 0 and self.end.second == 0 and self.end.microsecond == 0
                 )
                 self.end = end_midnight if is_midnight_input else (end_midnight + timedelta(days=1))
         else:
@@ -132,6 +130,7 @@ class Event:
 # Phase
 # =============================================================================
 
+
 @dataclass
 class Phase:
     name: str
@@ -142,7 +141,7 @@ class Phase:
     meeting_density: str = "normal"  # 'none'|'low'|'normal'|'high' (convention)
     note: Optional[str] = None
     start: Optional[datetime] = None  # inclusive
-    end: Optional[datetime] = None    # exclusive
+    end: Optional[datetime] = None  # exclusive
 
     @property
     def duration_days(self) -> Optional[int]:
@@ -168,6 +167,7 @@ PhaseName = Literal[
 # PhaseWeekSpan
 # =============================================================================
 
+
 @dataclass(frozen=True)
 class PhaseWeekSpan:
     """
@@ -179,6 +179,7 @@ class PhaseWeekSpan:
     - ritual_type: optional tag for future routing (default 'focus')
     Emits full ISO weeks whose start occurs in the phase’s covered-week set (weeks discovered by iterating days in [phase.start, phase.end)). Does not clip within-week.
     """
+
     start: datetime
     phase_name: str
     week_index: int
@@ -193,7 +194,7 @@ class PhaseWeekSpan:
         return f"{self.phase_name} / Week {self.week_index + 1}"
 
     @classmethod
-    def from_phase(cls, phase: Phase) -> List["PhaseWeekSpan"]:
+    def from_phase(cls, phase: Phase) -> List[PhaseWeekSpan]:
         if phase.start is None or phase.end is None:
             raise ValueError(f"Phase {phase.name} is missing concrete start/end datetimes.")
 
@@ -210,7 +211,7 @@ class PhaseWeekSpan:
 
         sorted_weeks = sorted(week_map.items(), key=lambda x: min(x[1]))
 
-        spans: List["PhaseWeekSpan"] = []
+        spans: List[PhaseWeekSpan] = []
         for idx, (_, days) in enumerate(sorted_weeks):
             monday = min(days) - timedelta(days=min(days).weekday())
             monday = monday.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=UTC)
