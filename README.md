@@ -115,6 +115,9 @@ The full pattern, with a suggested set of calendars and the weekly loop,
 is in **[docs/PLAYBOOK.md](docs/PLAYBOOK.md)**. It's a starting point, not a
 rulebook: start small and adapt it.
 
+Prefer to plan with an AI assistant? See the
+[playbook](docs/PLAYBOOK.md#optional-an-ai-agenda-steward).
+
 ---
 
 ## 🗂 What's in each layer

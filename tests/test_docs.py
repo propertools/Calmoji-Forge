@@ -286,3 +286,50 @@ def test_test_strategy_claims_only_what_is_implemented():
 def test_ci_really_measures_coverage_so_fail_under_applies():
     ci = read(".github/workflows/ci.yml")
     assert "--cov=calmoji" in ci and "--cov-branch" in ci
+
+
+# -----------------------------------------------------------------------------
+# The optional AI agenda steward
+# -----------------------------------------------------------------------------
+
+STEWARD_HEADING = "## Optional: an AI agenda steward"
+
+
+def github_slug(heading: str) -> str:
+    """GitHub's heading anchor: lowercase, punctuation dropped, spaces to hyphens."""
+    text = heading.lstrip("#").strip().lower()
+    return re.sub(r"[^\w\- ]", "", text).replace(" ", "-")
+
+
+def test_the_steward_section_ends_the_playbook_and_its_code_block_is_closed():
+    text = read("docs/PLAYBOOK.md")
+    lines = text.splitlines()
+    assert lines.count(STEWARD_HEADING) == 1
+    section = text[text.index(STEWARD_HEADING) :]
+    assert section.rstrip().endswith("become more machine-like.\n```")
+    assert section.count("```") == 2  # one block, opened and closed
+    assert text.count("```") % 2 == 0  # no fence left open anywhere in the playbook
+    assert "```text\nYou're my agenda steward. I plan my time with calmoji." in section
+
+
+def test_the_steward_prompt_uses_the_current_layer_names():
+    section = read("docs/PLAYBOOK.md")
+    section = section[section.index(STEWARD_HEADING) :]
+    for name in ("🌗 Seasons", "🧠 Focus — Open", "🕒 Meetings — Open", "🧿 Emoji Clock", "🎯 Focus — Claimed"):
+        assert name in section, name
+    assert "calmoji needs no AI, no account and no cloud service" in section
+    assert "Never make commitments, cancel plans, contact anyone or change my calendar" in section
+
+
+def test_the_readme_points_at_the_steward_section_and_the_anchor_resolves():
+    readme = read("README.md")
+    how_to_use = readme[readme.index("## 🧭 How to use it") : readme.index("## 🗂 What's in each layer")]
+    assert (
+        "Prefer to plan with an AI assistant? See the\n[playbook](docs/PLAYBOOK.md#optional-an-ai-agenda-steward)."
+        in how_to_use
+    )
+
+    headings = [line for line in read("docs/PLAYBOOK.md").splitlines() if line.startswith("#")]
+    slugs = [github_slug(h) for h in headings]
+    assert slugs.count("optional-an-ai-agenda-steward") == 1
+    assert github_slug(STEWARD_HEADING) == "optional-an-ai-agenda-steward"

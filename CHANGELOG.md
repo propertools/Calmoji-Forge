@@ -78,6 +78,9 @@ review.
   numbers targets rather than gates, and lists only the gates CI really has.
 - `scripts/preflight.sh` suggests the release steps, not `gh pr create`, when
   it runs on `main`.
+- The playbook ends with an optional section on using an AI assistant as an
+  agenda steward, with a starting prompt, and the README points to it. calmoji
+  itself still needs no AI, account or cloud service.
 
 ## [0.1.1] — 2026-10-04
 
