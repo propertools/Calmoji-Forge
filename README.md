@@ -272,7 +272,9 @@ python3 calmoji.py --year=2027 --calendar-alignment=academic
 By default the files go to `output/<year>/<alignment>/`, so different years
 and alignments never mix. calmoji only writes into a folder that is empty or
 that it made itself (it leaves a `.calmoji-output` file there), and re-running
-replaces its own files in that folder. Any other non-empty folder is refused,
+replaces its own files in that folder. calmoji recognises its own files by
+name. Anything else in its folder, including another `.ics` file, makes it
+refuse without deleting anything. Any other non-empty folder is refused,
 untouched.
 
 Alignments: `academic`, `calendar`, `fiscal_us`, `fiscal_eu`,
@@ -339,15 +341,6 @@ for v0.2, in no promised order:
   archive.
 * **Releases built automatically** from a git tag, with byte-identical
   output checked in CI.
-
-Small fixes planned for v0.1.3 (they touch only the Python API, not the
-calendar files):
-
-* **Reading `.ics` files back in** (`unfold_ics_lines`) splits lines on more
-  characters than the iCalendar format does. It doesn't affect the files
-  calmoji writes.
-* **Control characters in text.** RFC 5545 doesn't allow most of them in text
-  values, so the escaper should reject them.
 
 Ideas and calendar-app quirks are very welcome in
 [issues](https://github.com/propertools/Calmoji-Forge/issues).

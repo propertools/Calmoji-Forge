@@ -336,17 +336,14 @@ def test_the_readme_points_at_the_steward_section_and_the_anchor_resolves():
     assert github_slug(STEWARD_HEADING) == "optional-an-ai-agenda-steward"
 
 
-def test_the_v0_1_3_todos_are_written_down_where_future_work_lives():
+def test_the_v0_1_3_todos_are_done_and_no_longer_listed():
     readme = " ".join(read("README.md").split())
     contributing = " ".join(read("CONTRIBUTING.md").split())
 
-    assert "Small fixes planned for v0.1.3" in readme
-    assert "`unfold_ics_lines`) splits lines on more characters than the iCalendar format does" in readme
-    assert "RFC 5545 doesn't allow most of them in text values, so the escaper should reject them" in readme
-
-    assert "**v0.1.3:** `unfold_ics_lines` uses `str.splitlines()`" in contributing
-    assert "**v0.1.3:** RFC 5545 doesn't allow most control characters in TEXT values" in contributing
-    # the existing roadmap entries are still there
+    assert "Small fixes planned for v0.1.3" not in readme
+    assert "**v0.1.3:**" not in contributing
+    assert "`unfold_ics_lines`) splits lines on more characters" not in readme
+    # the roadmap items that are still open are still there
     assert "Subscribable calendars" in readme and "Atomic file writes" in contributing
 
 
@@ -401,3 +398,19 @@ def test_the_ci_job_is_named_for_what_it_really_tests():
 
 def test_test_strategy_names_the_macos_interpreter_exactly():
     assert "on macOS's `/usr/bin/python3`" in read("TEST_STRATEGY.md")
+
+
+def test_readme_says_calmoji_recognises_its_own_files_by_name():
+    text = " ".join(read("README.md").split())
+    assert (
+        "calmoji recognises its own files by name. Anything else in its folder, including another `.ics` file, makes it refuse without deleting anything."
+        in text
+    )
+    assert "refused, untouched" in text
+    assert "re-running replaces its own files" in text
+
+
+def test_the_bundle_readme_template_makes_no_claim_about_deleting_calmojis_folder():
+    text = read("scripts/bundle_README.md.in")
+    assert "deletes" not in text and "recognises its own files" not in text
+    assert "--exclude=.calmoji-output" in text  # the marker is still explained where it matters
