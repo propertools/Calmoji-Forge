@@ -9,11 +9,58 @@ they do.
 
 ## [Unreleased]
 
+## [0.1.1] — YYYY-MM-DD
+
+A small release: focus blocks now work like meeting slots, and the release
+archives are built by a script.
+
 ### Changed
 
+- **Focus-block output has changed.** Focus blocks are now written per phase,
+  clipped to the phase's dates, instead of one file per ISO week:
+  - one file per phase, `focus_<phase>_<from>_to_<to>.ics`, holding exactly
+    the blocks that start inside that phase (`[start, end)`, end exclusive),
+    with the weekly 🗝️ Glyph Key on each Monday that falls inside it;
+  - one consolidated file per year, `focus_all_<year>.ics`, holding exactly
+    the union of the per-phase files;
+  - the weekly files and the `focus_weeks/` folder are gone.
+
+  A phase no longer includes days from before its start or after its end,
+  so a week that straddles two phases is no longer emitted twice. Events
+  keep the same summaries, descriptions and UIDs as in v0.1.0. If you
+  imported v0.1.0's weekly focus files, delete that focus calendar and
+  import the new files. Each year's output drops from 65–68 `.ics` files to
+  17.
+- `calmoji --dry-run` now previews focus blocks per phase, the way it
+  previews meeting slots.
+- `scripts/preflight.sh` reads the expected version from `pyproject.toml`
+  instead of hardcoding it, and its bundle gate (9) now builds the release
+  bundle twice and checks that the archives are byte-identical and the
+  manifest verifies, instead of checking a local, gitignored folder.
+  It also no longer insists on seven commits ahead of `main`, a rule left
+  over from the one-off OSS-release branch.
 - README rewritten for people using the calendars, with known limitations and a v0.2 roadmap.
 - New `docs/PLAYBOOK.md` describing the layered calendar pattern (replaces `CALENDAR_SYSTEM.md`).
 - The v0.1.0 release also offers a `.zip`, and the bundle's own README no longer points at ebi48.org.
+
+### Added
+
+- `scripts/build_bundle.py` builds the release archives
+  (`calmoji-artifacts-v<version>.zip` and `.tar.gz`) for 2026–2039 in both
+  alignments, with a `MANIFEST.sha256` and a README, and prints their
+  checksums. Running it twice gives byte-identical archives.
+- A "Releasing" section in `CONTRIBUTING.md`.
+
+### Removed
+
+- `calmoji.focus_blocks_writer.write_focus_blocks_weekly()`, replaced by
+  `write_focus_blocks()`, which writes the per-phase and per-year files.
+
+### Fixed
+
+- Focus blocks at phase boundaries were emitted twice: 336–588 duplicated
+  focus-block start times per year in v0.1.0, measured across 2026–2039 in
+  both alignments. There are none now.
 
 ## [0.1.0] — 2026-10-04
 
@@ -67,5 +114,6 @@ audit.
 - No known security issues at the time of this release. Reporting channel
   documented in `SECURITY.md`.
 
-[Unreleased]: https://github.com/propertools/Calmoji-Forge/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/propertools/Calmoji-Forge/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/propertools/Calmoji-Forge/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/propertools/Calmoji-Forge/releases/tag/v0.1.0

@@ -201,6 +201,31 @@ PRs that modify:
 
 ---
 
+# 🚀 Releasing
+
+1. Bump the version in `pyproject.toml`, and move `[Unreleased]` in
+   `CHANGELOG.md` under the new version's heading, with the release date.
+2. Run `bash scripts/preflight.sh`. Every gate must be green.
+3. Merge to `main` and tag it `vX.Y.Z`.
+4. Build the release archives, from the virtual environment calmoji is
+   installed into (`python3 -m pip install -e .`):
+
+   ```bash
+   python3 scripts/build_bundle.py --out dist
+   ```
+
+   It writes `dist/calmoji-artifacts-vX.Y.Z.zip` and `.tar.gz`, and prints
+   their file count, sizes and SHA-256 checksums.
+5. Create the GitHub Release by hand: attach the zip and the tar.gz, and
+   paste the checksums into the release notes.
+
+Running the build twice gives byte-identical archives on the same machine.
+Across machines only the `.ics` files and `MANIFEST.sha256` are promised to
+match, because compressors differ, so paste the checksums of the archives
+you actually attach.
+
+---
+
 # 🦊 Final Note
 
 Calmoji encodes meaning in time.

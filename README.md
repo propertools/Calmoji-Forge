@@ -26,7 +26,7 @@ anything else that speaks the iCalendar standard.
 
 Download the ready-made calendars for **2026–2039** from the
 [latest release](https://github.com/propertools/Calmoji-Forge/releases/latest):
-grab **`calmoji-artifacts-v0.1.0.zip`** and unzip it.
+grab **`calmoji-artifacts-v0.1.1.zip`** and unzip it.
 
 Inside, pick an alignment and stick with it:
 
@@ -41,7 +41,8 @@ Then open the folder for the year you want, for example `2026/academic/`:
 ├── semester_phases_2026.ics     ← the seasons of your year
 ├── meeting_all_2026.ics         ← every meeting slot for the year
 ├── meeting_<phase>_….ics        ← the same slots, one file per phase
-├── focus_weeks/                 ← focus blocks, one file per ISO week
+├── focus_all_2026.ics           ← every focus block for the year
+├── focus_<phase>_….ics          ← the same blocks, one file per phase
 └── ebi48_layer_2026.ics         ← the EBI48 emoji clock
 ```
 
@@ -60,12 +61,12 @@ on its own; the [playbook](docs/PLAYBOOK.md) explains why it matters.
 
 Tips for v0.1:
 
-* **Focus blocks come one file per week.** Import the next few weeks
-  rather than the whole year; it's a gentler start anyway. If two files
-  share a week number (for example `semester_a_seed__2027-W49.ics` and
-  `winter_break__2027-W49.ics`), import only one of them.
+* **Focus blocks come one file per phase.** Start with the phase you're
+  in rather than the whole year; it's a gentler start anyway. Each phase
+  file holds only that phase's own days, so the files never overlap.
 * Use **either** `meeting_all_<year>.ics` **or** the per-phase meeting
-  files, not both.
+  files, not both. The same goes for `focus_all_<year>.ics` and the
+  per-phase focus files.
 * To refresh a layer later, delete that calendar, recreate it and import
   again. Your own plans live in your own calendars and are untouched.
 
@@ -157,8 +158,6 @@ and :35 UTC, so "let's meet at 🦊" means the same moment everywhere. See
 * **The EBI48 layer appears one day a week**, and each entry shows its
   emoji twice. Its event descriptions also link to ebi48.org, which isn't
   live yet.
-* **Weeks at phase boundaries have two focus-block files**, one per phase.
-  Import only one of them.
 * **Leap years:** the last day of a leap year (for example 31 August 2028
   in `academic`, 31 December 2028 in `calendar`) belongs to no year's
   files.
@@ -224,8 +223,8 @@ Output for one year:
 ```
 output/
 ├── semester_phases_2027.ics
-├── focus_weeks/                    ← focus blocks, one file per ISO week
-│   └── <phase>__2027-W36.ics …
+├── focus_all_2027.ics              ← all focus blocks for the year
+├── focus_<phase>_<dates>.ics       ← the same, one file per phase
 ├── meeting_all_2027.ics            ← all meeting slots for the year
 ├── meeting_<phase>_<dates>.ics     ← the same, one file per phase
 └── ebi48_layer_2027.ics
@@ -262,8 +261,6 @@ for v0.2, in no promised order:
 * **A website, calmoji.propertools.be,** to browse the calendars and
   download single files or a zip per year, without unpacking the whole
   archive.
-* **One focus-blocks file per year** instead of one per week, with the
-  duplicate weeks at phase boundaries fixed.
 * **Meeting-slot labels that stay correct** through daylight saving time
   changes.
 * **An EBI48 clock that appears every day**, with its emoji shown once.
