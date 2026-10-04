@@ -270,18 +270,37 @@ def test_manifest_verifies_with_the_system_tools(built, tmp_path):
 # -----------------------------------------------------------------------------
 
 
-def test_readme_is_filled_in_for_per_phase_focus_files(built):
+def test_readme_is_filled_in_and_describes_the_monthly_layout(built):
     result, _ = built
     text = (result.bundle_dir / bb.README_NAME).read_text(encoding="utf-8")
 
     assert f"v{VERSION}" in text
-    assert "2027–2028" in text
+    assert "2027\u20132028" in text
     assert not re.search(r"@[A-Z][A-Z_]*@", text), "unfilled placeholder"
 
-    assert "focus_all_<year>.ics" in text
-    assert "focus_<phase>_<from>_to_<to>.ics" in text
-    for gone in ("focus_weeks", "ISO week", "week number", "W49", "Weeks at phase boundaries"):
-        assert gone not in text, f"stale per-week advice: {gone!r}"
+    # the monthly layout, the UTC caveat, the size budget (from the constants) and the upgrade note
+    assert "focus_<YYYY-MM>.ics" in text and "meetings_<YYYY-MM>.ics" in text
+    assert "Months are in **UTC**" in text
+    assert f"under {MAX_EVENTS_PER_FILE} events and {MAX_BYTES_PER_FILE // 1024} KB" in text
+    assert "Proton accepts events only up to 2037" in text
+    assert "Start with this month and next" in text
+    assert "Upgrading from v0.1.0" in text
+    assert "fixed in UTC all year" in text and "every day" in text
+
+    for gone in (
+        "focus_weeks",
+        "focus_all",
+        "meeting_all",
+        "per-phase",
+        "ISO week",
+        "week number",
+        "W49",
+        "Weeks at phase boundaries",
+        "Leap years:",
+        "shows its",
+        "one day a week",
+    ):
+        assert gone not in text, f"stale advice or limitation: {gone!r}"
 
 
 def test_render_readme_substitutions_and_leftover_placeholders():

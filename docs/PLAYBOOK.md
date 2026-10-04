@@ -91,7 +91,9 @@ glance.
    you want; see "Start small" below).
 2. Import calmoji's files into the reference calendars, one layer per
    calendar. See the [README](../README.md#-get-the-calendars) for where
-   to get them. (Subscribable feeds are planned for v0.2.)
+   to get them. Focus blocks and meeting slots come one file per month:
+   start with this month and next, and add months as you go. (Subscribable
+   feeds are planned for v0.2.)
 3. Pick colours and notification defaults per calendar.
 4. Hide the reference layers. You'll switch them on when you plan.
 
@@ -115,7 +117,9 @@ you as unavailable, set the claimed copy to *busy*.
 
 ### Book a meeting
 Duplicate a meeting slot into 🤝 One-off or 🔄 Recurring, then add the
-people, the agenda and the call link.
+people, the agenda and the call link. Slots are fixed in UTC, so your
+calendar shows them in your local time; open a slot's description to see
+when it falls in that city, summer and winter.
 
 ### Work
 Switch the reference layers off. Your calendar now shows only what you've
@@ -161,9 +165,12 @@ Reference layers can be replaced at any time, for example when a new
 calmoji version comes out, or when you change your focus pattern halfway
 through the year.
 
-Delete the reference calendar, recreate it, and import the new file.
+Delete the reference calendar, recreate it, and import the new files.
 (Once subscribable feeds arrive in v0.2, subscribers won't need to do
 anything; feeds will update themselves.)
+
+If you imported calmoji v0.1.0, do this once now: delete those reference
+calendars and import fresh, because event times and identifiers changed.
 
 Everything you've claimed lives in your working calendars, so
 nothing you've planned is lost. That's the point of the pattern: the
@@ -175,8 +182,8 @@ structure can change without breaking your commitments.
 
 If this looks like a lot, it is. You don't need all of it.
 
-* **Day one:** 🧠 Focus Blocks and 🎯 Focus — Claimed. Claim one block
-  tomorrow. That's it.
+* **Day one:** this month's 🧠 Focus Blocks and 🎯 Focus — Claimed. Claim
+  one block tomorrow. That's it.
 * **Week two:** add 🎯 → ✅ and the roll-forward habit.
 * **Later:** meeting slots, semester phases, life layers, privacy
   toggles, as you feel the need.

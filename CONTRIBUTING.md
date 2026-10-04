@@ -216,8 +216,9 @@ PRs that modify:
    python3 scripts/build_bundle.py --out dist
    ```
 
-   It writes `dist/calmoji-artifacts-vX.Y.Z.zip` and `.tar.gz`, and prints
-   their file count, sizes and SHA-256 checksums.
+   It writes `dist/calmoji-artifacts-vX.Y.Z.zip` and `.tar.gz`, and fails if
+   any file is over the size budget (600 events, 512 KB). It prints the file
+   count, the largest file, the archive sizes and their SHA-256 checksums.
 5. Create the GitHub Release by hand: attach the zip and the tar.gz, and
    paste the checksums into the release notes.
 

@@ -237,9 +237,14 @@ def write_manifest(bundle_dir: Path) -> int:
 
 
 def render_readme(template: str, version: str, years: Sequence[int]) -> str:
-    """Substitute @VERSION@ and @YEARS@ in the README template."""
+    """Substitute @VERSION@, @YEARS@ and the size budget (@MAX_EVENTS@, @MAX_KIB@) in the README template."""
     span = str(years[0]) if years[0] == years[-1] else f"{years[0]}–{years[-1]}"
-    text = template.replace("@VERSION@", version).replace("@YEARS@", span)
+    text = (
+        template.replace("@VERSION@", version)
+        .replace("@YEARS@", span)
+        .replace("@MAX_EVENTS@", str(MAX_EVENTS_PER_FILE))
+        .replace("@MAX_KIB@", str(MAX_BYTES_PER_FILE // 1024))
+    )
 
     leftover = sorted(set(re.findall(r"@[A-Z][A-Z_]*@", text)))
     if leftover:

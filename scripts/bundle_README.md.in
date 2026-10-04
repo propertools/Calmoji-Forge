@@ -15,17 +15,20 @@ Pick one alignment and stick with it.
 
 ```
 <year>/<alignment>/
-├── semester_phases_<year>.ics          ← the seasons of your year (all-day markers)
-├── meeting_all_<year>.ics              ← every meeting slot for the year
-├── meeting_<phase>_<from>_to_<to>.ics  ← the same slots, one file per phase
-├── focus_all_<year>.ics                ← every focus block for the year
-├── focus_<phase>_<from>_to_<to>.ics    ← the same blocks, one file per phase
-└── ebi48_layer_<year>.ics              ← the EBI48 emoji clock
+├── semester_phases_<year>.ics    ← the seasons of your year (all-day markers)
+├── ebi48_layer_<year>.ics        ← the EBI48 emoji clock, every day
+├── focus/
+│   └── focus_<YYYY-MM>.ics       ← focus blocks, one file per month
+└── meetings/
+    └── meetings_<YYYY-MM>.ics    ← meeting slots, one file per month
 ```
 
-Use **either** `meeting_all` **or** the per-phase meeting files, not both.
-Likewise use **either** `focus_all` **or** the per-phase focus files, not
-both.
+Months are in **UTC**. If you're west of UTC, an event late in the evening
+on the last day of a month may be in the next month's file.
+
+Every file is kept under @MAX_EVENTS@ events and @MAX_KIB@ KB, so it fits the
+import limits reported for Google, Outlook and Proton. This bundle covers
+@YEARS@, and stops at 2036 because Proton accepts events only up to 2037.
 
 ---
 
@@ -44,29 +47,33 @@ explains how to use the layers day to day.
 * **Outlook, Fastmail, Thunderbird and others:** use your app's "Import"
   option.
 
-**Focus blocks come one file per phase.** Start with the phase you're in
-rather than the whole year; it's a gentler start anyway. Each phase file
-holds only that phase's own days, so the files never overlap. If you'd
-rather have everything at once, import `focus_all_<year>.ics` instead
-(and none of the per-phase files).
+**Start with this month and next.** Focus blocks and meeting slots come one
+file per month; add more months as you go. It's a gentler start anyway, and
+each event is in exactly one file, so nothing is imported twice.
 
 To refresh a layer later, delete that calendar, recreate it, and import
 again. Your own events, in your own calendars, are untouched.
 
+### Upgrading from v0.1.0
+
+Delete the old calmoji calendars and import fresh. Event times and
+identifiers changed (see the
+[changelog](https://github.com/propertools/Calmoji-Forge/blob/main/CHANGELOG.md)),
+so importing over the old ones would leave you with duplicates.
+
 ---
 
-## Known limitations in v@VERSION@
+## Good to know in v@VERSION@
 
-* **Meeting slot labels assume summer time.** Times are correct in UTC,
-  but the local-time labels (CEST, EDT, PDT) are an hour off in winter
-  for Brussels, Havana and Seattle.
-* **The EBI48 clock appears one day a week**, and each entry shows its
-  emoji twice.
-* **Leap years:** the last day of a leap year (for example 31 August 2028
-  in `academic`, 31 December 2028 in `calendar`) belongs to no year's
-  files.
+* **Meeting slots are fixed in UTC all year.** Your calendar app shows
+  them in your local time. In cities with daylight saving time (Brussels,
+  Havana, Seattle) a slot's local time is an hour earlier in winter than in
+  summer. Each slot's description says exactly when it falls locally.
+* **The EBI48 clock appears every day**, one event per half-hour that
+  repeats daily through the year.
+* **Months are in UTC**, as above.
 
-All of these are planned for v0.2. See the
+More is planned for v0.2. See the
 [roadmap](https://github.com/propertools/Calmoji-Forge#-roadmap).
 
 ---

@@ -24,7 +24,7 @@ anything else that speaks the iCalendar standard.
 
 ## 🚀 Get the calendars
 
-Download the ready-made calendars for **2026–2039** from the
+Download the ready-made calendars for **2026–2036** from the
 [latest release](https://github.com/propertools/Calmoji-Forge/releases/latest):
 grab **`calmoji-artifacts-v0.1.1.zip`** and unzip it.
 
@@ -39,11 +39,11 @@ Then open the folder for the year you want, for example `2026/academic/`:
 ```
 2026/academic/
 ├── semester_phases_2026.ics     ← the seasons of your year
-├── meeting_all_2026.ics         ← every meeting slot for the year
-├── meeting_<phase>_….ics        ← the same slots, one file per phase
-├── focus_all_2026.ics           ← every focus block for the year
-├── focus_<phase>_….ics          ← the same blocks, one file per phase
-└── ebi48_layer_2026.ics         ← the EBI48 emoji clock
+├── ebi48_layer_2026.ics         ← the EBI48 emoji clock
+├── focus/
+│   └── focus_2026-09.ics …      ← focus blocks, one file per month
+└── meetings/
+    └── meetings_2026-09.ics …   ← meeting slots, one file per month
 ```
 
 ### Importing
@@ -61,14 +61,24 @@ on its own; the [playbook](docs/PLAYBOOK.md) explains why it matters.
 
 Tips for v0.1:
 
-* **Focus blocks come one file per phase.** Start with the phase you're
-  in rather than the whole year; it's a gentler start anyway. Each phase
-  file holds only that phase's own days, so the files never overlap.
-* Use **either** `meeting_all_<year>.ics` **or** the per-phase meeting
-  files, not both. The same goes for `focus_all_<year>.ics` and the
-  per-phase focus files.
+* **Start with this month and next.** Focus blocks and meeting slots come
+  one file per month; add more months as you go. It's a gentler start
+  anyway.
+* **Months are in UTC.** If you're west of UTC, an event late in the
+  evening on the last day of a month may be in the next month's file.
+* **Every file is kept under 600 events and 512 KB**, so it fits the
+  import limits reported for Google, Outlook and Proton. The ready-made
+  calendars cover 2026–2036 because Proton accepts events only up to 2037;
+  any other year you can
+  [generate yourself](#-regenerating-the-calendars-yourself).
 * To refresh a layer later, delete that calendar, recreate it and import
   again. Your own plans live in your own calendars and are untouched.
+
+### Upgrading from v0.1.0
+
+Delete the old calmoji calendars and import fresh. Event times and
+identifiers changed (see the [changelog](CHANGELOG.md)), so importing over
+the old ones would leave you with duplicates.
 
 Subscribable feeds that update themselves, and a website to browse and
 download individual files, are coming in v0.2. See the
@@ -133,7 +143,7 @@ theme glyph: 🧠 deep thinking, ✍️ writing, 📚 reading, 🔧 technical,
 🧾 admin, 📞 comms, 🪞 reflection, 📈 analysis, 🎨 creative,
 🛠️ maintenance, ⚖️ decisions, ⛩️ closure. You'll only ever use the few
 that fall in your waking hours. Each week also gets an all-day 🗝️ Glyph
-Key marker.
+Key marker. They come one file per month.
 
 ### 🕒 Meeting slots
 
@@ -141,28 +151,28 @@ Key marker.
 placed around early afternoon local time in Tokyo, Delhi, Mecca, Brussels,
 Havana and Seattle (Auckland is available when you generate them
 yourself). Slots run Monday–Friday (Sunday–Thursday for Mecca) and pause
-during breaks. Each slot carries the EBI48 emoji for its half-hour.
+during breaks. Each slot carries the EBI48 emoji for its half-hour, and they
+come one file per month.
+
+Like everything in calmoji, slots are fixed in UTC all year, and your
+calendar app shows them in your local time. Each slot's description says
+exactly when it falls locally.
 
 ### 🧿 EBI48 clock
 
 A deterministic emoji for each of the day's 48 half-hours, anchored at :05
-and :35 UTC, so "let's meet at 🦊" means the same moment everywhere. See
-[EBI48-README.md](EBI48-README.md).
+and :35 UTC, so "let's meet at 🦊" means the same moment everywhere. The
+clock appears every day. See [EBI48-README.md](EBI48-README.md).
 
 ### ⚠️ Known limitations
 
-* **Meeting slot labels assume summer time.** Slots are fixed in UTC, and
-  their local-time labels (CEST, EDT, PDT) are correct for summer. In
-  winter, Brussels, Havana and Seattle slots fall an hour earlier in local
-  time than the label says. The UTC time is always correct.
-* **The EBI48 layer appears one day a week**, and each entry shows its
-  emoji twice. Its event descriptions also link to ebi48.org, which isn't
-  live yet.
-* **Leap years:** the last day of a leap year (for example 31 August 2028
-  in `academic`, 31 December 2028 in `calendar`) belongs to no year's
-  files.
-
-All of these are on the [roadmap](#-roadmap) for v0.2.
+* **Daylight saving time moves meeting slots in local time.** A slot keeps
+  the same UTC time all year, so in cities with daylight saving time
+  (Brussels, Havana, Seattle) its local time is an hour earlier in winter
+  than in summer. Each slot's description says exactly when it falls,
+  summer and winter.
+* **Months are in UTC.** An event late in the evening on the last day of a
+  month, for someone west of UTC, may be in the next month's file.
 
 ---
 
@@ -210,8 +220,9 @@ Alignments: `academic`, `calendar`, `fiscal_us`, `fiscal_eu`,
 Options:
 
 ```bash
+--year=YYYY          # required
 --output-dir=DIR     # default: output/
---dry-run            # preview, write nothing
+--dry-run            # preview what would be written, month by month
 --no-meetings        # skip meeting slots
 --no-focus           # skip focus blocks
 --no-ebi48           # skip the EBI48 layer
@@ -223,11 +234,11 @@ Output for one year:
 ```
 output/
 ├── semester_phases_2027.ics
-├── focus_all_2027.ics              ← all focus blocks for the year
-├── focus_<phase>_<dates>.ics       ← the same, one file per phase
-├── meeting_all_2027.ics            ← all meeting slots for the year
-├── meeting_<phase>_<dates>.ics     ← the same, one file per phase
-└── ebi48_layer_2027.ics
+├── ebi48_layer_2027.ics
+├── focus/
+│   └── focus_<YYYY-MM>.ics …           ← one file per month
+└── meetings/
+    └── meetings_<YYYY-MM>.ics …        ← one file per month
 ```
 
 Optionally, install it as a package to get a `calmoji` command. Use a
@@ -261,11 +272,6 @@ for v0.2, in no promised order:
 * **A website, calmoji.propertools.be,** to browse the calendars and
   download single files or a zip per year, without unpacking the whole
   archive.
-* **Meeting-slot labels that stay correct** through daylight saving time
-  changes.
-* **An EBI48 clock that appears every day**, with its emoji shown once.
-* **The leap-year gap closed**, so consecutive years fit together
-  exactly.
 * **Releases built automatically** from a git tag, with byte-identical
   output checked in CI.
 
