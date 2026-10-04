@@ -29,7 +29,7 @@ The engine must remain mathematically stable across time.
 | `calendar_config.py`     | 95%+            | Anchor logic integrity                |
 | `calendar_phases.py`     | 95%+            | Offset + enrichment correctness       |
 | `slot_generator.py`      | 95%+            | Boundary & weekday policy correctness |
-| `focus_blocks_writer.py` | 90%+            | Event expansion logic                 |
+| `monthly.py`             | 90%+            | Month bucketing and file naming       |
 | CLI layer (when present) | 80%+            | I/O wrapper, lower criticality        |
 
 Core deterministic layers must approach total coverage.

@@ -20,3 +20,10 @@ CALNAME_PHASES = "🧿 calmoji — Semester Phases (UTC)"
 CALNAME_FOCUS = "🧿 calmoji — Focus Blocks (UTC)"
 CALNAME_MEETINGS = "🧿 calmoji — Meeting Slots (UTC)"
 CALNAME_EBI48 = "🧿 calmoji — EBI48 Clock (UTC)"
+
+# Size budget for every .ics file calmoji writes. Calendar apps cap imports
+# (reported: Google about 1 MB per file, Outlook failing somewhere between 650
+# and 700 events, Proton 15,000 events and 10 MB), so each file is kept well
+# under all of them. write_events_to_ics raises if a file would exceed either.
+MAX_EVENTS_PER_FILE = 600
+MAX_BYTES_PER_FILE = 512 * 1024

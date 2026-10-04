@@ -18,12 +18,13 @@ from pathlib import Path
 from calmoji import __version__
 from calmoji.calendar_config import ALIGNMENT_MODES, DEFAULT_ALIGNMENT
 from calmoji.calendar_phases import get_semester_phases
-from calmoji.dry_run import dry_run
-from calmoji.focus_blocks import generate_focus_blocks_for_phase
-from calmoji.focus_blocks_writer import write_focus_blocks
-from calmoji.ics_writer import write_ebi48_layer, write_events_to_ics, write_semester_blocks
+from calmoji.constants import CALNAME_FOCUS, CALNAME_MEETINGS
+from calmoji.dry_run import dry_run_months
+from calmoji.focus_blocks import generate_focus_blocks_for_phases
+from calmoji.ics_writer import write_ebi48_layer, write_semester_blocks
+from calmoji.monthly import month_rows, write_monthly_files
 from calmoji.slot_generator import generate_meeting_slots
-from calmoji.utils import format_range_slug, slugify
+from calmoji.types import Event
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -75,15 +76,32 @@ def main(argv: list[str] | None = None) -> None:
 
     # Build phase plan (UTC-aware datetimes inside each Phase)
     phases = get_semester_phases(args.year, args.calendar_alignment)
+    for ph in phases:
+        if ph.start is None or ph.end is None:
+            raise ValueError(f"Phase {ph.name} is missing concrete start/end datetimes.")
+
+    # Focus blocks (clipped to the phases) and meeting slots, for the whole year.
+    focus_events: list[Event] = []
+    if not args.no_focus:
+        focus_events = generate_focus_blocks_for_phases(phases)
+
+    meeting_events: list[Event] = []
+    if not args.no_meetings:
+        for phase in phases:
+            meeting_events.extend(generate_meeting_slots(phase, include_oceania=bool(args.include_oceania)))
+        meeting_events.sort(key=lambda e: e.start)
 
     if args.dry_run:
         print("\n📅 Phases:")
         for ph in phases:
-            if ph.start is None or ph.end is None:
-                raise ValueError(f"Phase {ph.name} is missing concrete start/end datetimes.")
+            assert ph.start is not None and ph.end is not None
             print(
                 f"  {ph.emoji} {ph.name}: {ph.start.date()} → {ph.end.date()} "
                 f"| meetings={ph.allow_meetings} ({ph.meeting_density})"
+            )
+        if focus_events or meeting_events:
+            dry_run_months(
+                month_rows(focus_events, meeting_events), focus=not args.no_focus, meetings=not args.no_meetings
             )
     else:
         outdir.mkdir(parents=True, exist_ok=True)
@@ -93,52 +111,19 @@ def main(argv: list[str] | None = None) -> None:
         write_semester_blocks(phases, filename=str(phases_path))
         print(f"✅ Wrote: {phases_path}")
 
-    # 2) Meeting slots
-    all_meeting_events = []
-    if not args.no_meetings:
-        for phase in phases:
-            if not phase.allow_meetings:
-                continue
-            if phase.start is None or phase.end is None:
-                raise ValueError(f"Phase {phase.name} is missing concrete start/end datetimes.")
+        # 2) Focus blocks, one file per month
+        for path in write_monthly_files(focus_events, outdir / "focus", "focus", CALNAME_FOCUS):
+            print(f"✅ Wrote: {path}")
 
-            events = generate_meeting_slots(
-                phase,
-                include_oceania=bool(args.include_oceania),
-            )
-            all_meeting_events.extend(events)
+        # 3) Meeting slots, one file per month
+        for path in write_monthly_files(meeting_events, outdir / "meetings", "meetings", CALNAME_MEETINGS):
+            print(f"✅ Wrote: {path}")
 
-            target = outdir / f"meeting_{slugify(phase.name)}_{format_range_slug(phase.start, phase.end)}.ics"
-
-            if args.dry_run:
-                dry_run(events, label=phase.name, kind="meeting slots")
-            else:
-                write_events_to_ics(events, target, calname=f"🧿 calmoji — Meetings — {phase.name} (UTC)")
-                print(f"✅ Wrote: {target}")
-
-        if not args.dry_run:
-            consolidated = outdir / f"meeting_all_{args.year}.ics"
-            write_events_to_ics(
-                all_meeting_events,
-                consolidated,
-                calname=f"🧿 calmoji — Meetings (All) {args.year} (UTC)",
-            )
-            print(f"✅ Wrote: {consolidated}")
-
-    # 3) Focus blocks (one file per phase, plus one consolidated file for the year)
-    if not args.no_focus:
-        if args.dry_run:
-            for phase in phases:
-                dry_run(generate_focus_blocks_for_phase(phase), label=phase.name, kind="focus blocks")
-        else:
-            for path in write_focus_blocks(phases, outdir, args.year):
-                print(f"✅ Wrote: {path}")
-
-    # 4) EBI48 overlay
+    # 4) EBI48 clock
     if not args.no_ebi48:
         ebi48_path = outdir / f"ebi48_layer_{args.year}.ics"
         if args.dry_run:
-            print("\n🧿 EBI48 overlay: (skipping file writes in dry-run)")
+            print("\n🧿 EBI48 clock: (skipping file writes in dry-run)")
         else:
             write_ebi48_layer(ebi48_path, args.year, args.calendar_alignment)
             print(f"✅ Wrote: {ebi48_path}")

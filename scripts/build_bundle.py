@@ -8,7 +8,9 @@ For every year x alignment this generates calmoji's calendars into
 
     <out>/v<version>/<year>/<alignment>/
 
-then adds MANIFEST.sha256 (the SHA-256 of every .ics) and a README.md, and packs
+checks that no file is over the size budget (MAX_EVENTS_PER_FILE events and
+MAX_BYTES_PER_FILE bytes, see calmoji.constants), then adds MANIFEST.sha256 (the
+SHA-256 of every .ics) and a README.md, and packs
 the whole v<version>/ folder into
 
     <out>/calmoji-artifacts-v<version>.zip
@@ -53,6 +55,8 @@ try:
     from calmoji import __version__
     from calmoji.calendar_config import ALIGNMENT_MODES
     from calmoji.cli import main as calmoji_main
+    from calmoji.constants import MAX_BYTES_PER_FILE, MAX_EVENTS_PER_FILE
+    from calmoji.ics_writer import IcsBudgetError
 except ImportError as exc:  # pragma: no cover -- only when calmoji isn't installed
     raise SystemExit(
         f"error: cannot import calmoji ({exc}).\nInstall it first, from the repo root: python3 -m pip install -e ."
@@ -80,6 +84,16 @@ DIR_MODE = 0o755
 _YEARS_RE = re.compile(r"^(\d{4})(?:\s*[-–]\s*(\d{4}))?$")
 
 
+class FileStats(NamedTuple):
+    path: str  # relative to the bundle folder
+    events: int
+    size: int  # bytes
+
+
+class BundleBudgetError(ValueError):
+    """A generated file is over the size budget."""
+
+
 class BuildResult(NamedTuple):
     version: str
     years: List[int]
@@ -89,6 +103,8 @@ class BuildResult(NamedTuple):
     tar_path: Path
     ics_count: int
     file_count: int
+    largest_by_events: FileStats
+    largest_by_size: FileStats
     zip_sha256: str
     tar_sha256: str
 
@@ -179,6 +195,29 @@ def sha256_hex(path: Path) -> str:
 def ics_files(bundle_dir: Path) -> List[str]:
     """Every .ics under bundle_dir as a sorted POSIX path relative to it."""
     return sorted(p.relative_to(bundle_dir).as_posix() for p in bundle_dir.rglob("*.ics") if p.is_file())
+
+
+def measure_files(bundle_dir: Path) -> List[FileStats]:
+    """Event count and size in bytes of every .ics under bundle_dir, sorted by path."""
+    stats = []
+    for rel in ics_files(bundle_dir):
+        data = (bundle_dir / rel).read_bytes()
+        stats.append(FileStats(rel, data.count(b"\nBEGIN:VEVENT\r\n"), len(data)))
+    return stats
+
+
+def check_budget(stats: Sequence[FileStats]) -> None:
+    """Fail if any file is over MAX_EVENTS_PER_FILE events or MAX_BYTES_PER_FILE bytes."""
+    over = [
+        f"{f.path}: {f.events} events, {f.size:,} bytes"
+        for f in stats
+        if f.events > MAX_EVENTS_PER_FILE or f.size > MAX_BYTES_PER_FILE
+    ]
+    if over:
+        raise BundleBudgetError(
+            f"{len(over)} file(s) over the budget of {MAX_EVENTS_PER_FILE} events and {MAX_BYTES_PER_FILE:,} bytes:\n  "
+            + "\n  ".join(over)
+        )
 
 
 def write_manifest(bundle_dir: Path) -> int:
@@ -302,6 +341,9 @@ def build_bundle(
         for alignment in alignments:
             generate_year(year, alignment, bundle_dir / str(year) / alignment)
 
+    stats = measure_files(bundle_dir)
+    check_budget(stats)
+
     ics_count = write_manifest(bundle_dir)
     write_readme(bundle_dir, version, years)
 
@@ -319,6 +361,8 @@ def build_bundle(
         tar_path=tar_path,
         ics_count=ics_count,
         file_count=ics_count + 2,  # + MANIFEST.sha256 and README.md
+        largest_by_events=max(stats, key=lambda f: (f.events, f.size, f.path)),
+        largest_by_size=max(stats, key=lambda f: (f.size, f.events, f.path)),
         zip_sha256=sha256_hex(zip_path),
         tar_sha256=sha256_hex(tar_path),
     )
@@ -333,6 +377,10 @@ def print_summary(result: BuildResult) -> None:
     print(f"calmoji v{result.version} release bundle: {first}-{last}, {', '.join(result.alignments)}")
     print(f"Files: {result.ics_count} .ics (+ {MANIFEST_NAME} and {README_NAME}: {result.file_count} files in all)")
     print(f"Folder: {result.bundle_dir}")
+    print(f"Budget per file: {MAX_EVENTS_PER_FILE} events and {MAX_BYTES_PER_FILE:,} bytes")
+    most, biggest = result.largest_by_events, result.largest_by_size
+    print(f"Largest file by events: {most.events} events, {most.size:,} bytes ({most.path})")
+    print(f"Largest file by size: {biggest.events} events, {biggest.size:,} bytes ({biggest.path})")
     for path in (result.zip_path, result.tar_path):
         print(f"{path.name}: {format_size(path.stat().st_size)}")
     print()
@@ -352,7 +400,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
         return 1
 
-    print_summary(build_bundle(args.out, args.years, args.alignments))
+    try:
+        result = build_bundle(args.out, args.years, args.alignments)
+    except (BundleBudgetError, IcsBudgetError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 1
+
+    print_summary(result)
     return 0
 
 

@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import argparse
 import ast
-import filecmp
 import gzip
 import hashlib
 import importlib.util
@@ -27,6 +26,8 @@ import pytest
 
 import calmoji
 from calmoji.cli import main as calmoji_main
+from calmoji.constants import MAX_BYTES_PER_FILE, MAX_EVENTS_PER_FILE
+from calmoji.ics_writer import IcsBudgetError
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SCRIPT = REPO_ROOT / "scripts" / "build_bundle.py"
@@ -139,6 +140,10 @@ def test_main_refuses_an_uninstalled_calmoji(tmp_path, monkeypatch, capsys):
 # -----------------------------------------------------------------------------
 
 
+def _tree(root: Path) -> dict:
+    return {p.relative_to(root).as_posix(): p.read_bytes() for p in sorted(root.rglob("*")) if p.is_file()}
+
+
 def test_bundle_layout_matches_the_cli(built, tmp_path):
     result, _ = built
     for year in YEARS:
@@ -146,11 +151,17 @@ def test_bundle_layout_matches_the_cli(built, tmp_path):
             cli_dir = tmp_path / str(year) / alignment
             calmoji_main([f"--year={year}", f"--calendar-alignment={alignment}", f"--output-dir={cli_dir}"])
 
-            bundled = result.bundle_dir / str(year) / alignment
-            comparison = filecmp.dircmp(cli_dir, bundled)
-            assert not comparison.left_only and not comparison.right_only
-            assert filecmp.cmpfiles(cli_dir, bundled, comparison.common_files, shallow=False)[1:] == ([], [])
-            assert not comparison.common_dirs  # no focus_weeks/ any more
+            # same files, same bytes, in the CLI's own monthly layout
+            assert _tree(result.bundle_dir / str(year) / alignment) == _tree(cli_dir)
+
+
+def test_bundle_year_folders_use_the_monthly_layout(built):
+    result, _ = built
+    year_dir = result.bundle_dir / "2027" / "academic"
+    names = sorted(p.relative_to(year_dir).as_posix() for p in year_dir.rglob("*.ics"))
+    assert "semester_phases_2027.ics" in names and "ebi48_layer_2027.ics" in names
+    assert "focus/focus_2027-09.ics" in names and "meetings/meetings_2028-08.ics" in names
+    assert not any(n.startswith(("focus_all", "meeting_all", "focus_weeks")) for n in names)
 
 
 def test_bundle_folder_is_named_after_the_version(built):
@@ -402,7 +413,7 @@ def test_script_runs_as_a_program(tmp_path):
     assert done.returncode == 0, done.stderr
     assert (tmp_path / f"calmoji-artifacts-v{VERSION}.zip").is_file()
     assert (tmp_path / f"calmoji-artifacts-v{VERSION}.tar.gz").is_file()
-    assert (tmp_path / f"v{VERSION}" / "2027" / "calendar" / "focus_all_2027.ics").is_file()
+    assert (tmp_path / f"v{VERSION}" / "2027" / "calendar" / "focus" / "focus_2027-01.ics").is_file()
 
 
 # -----------------------------------------------------------------------------
@@ -460,3 +471,65 @@ def test_script_uses_no_clock_host_user_or_randomness():
 
 def test_script_imports_only_the_standard_library_and_calmoji():
     assert _imported_top_level_modules() <= ALLOWED_IMPORTS
+
+
+# -----------------------------------------------------------------------------
+# Size budget
+# -----------------------------------------------------------------------------
+
+
+def test_every_file_in_the_bundle_is_within_budget_and_the_largest_is_reported(built):
+    result, _ = built
+    stats = bb.measure_files(result.bundle_dir)
+    assert len(stats) == result.ics_count
+    assert all(f.events <= MAX_EVENTS_PER_FILE and f.size <= MAX_BYTES_PER_FILE for f in stats)
+
+    assert result.largest_by_events.events == max(f.events for f in stats)
+    assert result.largest_by_size.size == max(f.size for f in stats)
+    assert result.largest_by_size.size == (result.bundle_dir / result.largest_by_size.path).stat().st_size
+    # counted the way a calendar app would: BEGIN:VEVENT lines
+    text = (result.bundle_dir / result.largest_by_events.path).read_text(encoding="utf-8")
+    assert text.count("BEGIN:VEVENT") == result.largest_by_events.events
+
+
+def test_check_budget_names_every_offender():
+    fine = bb.FileStats("a.ics", MAX_EVENTS_PER_FILE, MAX_BYTES_PER_FILE)
+    too_many = bb.FileStats("b.ics", MAX_EVENTS_PER_FILE + 1, 1000)
+    too_big = bb.FileStats("c.ics", 10, MAX_BYTES_PER_FILE + 1)
+
+    bb.check_budget([fine])
+    with pytest.raises(bb.BundleBudgetError) as excinfo:
+        bb.check_budget([fine, too_many, too_big])
+    message = str(excinfo.value)
+    assert "b.ics" in message and "c.ics" in message and "a.ics" not in message
+
+
+@needs_install
+def test_the_build_fails_if_any_file_is_over_budget(tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr(bb, "MAX_EVENTS_PER_FILE", 100)  # the generator itself still allows 600
+
+    assert bb.main(["--out", str(tmp_path), "--years", "2027", "--alignments", "academic"]) == 1
+    err = capsys.readouterr().err
+    assert "over the budget" in err
+    assert not list(tmp_path.glob("*.zip")) and not list(tmp_path.glob("*.tar.gz"))
+
+
+@needs_install
+def test_a_file_the_writer_refuses_also_fails_the_build_cleanly(tmp_path, monkeypatch, capsys):
+    def refuse(argv):
+        raise IcsBudgetError("somewhere.ics: 601 events is over the budget of 600 per file.")
+
+    monkeypatch.setattr(bb, "calmoji_main", refuse)
+
+    assert bb.main(["--out", str(tmp_path), "--years", "2027", "--alignments", "academic"]) == 1
+    assert "error: somewhere.ics" in capsys.readouterr().err
+
+
+@needs_install
+def test_main_reports_the_budget_and_the_largest_files(tmp_path, capsys):
+    assert bb.main(["--out", str(tmp_path), "--years", "2027", "--alignments", "academic"]) == 0
+    shown = capsys.readouterr().out
+
+    assert f"Budget per file: {MAX_EVENTS_PER_FILE} events and {MAX_BYTES_PER_FILE:,} bytes" in shown
+    assert re.search(r"^Largest file by events: \d+ events, [\d,]+ bytes \(.+\.ics\)$", shown, re.M)
+    assert re.search(r"^Largest file by size: \d+ events, [\d,]+ bytes \(.+\.ics\)$", shown, re.M)

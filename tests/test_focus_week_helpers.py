@@ -1,13 +1,10 @@
-# tests/test_focus_blocks_writer.py
+# tests/test_focus_week_helpers.py
+# The whole-ISO-week helpers (generate_focus_blocks_for_week, PhaseWeekSpan). Phases use neither.
 
 import datetime
 
-import pytest
-
 from calmoji.focus_blocks import generate_focus_blocks_for_week
 from calmoji.focus_blocks_config import ACTIVE_WEEKDAYS, DEFAULT_ACTIVE_WEEKDAYS, FOCUS_BLOCKS
-from calmoji.focus_blocks_writer import write_focus_blocks
-from calmoji.ics_writer import unfold_ics_lines
 from calmoji.types import Phase, PhaseWeekSpan
 
 UTC = datetime.timezone.utc
@@ -124,70 +121,3 @@ def test_last_focus_block_is_block_12_with_torii_in_summary():
     final_event = sorted(events, key=lambda e: e.start)[-1]
     assert "Focus Block 12" in final_event.summary
     assert "⛩️" in final_event.summary, f"Expected ⛩️ in summary, got: {final_event.summary!r}"
-
-
-def _summaries(path):
-    return [line for line in unfold_ics_lines(path.read_text(encoding="utf-8")) if line.startswith("SUMMARY:")]
-
-
-def test_glyph_key_event_written_for_single_monday(tmp_path):
-    # Single day: Monday 2025-01-06 (inclusive) => end exclusive 2025-01-07
-    phase = make_phase("Glyph Test Phase", "2025-01-06", "2025-01-06", emoji="🧪")
-
-    write_focus_blocks([phase], tmp_path, 2025)
-
-    expected = tmp_path / "focus_glyph_test_phase_2025-01-06_to_2025-01-07.ics"
-    assert expected.exists(), f"Expected .ics file not found: {expected}"
-
-    summaries = _summaries(expected)
-    glyph = [line for line in summaries if "GLYPH KEY" in line.upper()]
-    assert len(glyph) == 1, f"Expected 1 Glyph Key SUMMARY, found {len(glyph)}"
-    assert len(summaries) == len(FOCUS_BLOCKS) + 1
-
-
-def test_no_glyph_key_for_a_phase_without_a_monday(tmp_path):
-    # Single day: Saturday 2025-01-04. The Monday of its ISO week is outside the phase.
-    phase = make_phase("Saturday Phase", "2025-01-04", "2025-01-04", emoji="🧪")
-
-    write_focus_blocks([phase], tmp_path, 2025)
-
-    summaries = _summaries(tmp_path / "focus_saturday_phase_2025-01-04_to_2025-01-05.ics")
-    assert not [line for line in summaries if "GLYPH KEY" in line.upper()]
-    assert len(summaries) == len(FOCUS_BLOCKS)
-
-
-def test_writer_writes_one_file_per_phase_plus_a_consolidated_file(tmp_path):
-    phases = [
-        make_phase("Phase One", "2025-01-06", "2025-01-12"),
-        make_phase("Phase Two", "2025-01-13", "2025-01-19"),
-    ]
-
-    written = write_focus_blocks(phases, tmp_path, 2025)
-
-    assert [p.name for p in written] == [
-        "focus_phase_one_2025-01-06_to_2025-01-13.ics",
-        "focus_phase_two_2025-01-13_to_2025-01-20.ics",
-        "focus_all_2025.ics",
-    ]
-    assert sorted(p.name for p in tmp_path.iterdir()) == sorted(p.name for p in written)
-
-    one, two, everything = (_summaries(p) for p in written)
-    assert sorted(one + two) == sorted(everything)
-
-
-def test_writer_sets_calendar_names(tmp_path):
-    phase = make_phase("Phase One", "2025-01-06", "2025-01-12")
-
-    one, everything = write_focus_blocks([phase], tmp_path, 2025)
-
-    one_lines = unfold_ics_lines(one.read_text(encoding="utf-8"))
-    all_lines = unfold_ics_lines(everything.read_text(encoding="utf-8"))
-    assert "X-WR-CALNAME:🧿 calmoji — Focus Blocks — Phase One (UTC)" in one_lines
-    assert "X-WR-CALNAME:🧿 calmoji — Focus Blocks (All) 2025 (UTC)" in all_lines
-
-
-def test_writer_rejects_undated_phase(tmp_path):
-    undated = Phase(name="Undated", start_offset=0, end_offset=7, emoji="🧪")
-
-    with pytest.raises(ValueError, match="Undated"):
-        write_focus_blocks([undated], tmp_path, 2025)

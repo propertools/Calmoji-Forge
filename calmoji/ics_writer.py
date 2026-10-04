@@ -4,10 +4,16 @@ from __future__ import annotations
 
 import datetime
 from pathlib import Path
-from typing import Iterable, Optional, Sequence
+from typing import Optional, Sequence
 
 from calmoji.calendar_config import get_year_start_date
-from calmoji.constants import CALNAME_EBI48, CALNAME_PHASES, EBI48_URL
+from calmoji.constants import (
+    CALNAME_EBI48,
+    CALNAME_PHASES,
+    EBI48_URL,
+    MAX_BYTES_PER_FILE,
+    MAX_EVENTS_PER_FILE,
+)
 from calmoji.ebi48 import get_emoji_for_time
 from calmoji.types import Event, Phase
 from calmoji.uid import generate_uid
@@ -110,6 +116,10 @@ def unfold_ics_lines(content: str) -> list[str]:
 # =============================================================================
 
 
+class IcsBudgetError(ValueError):
+    """An .ics file would exceed MAX_EVENTS_PER_FILE or MAX_BYTES_PER_FILE."""
+
+
 def write_events_to_ics(
     events: Sequence[Event],
     filename: str | Path,
@@ -130,26 +140,36 @@ def write_events_to_ics(
         header/footer: Whether to include VCALENDAR wrapper.
         calname/version/comments: Metadata for VCALENDAR.
         sort_by_start: If True, writes events in start-time order (diff stability).
+
+    Raises:
+        IcsBudgetError: if the file would hold more than MAX_EVENTS_PER_FILE events
+            or be larger than MAX_BYTES_PER_FILE bytes. Nothing is written then.
     """
     path = Path(filename)
+
+    seq: Sequence[Event] = sorted(events, key=lambda e: e.start) if sort_by_start else events
+    if len(seq) > MAX_EVENTS_PER_FILE:
+        raise IcsBudgetError(f"{path}: {len(seq)} events is over the budget of {MAX_EVENTS_PER_FILE} per file.")
+
+    parts: list[str] = []
+    if header:
+        parts.append(fold_lines(create_ics_header(calname=calname, version=version, comments=comments)) + "\r\n")
+
+    for i, event in enumerate(seq):
+        try:
+            parts.append(fold_lines(event.to_ics()) + "\r\n")
+        except Exception as e:
+            raise ValueError(f"Failed to render event at index {i}: {event}") from e
+
+    if footer:
+        parts.append(fold_lines(create_ics_footer()) + "\r\n")
+
+    data = "".join(parts).encode("utf-8")
+    if len(data) > MAX_BYTES_PER_FILE:
+        raise IcsBudgetError(f"{path}: {len(data):,} bytes is over the budget of {MAX_BYTES_PER_FILE:,} per file.")
+
     path.parent.mkdir(parents=True, exist_ok=True)
-
-    seq: Iterable[Event] = events
-    if sort_by_start:
-        seq = sorted(events, key=lambda e: e.start)
-
-    with path.open("w", encoding="utf-8", newline="") as f:
-        if header:
-            f.write(fold_lines(create_ics_header(calname=calname, version=version, comments=comments)) + "\r\n")
-
-        for i, event in enumerate(seq):
-            try:
-                f.write(fold_lines(event.to_ics()) + "\r\n")
-            except Exception as e:
-                raise ValueError(f"Failed to render event at index {i}: {event}") from e
-
-        if footer:
-            f.write(fold_lines(create_ics_footer()) + "\r\n")
+    path.write_bytes(data)
 
 
 # =============================================================================
