@@ -13,10 +13,10 @@ from calmoji.constants import CALNAME_EBI48, CALNAME_FOCUS, CALNAME_MEETINGS, CA
 from tests.ics_helpers import header_lines, read_events
 
 EXPECTED_NAMES = {
-    "phases": "🧿 calmoji — Semester Phases (UTC)",
-    "focus": "🧿 calmoji — Focus Blocks (UTC)",
-    "meetings": "🧿 calmoji — Meeting Slots (UTC)",
-    "ebi48": "🧿 calmoji — EBI48 Clock (UTC)",
+    "phases": "🌗 Seasons",
+    "focus": "🧠 Focus — Open",
+    "meetings": "🕒 Meetings — Open",
+    "ebi48": "🧿 Emoji Clock",
 }
 
 
@@ -38,9 +38,9 @@ def generated(tmp_path_factory):
 
 
 def layer_of(path) -> str:
-    if path.name.startswith("semester_phases"):
+    if path.name.startswith("seasons_"):
         return "phases"
-    if path.name.startswith("ebi48"):
+    if path.name.startswith("emoji_clock_"):
         return "ebi48"
     return path.parent.name  # focus / meetings
 
@@ -59,6 +59,7 @@ def test_every_file_of_a_layer_has_the_same_calendar_name_with_no_year_date_or_p
         header = header_lines(path)
         calname = next(line for line in header if line.startswith("X-WR-CALNAME:")).split(":", 1)[1]
         assert f"NAME:{calname}" in header
+        assert "UTC" not in calname and "(" not in calname, f"{path.name}: {calname!r}"
         names[layer_of(path)].add(calname)
         assert not re.search(r"\d", calname.replace("EBI48", "")), f"{path.name}: {calname!r} carries a year or date"
 
@@ -122,3 +123,11 @@ def test_no_summary_contains_the_same_emoji_twice(generated):
             assert len(found) == len(set(found)), f"{path.name}: {event['SUMMARY']!r}"
             checked += 1
     assert checked > 5000
+
+
+def test_generated_files_use_the_new_file_names(generated):
+    for year_dir in sorted(p for p in generated.glob("*/*") if p.is_dir()):
+        year = year_dir.name
+        assert (year_dir / f"seasons_{year}.ics").is_file()
+        assert (year_dir / f"emoji_clock_{year}.ics").is_file()
+        assert not list(year_dir.glob("semester_phases_*")) and not list(year_dir.glob("ebi48_layer_*"))

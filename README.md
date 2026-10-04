@@ -38,20 +38,23 @@ Then open the folder for the year you want, for example `2026/academic/`:
 
 ```
 2026/academic/
-├── semester_phases_2026.ics     ← the seasons of your year
-├── ebi48_layer_2026.ics         ← the EBI48 emoji clock
+├── seasons_2026.ics             ← 🌗 Seasons: the seasons of your year
+├── emoji_clock_2026.ics         ← 🧿 Emoji Clock
 ├── focus/
-│   └── focus_2026-09.ics …      ← focus blocks, one file per month
+│   └── focus_2026-09.ics …      ← 🧠 Focus — Open, one file per month
 └── meetings/
-    └── meetings_2026-09.ics …   ← meeting slots, one file per month
+    └── meetings_2026-09.ics …   ← 🕒 Meetings — Open, one file per month
 ```
 
 ### Importing
 
 Create one calendar per layer in your calendar app (for example
-"🧠 Focus Blocks", "🕒 Meeting Slots"), then import each file into its own
+"🧠 Focus — Open", "🕒 Meetings — Open"), then import each file into its own
 calendar. That's what lets you colour each layer and switch it on and off
-on its own; the [playbook](docs/PLAYBOOK.md) explains why it matters.
+on its own; the [playbook](docs/PLAYBOOK.md) explains why it matters. Give
+each layer its own colour; the playbook suggests a
+[calm starting palette](docs/PLAYBOOK.md#colours). In apps that create a
+calendar when you import, the file already names it for you.
 
 * **Apple Calendar:** File → Import → choose the file → choose the calendar.
 * **Google Calendar:** Settings → Import & export → choose the file and the
@@ -94,7 +97,8 @@ we'll fold what we learn into these docs.
 
 The short version:
 
-1. **Reference layers are read-only.** calmoji's layers show what's
+1. **The Map is read-only.** calmoji's layers (🌗 Seasons,
+   🧠 Focus — Open, 🕒 Meetings — Open and 🧿 Emoji Clock) show what's
    *available*. Don't edit them.
 2. **Claim, don't edit.** To use a focus block or meeting slot, duplicate
    it into one of your own calendars (for example "🎯 Focus — Claimed").
@@ -118,13 +122,13 @@ Every event is marked **private** and **free** (it won't make you look
 busy). All times are fixed in **UTC**; your calendar app shows them in your
 local time.
 
-### 📅 Semester phases
+### 🌗 Seasons
 
 The year is divided into eight phases, each an all-day marker so you always
 know which mode you're in. Names come from the academic year; in the
 `calendar` alignment the same arc starts on 1 January.
 
-| Phase | Length | Meeting slots? |
+| Phase | Length | Open meetings? |
 |---|---|---|
 | 🌱 Semester A (Seed) | 14 weeks | yes |
 | ❄️ Winter Break | 2 weeks | no |
@@ -135,7 +139,7 @@ know which mode you're in. Names come from the academic year; in the
 | 🧠 Deep Work Phase | 6 weeks | yes |
 | 🍂 Autumn Drift | until the year turns | no |
 
-### 🧠 Focus blocks
+### 🧠 Focus — Open
 
 Twelve 96-minute blocks a day, starting every two hours on the hour (UTC),
 every day of the week, with a 24-minute breather between them. Each has a
@@ -145,7 +149,7 @@ theme glyph: 🧠 deep thinking, ✍️ writing, 📚 reading, 🔧 technical,
 that fall in your waking hours. Each week also gets an all-day 🗝️ Glyph
 Key marker. They come one file per month.
 
-### 🕒 Meeting slots
+### 🕒 Meetings — Open
 
 25-minute windows starting at :05 or :35 past the hour, two per city,
 placed around early afternoon local time in Tokyo, Delhi, Mecca, Brussels,
@@ -158,11 +162,19 @@ Like everything in calmoji, slots are fixed in UTC all year, and your
 calendar app shows them in your local time. Each slot's description says
 exactly when it falls locally.
 
-### 🧿 EBI48 clock
+### 🧿 Emoji Clock
 
-A deterministic emoji for each of the day's 48 half-hours, anchored at :05
-and :35 UTC, so "let's meet at 🦊" means the same moment everywhere. The
-clock appears every day. See [EBI48-README.md](EBI48-README.md).
+I designed EBI48 after years of watching global technical standards
+calls spend their last ten minutes on time-zone arithmetic: which
+city, which day, has London changed its clocks yet, does that clash with
+Jane's carpool next Thursday. Everyone was doing mental maths, juggling
+guilt and triage, just to find a time.
+
+EBI48 gives each of the day's 48 half-hours an emoji that means the same
+moment everywhere, anchored at :05 and :35 UTC. Your calendar shows each
+one at your local time, so nobody converts anything out loud. Instead of
+doing sums, you **pick a day and look for free animals at acceptable
+times**. See [EBI48-README.md](EBI48-README.md).
 
 ### ⚠️ Known limitations
 
@@ -233,8 +245,8 @@ Output for one year:
 
 ```
 output/
-├── semester_phases_2027.ics
-├── ebi48_layer_2027.ics
+├── seasons_2027.ics
+├── emoji_clock_2027.ics
 ├── focus/
 │   └── focus_<YYYY-MM>.ics …           ← one file per month
 └── meetings/

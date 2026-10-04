@@ -190,7 +190,7 @@ def write_semester_blocks(phases: Sequence[Phase], filename: Optional[str] = Non
 
     if filename is None:
         anchor_year = phases[0].start.year if phases[0].start else "unknown"
-        filename = f"output/semester_phases_{anchor_year}.ics"
+        filename = f"output/seasons_{anchor_year}.ics"
 
     events: list[Event] = []
     for phase in phases:

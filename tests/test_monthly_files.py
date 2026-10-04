@@ -96,7 +96,7 @@ def all_events(outdir: Path, kind: str) -> List[Tuple[str, Ics]]:
 def test_layout(outputs, alignment, year):
     outdir = outputs[(alignment, year)]
     top = sorted(p.name for p in outdir.iterdir())
-    assert top == sorted([f"ebi48_layer_{year}.ics", "focus", "meetings", f"semester_phases_{year}.ics"])
+    assert top == sorted([f"emoji_clock_{year}.ics", "focus", "meetings", f"seasons_{year}.ics"])
 
     assert sorted(p.name for p in (outdir / "focus").iterdir()) == [
         f"focus_{m}.ics" for m in months_of_year(year, alignment)
@@ -120,10 +120,10 @@ def test_the_retired_files_are_gone(outputs, alignment):
 def test_the_2027_academic_tree(outputs):
     outdir = outputs[("academic", 2027)]
     tree = sorted(p.relative_to(outdir).as_posix() for p in outdir.rglob("*.ics"))
-    assert tree[0] == "ebi48_layer_2027.ics"
+    assert tree[0] == "emoji_clock_2027.ics"
     assert "focus/focus_2027-09.ics" in tree and "focus/focus_2028-08.ics" in tree
     assert "meetings/meetings_2027-09.ics" in tree and "meetings/meetings_2028-08.ics" in tree
-    assert tree[-1] == "semester_phases_2027.ics"
+    assert tree[-1] == "seasons_2027.ics"
     assert len(tree) == 2 + 12 + 12
 
 
@@ -134,8 +134,8 @@ def test_calendar_names_are_constant_per_layer(outputs, alignment):
         assert f"X-WR-CALNAME:{CALNAME_FOCUS}" in header_lines(path)
     for path in (outdir / "meetings").iterdir():
         assert f"X-WR-CALNAME:{CALNAME_MEETINGS}" in header_lines(path)
-    assert CALNAME_FOCUS == "🧿 calmoji — Focus Blocks (UTC)"
-    assert CALNAME_MEETINGS == "🧿 calmoji — Meeting Slots (UTC)"
+    assert CALNAME_FOCUS == "🧠 Focus — Open"
+    assert CALNAME_MEETINGS == "🕒 Meetings — Open"
 
 
 # -----------------------------------------------------------------------------
@@ -309,12 +309,12 @@ def test_dry_run_shows_a_dash_for_a_layer_that_is_switched_off(tmp_path, capsys)
 
 def test_no_focus_flag_skips_the_focus_folder(tmp_path):
     run_cli(tmp_path, 2027, "academic", "--no-focus", "--no-meetings", "--no-ebi48")
-    assert sorted(p.name for p in tmp_path.iterdir()) == ["semester_phases_2027.ics"]
+    assert sorted(p.name for p in tmp_path.iterdir()) == ["seasons_2027.ics"]
 
 
 def test_no_meetings_flag_skips_the_meetings_folder(tmp_path):
     run_cli(tmp_path, 2027, "academic", "--no-meetings", "--no-ebi48")
-    assert sorted(p.name for p in tmp_path.iterdir()) == ["focus", "semester_phases_2027.ics"]
+    assert sorted(p.name for p in tmp_path.iterdir()) == ["focus", "seasons_2027.ics"]
 
 
 def test_include_oceania_adds_auckland(tmp_path):

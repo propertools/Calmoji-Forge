@@ -106,8 +106,8 @@ def main(argv: list[str] | None = None) -> None:
     else:
         outdir.mkdir(parents=True, exist_ok=True)
 
-        # 1) Semester phase markers
-        phases_path = outdir / f"semester_phases_{args.year}.ics"
+        # 1) Seasons (one all-day marker per phase)
+        phases_path = outdir / f"seasons_{args.year}.ics"
         write_semester_blocks(phases, filename=str(phases_path))
         print(f"✅ Wrote: {phases_path}")
 
@@ -119,11 +119,11 @@ def main(argv: list[str] | None = None) -> None:
         for path in write_monthly_files(meeting_events, outdir / "meetings", "meetings", CALNAME_MEETINGS):
             print(f"✅ Wrote: {path}")
 
-    # 4) EBI48 clock
+    # 4) Emoji Clock (EBI48)
     if not args.no_ebi48:
-        ebi48_path = outdir / f"ebi48_layer_{args.year}.ics"
+        ebi48_path = outdir / f"emoji_clock_{args.year}.ics"
         if args.dry_run:
-            print("\n🧿 EBI48 clock: (skipping file writes in dry-run)")
+            print("\n🧿 Emoji Clock: (skipping file writes in dry-run)")
         else:
             write_ebi48_layer(ebi48_path, args.year, args.calendar_alignment)
             print(f"✅ Wrote: {ebi48_path}")

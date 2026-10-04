@@ -2,6 +2,8 @@
 
 *A layered calendar pattern. Adapt it, don't obey it.*
 
+*The Map shows what's possible; Commitments hold what you've chosen.*
+
 calmoji gives you structure; this playbook is one way to live inside it.
 It grew out of daily use by people who drift off task, so it's built to
 ask very little of you in the moment: no blank pages, no rebuilding your
@@ -14,44 +16,47 @@ doesn't.
 
 ## The idea in one sentence
 
-**calmoji's layers show what's available; your own calendars hold what
-you've committed to. You move time from one to the other by copying,
-never by editing.**
+**calmoji's layers (The Map) show what's available; your own calendars
+hold what you've committed to. You move time from one to the other by
+copying, never by editing.**
 
 ---
 
 ## Two kinds of calendars
 
-**Reference layers** come from calmoji. They're *immutable*: you never
-edit them, and you can delete and re-import them whenever you like.
+**The Map** comes from calmoji. It's *read-only*: you never edit it, and
+you can delete and re-import it whenever you like.
 
-**Working calendars** are yours. They're *mutable*: this is where your
-real plans, meetings and life go.
+**Commitments** are yours, and so is everything else below. They're
+*mine*: this is where your real plans, meetings and life go.
 
-A small habit that helps: write `(immutable)` or `(mutable)` in each
-calendar's description, so future-you never edits the wrong one.
+A small habit that helps: write `(read-only)` in each Map calendar's
+description and `(mine)` in everything else, so future-you never edits the
+wrong one.
 
 ---
 
 ## A suggested setup
 
-### Reference layers (toggle on to plan, off to work)
+### The Map (toggle on to plan, off to work)
 
 | Calendar | What it's for |
 |---|---|
-| 📅 Semester Phases | The season you're in, and what mode it calls for |
-| 🧠 Focus Blocks | The daily palette of available focus time |
-| 🕒 Meeting Slots | Humane windows for meeting people in other time zones |
-| 🧿 EBI48 Clock | A shared emoji for each half-hour (optional) |
+| 🌗 Seasons | The season you're in, and what mode it calls for |
+| 🧠 Focus — Open | The daily palette of available focus time |
+| 🕒 Meetings — Open | Humane windows for meeting people in other time zones |
+| 🧿 Emoji Clock | A shared emoji for each half-hour (optional) |
 
 Give these **no notifications**. They're a map, not a to-do list.
 
-### Working calendars
+The 🧿 Emoji Clock is built on EBI48; see [EBI48-README.md](../EBI48-README.md).
+
+### Commitments
 
 | Calendar | What it's for |
 |---|---|
 | 🎯 Focus — Claimed | Focus time you've committed to a specific task |
-| 🤝 Meetings — One-off | Single meetings, booked from a meeting slot |
+| 🤝 Meetings — One-off | Single meetings, booked from an open meeting slot |
 | 🔄 Meetings — Recurring | Meetings that have earned a regular cadence |
 
 Put **useful notifications** here, for example 5 minutes before a claimed
@@ -64,11 +69,11 @@ you thinking about it.
 | Calendar | What it's for |
 |---|---|
 | 🛠️ Everyday Stuff | Life maintenance; make this your default calendar |
-| 🫂 Other People's Stuff | Favours, errands, things you're doing for others |
+| 🫂 For Others | Favours, errands, things you're doing for others |
 | 👨‍👩‍👧 Family | Commitments that don't move |
 | ✈️ Travel | Trips and time away |
 | 🪷 Feast Days | Birthdays, anniversaries, days worth marking |
-| 🧾 Deadlines | Legal, tax, regulatory: the truly immovable |
+| ⚖️ Hard Deadlines | Legal, tax, regulatory: the truly immovable |
 
 ### Sandbox
 
@@ -79,9 +84,45 @@ you thinking about it.
 Import anything new here first. If it goes wrong, delete the sandbox and
 make a fresh one; your real calendars never notice.
 
-**Colours matter.** Give reference layers muted colours and working
-calendars strong ones, so "available" and "claimed" look different at a
-glance.
+## Colours
+
+Colour is how you read a calendar at a glance, so it's worth a few
+minutes. Here's one calm starting point: the author's own palette, used
+daily in a dark theme. Names are Proton Calendar's; other apps have
+their own palettes, so pick the nearest match to each hex value.
+
+| Calendar | Colour | Hex |
+|---|---|---|
+| 🌗 Seasons | Fern | `#63B84E` |
+| 🧠 Focus — Open | Soil | `#524740` |
+| 🕒 Meetings — Open | Forest | `#448533` |
+| 🧿 Emoji Clock | Cobalt | `#2C3DAB` |
+| 🎯 Focus — Claimed | Ocean | `#3575A2` |
+| 🤝 Meetings — One-off | Pacific | `#4A9DD4` |
+| 🔄 Meetings — Recurring | Ocean | `#3575A2` |
+| 🛠️ Everyday Stuff | Purple | `#8080F7` |
+| 🫂 For Others | Pink | `#CC67D0` |
+| 👨‍👩‍👧 Family | Rose | `#DA4D7C` |
+| ✈️ Travel | Carrot | `#E88A33` |
+| 🪷 Feast Days | Cobalt | `#2C3DAB` |
+| ⚖️ Hard Deadlines | Raspberry | `#AB2F56` |
+| 🧪 Sandbox | Olive | `#7E7323` |
+
+The thinking behind it, if you'd rather choose your own:
+
+* **The Map is earthy and quiet** (greens, a soft brown). They're
+  the background you plan against, so they shouldn't shout.
+* **Commitments are calm blue.** Claimed focus and recurring meetings
+  share one blue on purpose: what you've chosen should look steady.
+* **Life is warm:** people, places and favours in purple, pink, rose and
+  orange.
+* **Deep red is only for the truly immovable.** Use alarm colours
+  sparingly, so they keep their meaning.
+* **The sandbox gets a colour you use nowhere else,** so you notice when
+  you're looking at test data.
+
+If you use a light theme, check that text on each colour stays easy to
+read, and nudge any that don't.
 
 ---
 
@@ -89,24 +130,45 @@ glance.
 
 1. Create the calendars above in your calendar app (as many or as few as
    you want; see "Start small" below).
-2. Import calmoji's files into the reference calendars, one layer per
+2. Import calmoji's files into the Map calendars, one layer per
    calendar. See the [README](../README.md#-get-the-calendars) for where
    to get them. Focus blocks and meeting slots come one file per month:
    start with this month and next, and add months as you go. (Subscribable
    feeds are planned for v0.2.)
 3. Pick colours and notification defaults per calendar.
-4. Hide the reference layers. You'll switch them on when you plan.
+4. Hide The Map. You'll switch it on when you plan.
+
+---
+
+## The rule underneath
+
+A to-do list is a promise without a time, and promises without times get
+juggled forever: moved between lists, re-read, re-prioritised, never
+quite done. This pattern rests on one rule instead:
+
+* **Trivial? Do it today.**
+* **A future commitment? Give it a time.** Claim an open focus block for it, so
+  "I'll do that" becomes "I'll do that on Thursday at 🦊".
+
+This doesn't replace project planning. A big project still needs
+breaking into next steps first, and then each step gets its time.
+
+It has a side benefit: once your commitments sit on the calendar,
+**hyperfocus becomes visible.** If you're still deep in one thing when
+the next claimed block begins, you can see it, and choose on purpose
+whether to keep going or switch, instead of discovering three hours
+later that the afternoon has gone.
 
 ---
 
 ## The weekly loop
 
 ### Plan
-Switch on 📅 Semester Phases, 🧠 Focus Blocks and 🕒 Meeting Slots. Look
+Switch on 🌗 Seasons, 🧠 Focus — Open and 🕒 Meetings — Open. Look
 at the week ahead and notice what season you're in.
 
 ### Claim focus
-Pick a focus block in your waking hours and **duplicate** it into
+Pick an open focus block in your waking hours and **duplicate** it into
 🎯 Focus — Claimed. Rename it to the task, starting with 🎯:
 
 > 🎯 Draft the grant budget
@@ -116,13 +178,14 @@ app may copy that setting when you duplicate; if you want others to see
 you as unavailable, set the claimed copy to *busy*.
 
 ### Book a meeting
-Duplicate a meeting slot into 🤝 One-off or 🔄 Recurring, then add the
+Duplicate an open meeting slot into 🤝 Meetings — One-off or
+🔄 Meetings — Recurring, then add the
 people, the agenda and the call link. Slots are fixed in UTC, so your
 calendar shows them in your local time; open a slot's description to see
 when it falls in that city, summer and winter.
 
 ### Work
-Switch the reference layers off. Your calendar now shows only what you've
+Switch The Map off. Your calendar now shows only what you've
 committed to.
 
 ### Close out
@@ -151,7 +214,7 @@ of switching things on and off:
 1. Switch your calendar's view to the other person's time zone.
 2. Show the next week or two.
 3. Turn on only the layers they should see: perhaps ✈️ Travel and
-   🔄 Recurring meetings, but not one-off meetings or 👨‍👩‍👧 Family.
+   🔄 Meetings — Recurring, but not 🤝 Meetings — One-off or 👨‍👩‍👧 Family.
 4. Offer them the free meeting slots that remain.
 
 Your private life stays private, and you never have to explain why a time
@@ -161,18 +224,18 @@ doesn't work.
 
 ## Regenerating safely
 
-Reference layers can be replaced at any time, for example when a new
+The Map can be replaced at any time, for example when a new
 calmoji version comes out, or when you change your focus pattern halfway
 through the year.
 
-Delete the reference calendar, recreate it, and import the new files.
+Delete the Map calendar, recreate it, and import the new files.
 (Once subscribable feeds arrive in v0.2, subscribers won't need to do
 anything; feeds will update themselves.)
 
-If you imported calmoji v0.1.0, do this once now: delete those reference
+If you imported calmoji v0.1.0, do this once now: delete those Map
 calendars and import fresh, because event times and identifiers changed.
 
-Everything you've claimed lives in your working calendars, so
+Everything you've claimed lives in your Commitments, so
 nothing you've planned is lost. That's the point of the pattern: the
 structure can change without breaking your commitments.
 
@@ -182,11 +245,11 @@ structure can change without breaking your commitments.
 
 If this looks like a lot, it is. You don't need all of it.
 
-* **Day one:** this month's 🧠 Focus Blocks and 🎯 Focus — Claimed. Claim
+* **Day one:** this month's 🧠 Focus — Open and 🎯 Focus — Claimed. Claim
   one block tomorrow. That's it.
 * **Week two:** add 🎯 → ✅ and the roll-forward habit.
-* **Later:** meeting slots, semester phases, life layers, privacy
-  toggles, as you feel the need.
+* **Later:** meetings, seasons, the Life calendars, privacy toggles, as
+  you feel the need.
 
 The pattern works best when it grows out of what you actually do.
 

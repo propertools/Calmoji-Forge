@@ -42,6 +42,25 @@ Every symbol corresponds to exactly one half-hour.
 
 ---
 
+## 🗣 Where it came from
+
+EBI48 started on global technical standards calls. Again and again,
+the last ten minutes went on cities, time zones and days of the week:
+Jane has carpool next Thursday, and is that before or after London
+changes its clocks?
+
+That conversation makes everyone switch between the maths side of the
+brain and the language side, while also spending executive function on
+suppressing guilt, triaging and managing stress, all to find one free
+half-hour. It's an expensive way to do something simple.
+
+EBI48 moves the work to the visual cortex, which is fast at this kind of
+thing. Each half-hour has an animal (or another face) that means the
+same moment for everyone. The conversation shrinks to: **pick a day,
+find free animals at acceptable times.**
+
+---
+
 ## 🧭 Why It Exists
 
 UTC is globally consistent but cognitively abstract.
@@ -169,6 +188,7 @@ EBI48_CLOCK
 
 EBI48 powers:
 
+* The 🧿 Emoji Clock calendar: all 48 half-hours, every day
 * Meeting slot tagging
 * Symbolic focus cycles
 * Cross-team coordination layers

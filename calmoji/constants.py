@@ -14,12 +14,14 @@ DTSTAMP = "20260101T000000Z"
 # Where generated files point people who want to know what EBI48 is.
 EBI48_URL = "https://github.com/propertools/Calmoji-Forge/blob/main/EBI48-README.md"
 
-# Calendar names are constant per layer (no years, dates or phases), so repeated
-# imports into one calendar look consistent.
-CALNAME_PHASES = "🧿 calmoji — Semester Phases (UTC)"
-CALNAME_FOCUS = "🧿 calmoji — Focus Blocks (UTC)"
-CALNAME_MEETINGS = "🧿 calmoji — Meeting Slots (UTC)"
-CALNAME_EBI48 = "🧿 calmoji — EBI48 Clock (UTC)"
+# Each layer's calendar name is exactly the calendar name the docs recommend, and is
+# the same in every file of the layer (no years, dates or phases), so apps that
+# create a calendar on import name it correctly and repeated imports look consistent.
+# Every time in calmoji is UTC, so the names don't say so.
+CALNAME_PHASES = "🌗 Seasons"
+CALNAME_FOCUS = "🧠 Focus — Open"
+CALNAME_MEETINGS = "🕒 Meetings — Open"
+CALNAME_EBI48 = "🧿 Emoji Clock"
 
 # Size budget for every .ics file calmoji writes. Calendar apps cap imports
 # (reported: Google about 1 MB per file, Outlook failing somewhere between 650

@@ -9,19 +9,26 @@ in two alignments:
 
 Pick one alignment and stick with it.
 
+Every time in these files is in **UTC**, and your calendar app shows it in
+your local time. That's why the calendar names don't say "UTC".
+
 ---
 
 ## What's in each year's folder
 
 ```
 <year>/<alignment>/
-├── semester_phases_<year>.ics    ← the seasons of your year (all-day markers)
-├── ebi48_layer_<year>.ics        ← the EBI48 emoji clock, every day
+├── seasons_<year>.ics            ← 🌗 Seasons (all-day markers)
+├── emoji_clock_<year>.ics        ← 🧿 Emoji Clock, every day
 ├── focus/
-│   └── focus_<YYYY-MM>.ics       ← focus blocks, one file per month
+│   └── focus_<YYYY-MM>.ics       ← 🧠 Focus — Open, one file per month
 └── meetings/
-    └── meetings_<YYYY-MM>.ics    ← meeting slots, one file per month
+    └── meetings_<YYYY-MM>.ics    ← 🕒 Meetings — Open, one file per month
 ```
+
+Each file names its calendar for you: the calendar name inside is exactly
+the name above (🌗 Seasons, 🧠 Focus — Open, 🕒 Meetings — Open, 🧿 Emoji
+Clock), so apps that create a calendar on import get it right.
 
 Months are in **UTC**. If you're west of UTC, an event late in the evening
 on the last day of a month may be in the next month's file.
@@ -34,8 +41,8 @@ import limits reported for Google, Outlook and Proton. This bundle covers
 
 ## Importing
 
-Import each layer into **its own calendar** (for example "🧠 Focus
-Blocks", "🕒 Meeting Slots"), so you can colour it and switch it on and
+Import each layer into **its own calendar** (for example "🧠 Focus — Open",
+"🕒 Meetings — Open"), so you can colour it and switch it on and
 off on its own. The calmoji
 [playbook](https://github.com/propertools/Calmoji-Forge/blob/main/docs/PLAYBOOK.md)
 explains how to use the layers day to day.
@@ -69,8 +76,8 @@ so importing over the old ones would leave you with duplicates.
   them in your local time. In cities with daylight saving time (Brussels,
   Havana, Seattle) a slot's local time is an hour earlier in winter than in
   summer. Each slot's description says exactly when it falls locally.
-* **The EBI48 clock appears every day**, one event per half-hour that
-  repeats daily through the year.
+* **The 🧿 Emoji Clock (EBI48) appears every day**, one event per half-hour
+  that repeats daily through the year.
 * **Months are in UTC**, as above.
 
 More is planned for v0.2. See the

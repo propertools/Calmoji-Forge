@@ -104,7 +104,7 @@ def test_calendar_name_and_reference_link(layer):
     _, _, path, events = layer
     header = header_lines(path)
     assert f"X-WR-CALNAME:{CALNAME_EBI48}" in header
-    assert CALNAME_EBI48 == "🧿 calmoji — EBI48 Clock (UTC)"
+    assert CALNAME_EBI48 == "🧿 Emoji Clock"
     text = path.read_bytes().decode("utf-8").replace("\r\n ", "")
     assert "ebi48.org" not in text
     assert EBI48_URL in text

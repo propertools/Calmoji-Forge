@@ -174,7 +174,7 @@ def test_bundle_year_folders_use_the_monthly_layout(built):
     result, _ = built
     year_dir = result.bundle_dir / "2027" / "academic"
     names = sorted(p.relative_to(year_dir).as_posix() for p in year_dir.rglob("*.ics"))
-    assert "semester_phases_2027.ics" in names and "ebi48_layer_2027.ics" in names
+    assert "seasons_2027.ics" in names and "emoji_clock_2027.ics" in names
     assert "focus/focus_2027-09.ics" in names and "meetings/meetings_2028-08.ics" in names
     assert not any(n.startswith(("focus_all", "meeting_all", "focus_weeks")) for n in names)
 
