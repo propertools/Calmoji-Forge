@@ -43,6 +43,22 @@ def _reject_line_breaks(name: str, value: Optional[str]) -> None:
 
 @dataclass
 class Event:
+    """
+    One calendar event (a VEVENT). All datetimes are UTC.
+
+    End rules:
+
+    - Timed event: ``end`` must be after ``start`` (``end <= start`` raises ValueError).
+      With no ``end`` the event lasts one hour.
+    - All-day event: ``start`` is floored to midnight, and the stored ``end`` is an
+      EXCLUSIVE midnight, as DTEND;VALUE=DATE is. With no ``end`` the event lasts one day.
+      An ``end`` at exactly midnight is taken as that exclusive boundary, and must be
+      after the start date. An ``end`` with a time of day means "through that date"
+      (inclusive), so it becomes the next midnight: even on the same date as the start,
+      08:00-23:00 on one date is a one-day all-day event. An end date before the start
+      date raises ValueError.
+    """
+
     start: datetime
     summary: str
     end: Optional[datetime] = None
@@ -60,26 +76,32 @@ class Event:
             self.end = self._enforce_utc(self.end)
 
         if self.all_day:
-            # DTSTART;VALUE=DATE is a date; DTEND;VALUE=DATE is EXCLUSIVE.
-            # We store start at midnight, and store end at the exclusive midnight boundary.
             self.start = self.start.replace(hour=0, minute=0, second=0, microsecond=0)
 
             if self.end is None:
                 self.end = self.start + timedelta(days=1)
             else:
-                # If caller passes a date-like midnight boundary, assume it's already exclusive.
-                # If caller passes a timeful end, treat it as an inclusive end-date and +1 day.
                 end_midnight = self.end.replace(hour=0, minute=0, second=0, microsecond=0)
 
-                if end_midnight <= self.start:
-                    raise ValueError("All-day event end must be after start.")
-
-                is_midnight_input = (
-                    self.end.hour == 0 and self.end.minute == 0 and self.end.second == 0 and self.end.microsecond == 0
-                )
-                self.end = end_midnight if is_midnight_input else (end_midnight + timedelta(days=1))
-        else:
-            self.end = self.end or (self.start + timedelta(hours=1))
+                if self.end == end_midnight:
+                    # An end at midnight is the exclusive boundary, and must be after the start date.
+                    if self.end <= self.start:
+                        raise ValueError(
+                            f"All-day event end {self.end:%Y-%m-%d} must be after its start {self.start:%Y-%m-%d} "
+                            "(an end at midnight is exclusive)."
+                        )
+                else:
+                    # An end with a time of day means "through that date" (inclusive): the next midnight.
+                    if end_midnight < self.start:
+                        raise ValueError(
+                            f"All-day event end date {end_midnight:%Y-%m-%d} is before its start date "
+                            f"{self.start:%Y-%m-%d}."
+                        )
+                    self.end = end_midnight + timedelta(days=1)
+        elif self.end is None:
+            self.end = self.start + timedelta(hours=1)
+        elif self.end <= self.start:
+            raise ValueError(f"Event end {self.end.isoformat()} must be after its start {self.start.isoformat()}.")
 
         if not self.uid:
             dt_str = self.start.strftime("%Y%m%d") if self.all_day else self.start.strftime("%Y%m%dT%H%M%S")
