@@ -81,7 +81,7 @@ if [[ ! -d "$VENV_DIR" ]]; then
 fi
 # shellcheck disable=SC1091
 source "$VENV_DIR/bin/activate"
-gate "pip install -e '.[dev]'" \
+gate "pip upgrade" \
     pip install --quiet --upgrade pip
 gate "pip install -e .[dev]" \
     pip install --quiet -e '.[dev]'
@@ -130,6 +130,7 @@ rm -rf "$SMOKE_VENV"
 python3 -m venv "$SMOKE_VENV"
 # shellcheck disable=SC1091
 source "$SMOKE_VENV/bin/activate"
+pip install --quiet --upgrade pip
 if pip install --quiet "calmoji @ git+file://$REPO_ROOT@$CURRENT_BRANCH" >/tmp/preflight-pipgit.log 2>&1; then
     SMOKE_VERSION=$(calmoji --version 2>&1)
     if [[ "$SMOKE_VERSION" == "calmoji 0.1.0" ]]; then

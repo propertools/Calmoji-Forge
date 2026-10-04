@@ -263,27 +263,30 @@ or newer works, including the `python3` that ships with macOS.
 python3 calmoji.py --year=2039
 ```
 
-Optionally, install it as a package to get a `calmoji` command:
+Optionally, install it as a package to get a `calmoji` command. Use a
+virtual environment, and upgrade pip first (macOS ships an old one):
 
 ```bash
-pip install -e .
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install --upgrade pip
+python3 -m pip install -e .
 calmoji --year=2039
-python3 -m calmoji --year=2039
 ```
 
-Or install directly from GitHub without cloning:
+Or install directly from GitHub without cloning (same setup, then):
 
 ```bash
-pip install 'calmoji @ git+https://github.com/propertools/Calmoji-Forge.git'
+python3 -m pip install 'calmoji @ git+https://github.com/propertools/Calmoji-Forge.git'
 ```
 
-Working on calmoji itself? `pip install -e '.[dev]'` adds the test,
-lint and type-check tools.
+Working on calmoji itself? `python3 -m pip install -e '.[dev]'` adds the
+test, lint and type-check tools.
 
 Preview only:
 
 ```bash
-calmoji --year=2039 --dry-run
+python3 calmoji.py --year=2039 --dry-run
 ```
 
 Disable layers:
