@@ -146,9 +146,9 @@ deactivate || true
 
 step "Summary"
 echo "Passed: ${#PASSED[@]}"
-for p in "${PASSED[@]}"; do echo "  ✅ $p"; done
+for p in ${PASSED[@]+"${PASSED[@]}"}; do echo "  ✅ $p"; done
 echo "Failed: ${#FAILED[@]}"
-for f in "${FAILED[@]}"; do echo "  ❌ $f"; done
+for f in ${FAILED[@]+"${FAILED[@]}"}; do echo "  ❌ $f"; done
 
 if [[ ${#FAILED[@]} -eq 0 ]]; then
     echo
