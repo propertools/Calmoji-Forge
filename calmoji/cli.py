@@ -33,7 +33,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         description="🧿 calmoji — Ritual Calendar Crafter (UTC-fixed)",
     )
 
-    p.add_argument("--year", type=int, default=2025, help="Anchor year (e.g., 2025)")
+    p.add_argument("--year", type=int, required=True, help="Anchor year (e.g., 2027)")
     p.add_argument(
         "--calendar-alignment",
         choices=sorted(ALIGNMENT_MODES),

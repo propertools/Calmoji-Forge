@@ -4,13 +4,14 @@ Tests for scripts/build_bundle.py, the release-archive builder.
 
 The script lives outside the package, so it is loaded by path. Bundles are built
 for a couple of years only; scripts/preflight.sh builds two years (2026-2027),
-and only the release process runs the full 2026-2039 build.
+and only the release process runs the full default build (2026-2036).
 """
 
 from __future__ import annotations
 
 import argparse
 import ast
+import datetime
 import gzip
 import hashlib
 import importlib.util
@@ -25,6 +26,7 @@ from pathlib import Path
 import pytest
 
 import calmoji
+from calmoji.calendar_phases import get_semester_phases
 from calmoji.cli import main as calmoji_main
 from calmoji.constants import MAX_BYTES_PER_FILE, MAX_EVENTS_PER_FILE
 from calmoji.ics_writer import IcsBudgetError
@@ -100,8 +102,21 @@ def test_parse_years_rejects_bad_input(spec):
         bb.parse_years(spec)
 
 
-def test_default_years_cover_the_published_range():
-    assert bb.parse_years(bb.DEFAULT_YEARS) == list(range(2026, 2040))
+def test_default_years_are_2026_to_2036():
+    assert bb.DEFAULT_YEARS == "2026-2036"
+    assert bb.parse_years(bb.DEFAULT_YEARS) == list(range(2026, 2037))
+
+
+@pytest.mark.parametrize("alignment", ["academic", "calendar"])
+def test_default_years_end_where_proton_stops_accepting_events(alignment):
+    # Proton Calendar only accepts events up to the end of 2037.
+    limit = datetime.datetime(2038, 1, 1, tzinfo=datetime.timezone.utc)
+    last_default = bb.parse_years(bb.DEFAULT_YEARS)[-1]
+
+    assert get_semester_phases(last_default, alignment)[-1].end <= limit
+    # ...and the next year would not fit for 'academic', which is why the defaults stop here.
+    if alignment == "academic":
+        assert get_semester_phases(last_default + 1, alignment)[-1].end > limit
 
 
 def test_parse_alignments():

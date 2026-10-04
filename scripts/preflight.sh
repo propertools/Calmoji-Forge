@@ -118,7 +118,7 @@ gate "mypy calmoji" \
 
 step "Gate 9: release bundle is reproducible"
 # Build the bundle twice, for two years only (the release itself builds
-# 2026-2039), into two temporary directories. The archives must match byte
+# 2026-2036), into two temporary directories. The archives must match byte
 # for byte, and the manifest must verify.
 verify_manifest() {
     # Run from inside the bundle folder, as the bundle's own README tells users to.
