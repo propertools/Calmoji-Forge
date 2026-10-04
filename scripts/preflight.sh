@@ -113,7 +113,7 @@ gate "mypy calmoji" \
 
 step "Gate 9: bundle integrity"
 if [[ -f release-bundle/v0.1.0/MANIFEST.sha256 ]]; then
-    if (cd release-bundle/v0.1.0 && sha256sum -c MANIFEST.sha256 >/tmp/preflight-manifest.log 2>&1); then
+    if (cd release-bundle/v0.1.0 && if command -v sha256sum >/dev/null; then sha256sum -c MANIFEST.sha256; else shasum -a 256 -c MANIFEST.sha256; fi >/tmp/preflight-manifest.log 2>&1); then
         ok "all 1873 bundle entries verified against MANIFEST.sha256"
     else
         bad "manifest verification failed (see /tmp/preflight-manifest.log)"

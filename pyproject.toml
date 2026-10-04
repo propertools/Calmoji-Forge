@@ -7,7 +7,7 @@ name = "calmoji"
 version = "0.1.0"
 description = "Deterministic, UTC-fixed ritual calendar generator with EBI48 emoji time mapping."
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.9"
 license = { text = "MIT" }
 authors = [
     { name = "Trey Darley", email = "trey@propertools.be" },
@@ -35,6 +35,8 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -100,7 +102,7 @@ exclude_lines = [
 ]
 
 [tool.ruff]
-target-version = "py311"
+target-version = "py39"
 line-length = 120
 
 [tool.ruff.lint]
@@ -115,6 +117,11 @@ select = [
 ]
 ignore = [
     "E501",  # line length handled by black/formatter
+    # Keep typing.List / Optional style; calmoji supports Python 3.9.
+    "UP006",
+    "UP007",
+    "UP035",
+    "UP045",
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -122,10 +129,9 @@ ignore = [
 
 [tool.black]
 line-length = 120
-target-version = ["py311", "py312", "py313"]
+target-version = ["py39", "py310", "py311", "py312", "py313"]
 
 [tool.mypy]
-python_version = "3.11"
 strict = true
 warn_unused_configs = true
 warn_redundant_casts = true

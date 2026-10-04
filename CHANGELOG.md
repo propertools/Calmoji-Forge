@@ -25,10 +25,14 @@ audit.
 - Console script `calmoji` and module entry point `python -m calmoji`.
 - `--version` flag sourced from package metadata via `importlib.metadata`.
 - `py.typed` marker for downstream type checkers.
-- Continuous integration on Python 3.11, 3.12, and 3.13 (ruff, black,
-  mypy, pytest with branch coverage).
+- Runs on Python 3.9 and newer, including the `python3` that ships with
+  macOS, with no third-party runtime dependencies.
+- Continuous integration: pytest with branch coverage on Python 3.9
+  through 3.13, ruff/black/mypy against the 3.9 floor, and a no-install
+  run on the stock macOS `python3`.
 - A determinism check in CI that runs the generator twice with identical
-  inputs and diffs the outputs byte-for-byte.
+  inputs, and on both Python 3.9 and 3.13, and diffs the outputs
+  byte-for-byte.
 - `SECURITY.md` describing the coordinated-disclosure policy.
 - `CHANGELOG.md` (this file).
 - Pre-generated `.ics` artifact bundle covering 2026–2039 in both

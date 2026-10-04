@@ -4,7 +4,7 @@
 
 [![CI](https://github.com/propertools/Calmoji-Forge/actions/workflows/ci.yml/badge.svg)](https://github.com/propertools/Calmoji-Forge/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 
 > A symbolic scheduling engine built on UTC discipline, exclusive time semantics, and deterministic emoji clocks.
 
@@ -256,10 +256,19 @@ git clone https://github.com/propertools/Calmoji-Forge.git
 cd Calmoji-Forge
 ```
 
-Install (editable, with dev extras):
+Generate. Nothing to install, no third-party packages: any Python 3.9
+or newer works, including the `python3` that ships with macOS.
 
 ```bash
-pip install -e '.[dev]'
+python3 calmoji.py --year=2039
+```
+
+Optionally, install it as a package to get a `calmoji` command:
+
+```bash
+pip install -e .
+calmoji --year=2039
+python3 -m calmoji --year=2039
 ```
 
 Or install directly from GitHub without cloning:
@@ -268,13 +277,8 @@ Or install directly from GitHub without cloning:
 pip install 'calmoji @ git+https://github.com/propertools/Calmoji-Forge.git'
 ```
 
-Generate (either form works once installed):
-
-```bash
-calmoji --year=2039
-python -m calmoji --year=2039
-python3 calmoji.py --year=2039   # legacy entry point, still supported
-```
+Working on calmoji itself? `pip install -e '.[dev]'` adds the test,
+lint and type-check tools.
 
 Preview only:
 
@@ -291,7 +295,7 @@ Disable layers:
 ```
 
 Reproducibility note: the same `--year` and `--calendar-alignment` always
-produce byte-identical output. CI verifies this on every commit. So if
+produce byte-identical output. CI verifies this on every commit, across Python versions. So if
 you regenerate `2030 / academic` locally, you should get exactly the
 files we shipped. If you don't, that's a bug — please open an issue.
 

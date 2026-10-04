@@ -1,5 +1,7 @@
 # tests/test_2039.py
 
+from __future__ import annotations
+
 import datetime
 
 from calmoji.calendar_phases import get_semester_phases

@@ -1,10 +1,12 @@
 # tests/test_config.py
 
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 
 from calmoji.calendar_config import get_year_start_date
 from calmoji.calendar_phases import get_semester_phases
 from calmoji.types import Phase
+
+UTC = timezone.utc
 
 
 def _academic_anchor_year_for_today(today: datetime) -> int:
