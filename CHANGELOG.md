@@ -9,6 +9,12 @@ they do.
 
 ## [Unreleased]
 
+### Changed
+
+- README rewritten for people using the calendars, with known limitations and a v0.2 roadmap.
+- New `docs/PLAYBOOK.md` describing the layered calendar pattern (replaces `CALENDAR_SYSTEM.md`).
+- The v0.1.0 release also offers a `.zip`, and the bundle's own README no longer points at ebi48.org.
+
 ## [0.1.0] — 2026-10-04
 
 First public release. The engine has been in private use for some time;

@@ -53,7 +53,7 @@ backports to earlier tags.
 
 - The Python package `calmoji` and its CLI.
 - The pre-generated `.ics` artifact bundle distributed alongside tagged
-  releases (e.g. on GitHub Releases or via [ebi48.org](https://ebi48.org)).
+  releases (on GitHub Releases).
 - The EBI48 emoji-to-time mapping table in `calmoji/ebi48.py`.
 
 ## Out of scope
