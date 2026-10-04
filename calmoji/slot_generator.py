@@ -18,7 +18,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Iterable, List, Set
 
 from calmoji.ebi48 import get_emoji_for_time
-from calmoji.meeting_slots import MEETING_SLOTS
+from calmoji.meeting_slots import MEETING_SLOTS, describe_slot
 from calmoji.types import Event, Phase
 
 UTC = timezone.utc
@@ -43,7 +43,6 @@ class MeetingSlot:
     start_minute: int
     end_hour: int
     end_minute: int
-    local_desc: str
 
 
 def is_valid_slot_day(city: str, weekday: int) -> bool:
@@ -76,8 +75,8 @@ def _slots_from_config() -> List[MeetingSlot]:
     """Parse MEETING_SLOTS config into typed MeetingSlot objects."""
     slots: List[MeetingSlot] = []
     for raw in MEETING_SLOTS:
-        city, sh, sm, eh, em, desc = raw
-        slots.append(MeetingSlot(city, sh, sm, eh, em, desc))
+        city, sh, sm, eh, em = raw
+        slots.append(MeetingSlot(city, sh, sm, eh, em))
     return slots
 
 
@@ -129,8 +128,13 @@ def generate_meeting_slots(
 
             emoji, face_name = get_emoji_for_time(start_dt)
 
-            summary = f"{s.city} {emoji} {face_name} Slot ({s.local_desc})"
-            description = f"{phase.emoji} — {phase.name}"
+            # No local time in the title: the calendar app shows the time. The
+            # description says when the slot falls locally, summer and winter.
+            summary = f"{s.city} {emoji} {face_name} Slot"
+            description = (
+                f"{describe_slot(s.city, s.start_hour, s.start_minute, s.end_hour, s.end_minute)}\n"
+                f"{phase.emoji} — {phase.name}"
+            )
 
             events.append(
                 Event(
