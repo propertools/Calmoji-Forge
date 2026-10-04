@@ -9,6 +9,75 @@ they do.
 
 ## [Unreleased]
 
+## [0.1.2] — YYYY-MM-DD
+
+**The calendar files are unchanged.** v0.1.2 produces byte-for-byte the same
+`.ics` files as v0.1.1, so there is nothing to re-import. It hardens the
+Python API and the command line, and corrects the docs, after an external
+review.
+
+### Fixed
+
+- **Every TEXT value is now escaped** as RFC 5545 §3.3.11 requires: `\`, `;`,
+  `,` and line breaks. Before, only newlines in `DESCRIPTION` were, and
+  `SUMMARY` wasn't escaped at all, so an event titled
+  `"Hello\nATTENDEE:mailto:x@example.com"` injected a second property.
+  `SUMMARY`, `DESCRIPTION`, `COMMENT`, `NAME` and `X-WR-CALNAME` all go
+  through the new `escape_ics_text()`; `UID` and `RRULE` aren't text, so a
+  line break in either is rejected instead. calmoji's own text never
+  contained a backslash, semicolon or comma, and its newlines were already
+  escaped, which is why the files don't change.
+- **Unknown alignments raise.** `get_year_start_date(2027, "acadmeic")` used
+  to fall back to `academic` silently. It now raises `ValueError` naming the
+  bad value and listing the valid ones.
+- **A stricter `Event`.** A timed event whose end isn't after its start
+  raises. All-day events follow one documented rule: an end at midnight is
+  exclusive; an end with a time of day means "through that date", so it
+  becomes the next midnight (08:00 to 23:00 on one date is a one-day all-day
+  event, which used to raise); an end date before the start date raises.
+- **`--version` works from a source checkout.** `python3 calmoji.py --version`
+  in a clone that isn't installed printed `calmoji 0.0.0+local`. It now reads
+  the version from the `pyproject.toml` next to the package, and keeps
+  `0.0.0+local` only if that file can't be found or read.
+
+### Changed
+
+- **Output folders never mix runs.** `--output-dir` now defaults to
+  `output/<year>/<alignment>/` (it was `output/`); an explicit `--output-dir`
+  is used as given. calmoji writes a small `.calmoji-output` marker into every
+  folder it fills, and only ever cleans a folder that has it. On a re-run it
+  replaces its own files (`focus/`, `meetings/`, the top-level `.ics` files)
+  and refuses, deleting nothing, if anything else is in the folder. A
+  non-empty folder without the marker is refused untouched, with a message
+  suggesting an empty folder or another `--output-dir`. Before, generating
+  2027 `academic` and then `calendar` into one folder left 20 monthly focus
+  files, and re-running with `--no-meetings` left the old `meetings/` behind.
+  `--dry-run` never touches the filesystem, and macOS's `.DS_Store` is
+  ignored. The release bundle doesn't contain the marker.
+
+### Removed
+
+- **The placeholder alignments `chinese_lunar` and `islamic_hijri`.** They
+  were a fixed 10 February and a fixed 7 July, not real calendars, but the
+  command line offered them as if they were. They may return later,
+  implemented properly.
+
+### Documentation
+
+- The README no longer says `scripts/preflight.sh` runs every check CI runs:
+  preflight runs CI's main checks on your machine, and CI also tests Python
+  3.9 through 3.13, compares output across Python versions, and runs on stock
+  macOS. It documents the new output folder, names the download by pattern
+  (`calmoji-artifacts-vX.Y.Z.zip`) so it needs no edit each release, and
+  explains that `DTSTAMP` is a fixed, documented constant so files stay
+  reproducible.
+- `CONTRIBUTING.md`'s roadmap no longer lists finished work, and its
+  "coverage of at least 90%" is now enforced (`fail_under = 90`; total branch
+  coverage is 94%). `TEST_STRATEGY.md` drops Codecov, calls the per-module
+  numbers targets rather than gates, and lists only the gates CI really has.
+- `scripts/preflight.sh` suggests the release steps, not `gh pr create`, when
+  it runs on `main`.
+
 ## [0.1.1] — 2026-10-04
 
 **Upgrading from v0.1.0: delete the old calmoji calendars and import fresh.**
@@ -155,6 +224,7 @@ audit.
 - No known security issues at the time of this release. Reporting channel
   documented in `SECURITY.md`.
 
-[Unreleased]: https://github.com/propertools/Calmoji-Forge/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/propertools/Calmoji-Forge/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/propertools/Calmoji-Forge/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/propertools/Calmoji-Forge/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/propertools/Calmoji-Forge/releases/tag/v0.1.0
