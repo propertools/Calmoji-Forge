@@ -9,7 +9,7 @@ they do.
 
 ## [Unreleased]
 
-## [0.1.2] — YYYY-MM-DD
+## [0.1.2] — 2026-10-04
 
 **The calendar files are unchanged.** v0.1.2 produces byte-for-byte the same
 `.ics` files as v0.1.1, so there is nothing to re-import. It hardens the
