@@ -63,6 +63,13 @@ Core modules must remain import-safe and side-effect-free.
 * [ ] Harden malformed config parsing
 * [ ] Guard against malformed phase definitions
 * [ ] Validate user-supplied year bounds
+* [ ] **v0.1.3:** `unfold_ics_lines` uses `str.splitlines()`, which also
+  splits on characters iCalendar doesn't treat as line breaks (such as
+  U+2028 and U+0085). Split on CRLF only. This matters only for reading
+  files back in, not for writing them.
+* [ ] **v0.1.3:** RFC 5545 doesn't allow most control characters in TEXT
+  values, so `escape_ics_text` should reject them (raise `ValueError`)
+  instead of passing them through.
 
 Calmoji should fail loudly and clearly — never silently drift.
 

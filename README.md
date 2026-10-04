@@ -303,6 +303,15 @@ for v0.2, in no promised order:
 * **Releases built automatically** from a git tag, with byte-identical
   output checked in CI.
 
+Small fixes planned for v0.1.3 (they touch only the Python API, not the
+calendar files):
+
+* **Reading `.ics` files back in** (`unfold_ics_lines`) splits lines on more
+  characters than the iCalendar format does. It doesn't affect the files
+  calmoji writes.
+* **Control characters in text.** RFC 5545 doesn't allow most of them in text
+  values, so the escaper should reject them.
+
 Ideas and calendar-app quirks are very welcome in
 [issues](https://github.com/propertools/Calmoji-Forge/issues).
 

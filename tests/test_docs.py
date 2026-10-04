@@ -333,3 +333,17 @@ def test_the_readme_points_at_the_steward_section_and_the_anchor_resolves():
     slugs = [github_slug(h) for h in headings]
     assert slugs.count("optional-an-ai-agenda-steward") == 1
     assert github_slug(STEWARD_HEADING) == "optional-an-ai-agenda-steward"
+
+
+def test_the_v0_1_3_todos_are_written_down_where_future_work_lives():
+    readme = " ".join(read("README.md").split())
+    contributing = " ".join(read("CONTRIBUTING.md").split())
+
+    assert "Small fixes planned for v0.1.3" in readme
+    assert "`unfold_ics_lines`) splits lines on more characters than the iCalendar format does" in readme
+    assert "RFC 5545 doesn't allow most of them in text values, so the escaper should reject them" in readme
+
+    assert "**v0.1.3:** `unfold_ics_lines` uses `str.splitlines()`" in contributing
+    assert "**v0.1.3:** RFC 5545 doesn't allow most control characters in TEXT values" in contributing
+    # the existing roadmap entries are still there
+    assert "Subscribable calendars" in readme and "Atomic file writes" in contributing
