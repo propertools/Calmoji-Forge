@@ -2,6 +2,9 @@
 
 This document defines coverage targets and testing principles for the **Calmoji** timekeeping engine.
 
+The per-module numbers below are **targets**, not gates. The only coverage gate CI
+enforces is the 90% total (see "What CI enforces").
+
 Our goal is not vanity metrics.
 
 We do not chase 100% coverage for optics.
@@ -32,8 +35,13 @@ The engine must remain mathematically stable across time.
 | `monthly.py`             | 90%+            | Month bucketing and file naming       |
 | CLI layer (when present) | 80%+            | I/O wrapper, lower criticality        |
 
-Core deterministic layers must approach total coverage.
+Core deterministic layers should approach total coverage.
 Presentation and CLI layers may tolerate minor gaps.
+
+Some modules are below their target today (for example, the helper functions in
+`ebi48.py` beyond the mapping lookups, and a few branches in `utils.py`). Run
+`pytest --cov=calmoji --cov-branch --cov-report=term-missing` to see the current
+numbers.
 
 ---
 
@@ -60,8 +68,9 @@ Presentation and CLI layers may tolerate minor gaps.
 
 ### 3️⃣ RFC 5545 Compliance
 
-* ICS line folding must respect 75-character limits
+* ICS line folding must respect the 75-octet limit (octets, not characters)
 * Unfolding must properly reconstruct logical lines
+* TEXT values (summaries, descriptions, comments, calendar names) must be escaped, so no value can inject a property
 * UID format must be stable and parseable
 * All timestamps must be UTC-normalized
 
@@ -102,28 +111,27 @@ We test the glyph layer because it encodes meaning.
 
 * `pytest`
 * `pytest-cov` (branch coverage enabled)
-* `mypy` (strict mode recommended)
+* `mypy` (strict mode)
 * `ruff`
 * `black`
-* GitHub Actions CI
-* Codecov for trend tracking
-
-CI enforces:
-
-* Full test pass
-* Coverage thresholds
-* Branch coverage on core logic
+* GitHub Actions CI (it uploads `coverage.xml` as a build artifact)
 
 ---
 
-## 🧱 CI Thresholds
+## 🧱 What CI enforces
 
 CI fails if:
 
-* Global coverage drops below **90%**
-* Any critical deterministic module drops below **95%**
-* Branch coverage regresses on core logic
-* Deterministic tests begin relying on local timezone behavior
+* Any test fails (on Python 3.9 through 3.13)
+* Total coverage, measured with branch coverage, drops below **90%**
+  (`fail_under` in `pyproject.toml`)
+* `ruff`, `black --check` or `mypy calmoji` fail
+* A sample year generated twice, and on Python 3.9 and 3.13, isn't byte-identical
+* The package can't generate a year, or its test suite fails, on the stock macOS `python3`
+
+Nothing else is gated. In particular there is no per-module coverage floor and no
+automatic check that tests avoid local-timezone behaviour; those are targets and
+review practice.
 
 ---
 

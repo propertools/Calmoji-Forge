@@ -26,7 +26,8 @@ anything else that speaks the iCalendar standard.
 
 Download the ready-made calendars for **2026–2036** from the
 [latest release](https://github.com/propertools/Calmoji-Forge/releases/latest):
-grab **`calmoji-artifacts-v0.1.1.zip`** and unzip it.
+grab **`calmoji-artifacts-vX.Y.Z.zip`** (X.Y.Z is the release's version
+number) and unzip it.
 
 Inside, pick an alignment and stick with it:
 
@@ -204,7 +205,11 @@ math, no off-by-one errors, clean boundaries, and deterministic tests.
 
 Stable UIDs, stable emoji mappings, stable file structure. The same inputs
 always produce byte-identical files, on any machine and any supported
-Python version. CI checks this on every commit.
+Python version. CI checks this on every commit: it generates a sample year
+twice, and on Python 3.9 and 3.13, and compares the files byte for byte.
+
+Even `DTSTAMP`, which RFC 5545 requires on every event, is a fixed,
+documented constant rather than "now", so that files stay reproducible.
 
 ---
 
@@ -225,6 +230,12 @@ newer works, including the `python3` that ships with macOS.
 python3 calmoji.py --year=2027 --calendar-alignment=academic
 ```
 
+By default the files go to `output/<year>/<alignment>/`, so different years
+and alignments never mix. calmoji only writes into a folder that is empty or
+that it made itself (it leaves a `.calmoji-output` file there), and re-running
+replaces its own files in that folder. Any other non-empty folder is refused,
+untouched.
+
 Alignments: `academic`, `calendar`, `fiscal_us`, `fiscal_eu`,
 `japanese_school`, `indian_fiscal`.
 
@@ -232,7 +243,7 @@ Options:
 
 ```bash
 --year=YYYY          # required
---output-dir=DIR     # default: output/
+--output-dir=DIR     # default: output/<year>/<alignment>/
 --dry-run            # preview what would be written, month by month
 --no-meetings        # skip meeting slots
 --no-focus           # skip focus blocks
@@ -240,10 +251,11 @@ Options:
 --include-oceania    # add Auckland meeting slots
 ```
 
-Output for one year:
+Output for one year (the files are in `output/2027/academic/` here):
 
 ```
-output/
+output/2027/academic/
+├── .calmoji-output                     ← marks the folder as calmoji's
 ├── seasons_2027.ics
 ├── emoji_clock_2027.ics
 ├── focus/
@@ -264,8 +276,10 @@ calmoji --year=2027
 ```
 
 Working on calmoji itself? `python3 -m pip install -e '.[dev]'` adds the
-test, lint and type-check tools, and `bash scripts/preflight.sh` runs every
-check CI runs.
+test, lint and type-check tools, and `bash scripts/preflight.sh` runs CI's
+main checks on your machine (tests with coverage, ruff, black, mypy) plus a
+reproducible release-bundle build. CI also tests Python 3.9 through 3.13,
+compares output across Python versions, and runs on stock macOS.
 
 If you regenerate a year we publish and get a different file, that's a
 bug. Please open an issue.
