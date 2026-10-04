@@ -22,7 +22,7 @@ import pytest
 from calmoji.calendar_config import get_year_start_date
 from calmoji.calendar_phases import get_semester_phases
 from calmoji.cli import main
-from calmoji.constants import CALNAME_FOCUS, CALNAME_MEETINGS
+from calmoji.constants import CALNAME_FOCUS, CALNAME_MEETINGS, OUTPUT_MARKER_NAME
 from calmoji.focus_blocks_config import FOCUS_BLOCKS
 from calmoji.meeting_slots import MEETING_SLOTS
 from tests.ics_helpers import Ics, header_lines, is_all_day, read_events, start_of
@@ -31,6 +31,7 @@ UTC = datetime.timezone.utc
 DAY = datetime.timedelta(days=1)
 
 ALIGNMENTS = ["academic", "calendar"]
+MARKER = OUTPUT_MARKER_NAME
 YEARS = [2026, 2027, 2028, 2029]
 BLOCKS_PER_DAY = len(FOCUS_BLOCKS)
 MONTH_FILE_RE = re.compile(r"^(focus|meetings)_(\d{4})-(\d{2})\.ics$")
@@ -96,7 +97,7 @@ def all_events(outdir: Path, kind: str) -> List[Tuple[str, Ics]]:
 def test_layout(outputs, alignment, year):
     outdir = outputs[(alignment, year)]
     top = sorted(p.name for p in outdir.iterdir())
-    assert top == sorted([f"emoji_clock_{year}.ics", "focus", "meetings", f"seasons_{year}.ics"])
+    assert top == sorted([MARKER, f"emoji_clock_{year}.ics", "focus", "meetings", f"seasons_{year}.ics"])
 
     assert sorted(p.name for p in (outdir / "focus").iterdir()) == [
         f"focus_{m}.ics" for m in months_of_year(year, alignment)
@@ -309,12 +310,12 @@ def test_dry_run_shows_a_dash_for_a_layer_that_is_switched_off(tmp_path, capsys)
 
 def test_no_focus_flag_skips_the_focus_folder(tmp_path):
     run_cli(tmp_path, 2027, "academic", "--no-focus", "--no-meetings", "--no-ebi48")
-    assert sorted(p.name for p in tmp_path.iterdir()) == ["seasons_2027.ics"]
+    assert sorted(p.name for p in tmp_path.iterdir()) == [MARKER, "seasons_2027.ics"]
 
 
 def test_no_meetings_flag_skips_the_meetings_folder(tmp_path):
     run_cli(tmp_path, 2027, "academic", "--no-meetings", "--no-ebi48")
-    assert sorted(p.name for p in tmp_path.iterdir()) == ["focus", "seasons_2027.ics"]
+    assert sorted(p.name for p in tmp_path.iterdir()) == [MARKER, "focus", "seasons_2027.ics"]
 
 
 def test_include_oceania_adds_auckland(tmp_path):
