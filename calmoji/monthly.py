@@ -18,6 +18,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, Iterable, List, NamedTuple
 
+from calmoji.filenames import monthly_filename
 from calmoji.ics_writer import write_events_to_ics
 from calmoji.types import Event
 
@@ -50,7 +51,7 @@ def write_monthly_files(events: Iterable[Event], directory: Path, prefix: str, c
     """
     written: List[Path] = []
     for key, month_events in bucket_by_month(events).items():
-        path = directory / f"{prefix}_{key}.ics"
+        path = directory / monthly_filename(prefix, key)
         write_events_to_ics(month_events, path, calname=calname)
         written.append(path)
     return written

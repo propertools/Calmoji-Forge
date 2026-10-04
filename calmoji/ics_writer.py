@@ -15,6 +15,7 @@ from calmoji.constants import (
     MAX_EVENTS_PER_FILE,
 )
 from calmoji.ebi48 import get_emoji_for_time
+from calmoji.filenames import seasons_filename
 from calmoji.ics_text import escape_ics_text
 from calmoji.types import Event, Phase
 from calmoji.uid import generate_uid
@@ -191,7 +192,7 @@ def write_semester_blocks(phases: Sequence[Phase], filename: Optional[str] = Non
 
     if filename is None:
         anchor_year = phases[0].start.year if phases[0].start else "unknown"
-        filename = f"output/seasons_{anchor_year}.ics"
+        filename = f"output/{seasons_filename(anchor_year)}"
 
     events: list[Event] = []
     for phase in phases:
