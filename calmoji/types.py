@@ -25,6 +25,7 @@ from hashlib import sha256
 from typing import DefaultDict, List, Literal, Optional
 
 from calmoji.constants import DTSTAMP
+from calmoji.ics_text import escape_ics_text
 from calmoji.uid import generate_uid
 
 UTC = timezone.utc
@@ -33,6 +34,11 @@ UTC = timezone.utc
 # =============================================================================
 # Event
 # =============================================================================
+
+
+def _reject_line_breaks(name: str, value: Optional[str]) -> None:
+    if value is not None and ("\n" in value or "\r" in value):
+        raise ValueError(f"{name} must not contain a line break: {value!r}")
 
 
 @dataclass
@@ -101,8 +107,16 @@ class Event:
         return f"DTEND:{self.end.strftime('%Y%m%dT%H%M%SZ')}"
 
     def to_ics(self) -> list[str]:
-        summary = f"{self.emoji} {self.summary}" if self.emoji else self.summary
-        safe_description = self.description.replace("\n", "\\n").replace("\r", "")
+        """
+        Render this event as VEVENT content lines.
+
+        TEXT properties (SUMMARY, DESCRIPTION) are escaped per RFC 5545 §3.3.11, so no
+        value can inject a content line. UID and RRULE aren't TEXT, so they can't be
+        escaped; instead they must not contain a line break at all.
+        """
+        summary = escape_ics_text(f"{self.emoji} {self.summary}" if self.emoji else self.summary)
+        _reject_line_breaks("UID", self.uid)
+        _reject_line_breaks("RRULE", self.recurrence)
 
         lines: list[str] = [
             "BEGIN:VEVENT",
@@ -114,7 +128,7 @@ class Event:
         ]
 
         if self.description:
-            lines.append(f"DESCRIPTION:{safe_description}")
+            lines.append(f"DESCRIPTION:{escape_ics_text(self.description)}")
 
         if self.recurrence:
             rule = self.recurrence.strip()

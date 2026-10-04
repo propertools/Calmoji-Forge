@@ -15,6 +15,7 @@ from calmoji.constants import (
     MAX_EVENTS_PER_FILE,
 )
 from calmoji.ebi48 import get_emoji_for_time
+from calmoji.ics_text import escape_ics_text
 from calmoji.types import Event, Phase
 from calmoji.uid import generate_uid
 
@@ -35,13 +36,13 @@ def create_ics_header(
         "VERSION:2.0",
         "CALSCALE:GREGORIAN",
         "PRODID:-//Proper Tools SRL//calmoji//EN",
-        f"NAME:{full_name}",
-        f"X-WR-CALNAME:{full_name}",
+        f"NAME:{escape_ics_text(full_name)}",
+        f"X-WR-CALNAME:{escape_ics_text(full_name)}",
         "X-WR-TIMEZONE:UTC",
         "METHOD:PUBLISH",
     ]
     if comments:
-        lines.extend([f"COMMENT:{c}" for c in comments])
+        lines.extend([f"COMMENT:{escape_ics_text(c)}" for c in comments])
     return lines
 
 
@@ -262,9 +263,9 @@ def write_ebi48_layer(target_path: str | Path, year: int, alignment: str) -> Non
             emoji, label = get_emoji_for_time(start)
 
             description = (
-                f"{emoji} {label} — Canonical EBI48 time at {hour:02d}:{minute:02d} UTC\\n"
-                "This slot is part of the EBI48 symbolic clock.\\n"
-                "🕒 UTC only — times do not shift with local time.\\n"
+                f"{emoji} {label} — Canonical EBI48 time at {hour:02d}:{minute:02d} UTC\n"
+                "This slot is part of the EBI48 symbolic clock.\n"
+                "🕒 UTC only — times do not shift with local time.\n"
                 f"{EBI48_URL}"
             )
 
