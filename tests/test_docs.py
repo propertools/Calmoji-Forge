@@ -592,3 +592,16 @@ def test_the_readmes_short_origin_story_agrees_with_the_full_one_and_links_to_it
     assert "See [EBI48-README.md](EBI48-README.md)." in section
     assert "Instead of doing sums, you **pick a day and look for free animals at acceptable times**." in section
     assert len(section.split()) < 200  # the short version: the fuller story lives in EBI48-README.md
+
+
+def test_the_readme_says_why_the_blocks_are_96_minutes():
+    readme = read("README.md")
+    section = " ".join(readme[readme.index("### 🧠 Focus — Open") : readme.index("### 🕒 Meetings — Open")].split())
+    assert "Twelve 96-minute blocks a day" in section
+    assert (
+        "Why 96 minutes? It's four sides of an LP, so if you work to records, the flips keep time for you." in section
+    )
+    # a human touch, not a spec claim: it stays one sentence, and the arithmetic it relies on is real
+    assert section.count("Why 96 minutes?") == 1
+    assert "24-minute breather" in section
+    assert 96 + 24 == 120  # block + breather = the two-hour cadence the blocks start on
