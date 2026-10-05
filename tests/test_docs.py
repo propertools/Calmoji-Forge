@@ -201,7 +201,9 @@ def test_the_emoji_clock_section_and_where_ebi48_came_from():
 
     ebi48 = read("EBI48-README.md")
     assert ebi48.index("## 🗣 Where it came from") < ebi48.index("## 🧭 Why It Exists")
-    assert "**pick a day,\nfind free animals at acceptable times.**" in ebi48
+    # "pick a day and look for free animals" is now said once, in the introduction under the title
+    assert "you pick a day and\nlook for free animals at acceptable times." in ebi48
+    assert ebi48.count("free animals") == 1
 
 
 def test_bundle_readme_and_readme_explain_that_every_time_is_utc():
@@ -544,3 +546,49 @@ def test_the_0_1_3_changelog_has_the_new_sections_and_keeps_the_old_content():
         < section.index("### Fixed")
         < section.index("### Documentation")
     )
+
+
+# -----------------------------------------------------------------------------
+# EBI48-README: what the name stands for, and where it came from
+# -----------------------------------------------------------------------------
+
+
+def ebi48_intro() -> str:
+    text = read("EBI48-README.md")
+    return text[text.index("# 🧿 EBI48") : text.index("## 🌍 What Is EBI48?")]
+
+
+def test_ebi48_readme_spells_out_the_name_and_the_anchoring_right_under_the_title():
+    intro = " ".join(ebi48_intro().split())
+    assert 'EBI48 (Emoji-Based Interval 48, or simply "the Emoji Clock")' in intro
+    assert "🐶 is 00:05 UTC, 🦨 is 00:35 UTC" in intro
+    assert "anchored at :05 or :35 past the hour" in intro
+    assert "calendars show it as a 25-minute window, leaving a five-minute gap before the next" in intro
+    assert "EBI48 grew directly out of years of watching international calls burn their final ten minutes" in intro
+    assert "easy for a non-native speaker to say clearly over a bad line" in intro
+
+
+def test_the_emoji_used_in_the_ebi48_readme_example_anchoring_are_the_real_ones():
+    from datetime import datetime, timezone
+
+    from calmoji.ebi48 import get_emoji_for_time
+
+    assert get_emoji_for_time(datetime(2027, 1, 1, 0, 5, tzinfo=timezone.utc))[0] == "🐶"
+    assert get_emoji_for_time(datetime(2027, 1, 1, 0, 35, tzinfo=timezone.utc))[0] == "🦨"
+
+
+def test_ebi48_readme_does_not_say_the_same_thing_twice():
+    text = read("EBI48-README.md")
+    assert text.count("48 half-hour") <= 2  # the definition, and the intro
+    assert "EBI48 started on global technical standards calls" not in text  # now the introduction's job
+    assert text.count("pick a day") == 1
+    assert text.count("final ten minutes") + text.count("last ten minutes") == 2  # the story, then its example
+
+
+def test_the_readmes_short_origin_story_agrees_with_the_full_one_and_links_to_it():
+    readme = " ".join(read("README.md").split())
+    section = readme[readme.index("### 🧿 Emoji Clock") : readme.index("### ⚠️ Known limitations")]
+    assert "anchored at :05 and :35 UTC" in section  # same anchoring as EBI48-README
+    assert "See [EBI48-README.md](EBI48-README.md)." in section
+    assert "Instead of doing sums, you **pick a day and look for free animals at acceptable times**." in section
+    assert len(section.split()) < 200  # the short version: the fuller story lives in EBI48-README.md

@@ -9,8 +9,22 @@ layout: default
 > Time is precise.  
 > EBI48 makes it legible.
 
-EBI48 is a deterministic symbolic overlay for UTC time.  
-It divides every day into **48 half-hour segments** and assigns each segment a **unique emoji + label pair**.
+EBI48 (Emoji-Based Interval 48, or simply "the Emoji Clock") is a
+deterministic symbolic notation that assigns a stable emoji identifier to
+each of the 48 half-hour intervals in a UTC day. Each interval is anchored
+at :05 or :35 past the hour (🐶 is 00:05 UTC, 🦨 is 00:35 UTC, and so on),
+and calendars show it as a 25-minute window, leaving a five-minute gap
+before the next. The half-hour is a practical coordination granularity:
+precise enough for most collaborative scheduling, while keeping the daily
+symbol set small enough to learn and use.
+
+EBI48 grew directly out of years of watching international calls burn their
+final ten minutes working out when the next call should happen. I chose the
+emoji set carefully. Each one should be easy for a non-native speaker to say
+clearly over a bad line, in as few syllables as possible; unlikely to offend
+across cultures; and easy to tell apart at a glance, including for people
+with low vision. Instead of doing time-zone arithmetic, you pick a day and
+look for free animals at acceptable times.
 
 No randomness.  
 No timezone drift.  
@@ -44,10 +58,9 @@ Every symbol corresponds to exactly one half-hour.
 
 ## 🗣 Where it came from
 
-EBI48 started on global technical standards calls. Again and again,
-the last ten minutes went on cities, time zones and days of the week:
-Jane has carpool next Thursday, and is that before or after London
-changes its clocks?
+On those calls, the last ten minutes kept going on cities, time zones and
+days of the week: Jane has carpool next Thursday, and is that before or
+after London changes its clocks?
 
 That conversation makes everyone switch between the maths side of the
 brain and the language side, while also spending executive function on
@@ -56,8 +69,7 @@ half-hour. It's an expensive way to do something simple.
 
 EBI48 moves the work to the visual cortex, which is fast at this kind of
 thing. Each half-hour has an animal (or another face) that means the
-same moment for everyone. The conversation shrinks to: **pick a day,
-find free animals at acceptable times.**
+same moment for everyone.
 
 ---
 
