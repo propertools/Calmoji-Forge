@@ -237,7 +237,7 @@ def test_fold_does_not_care_where_it_splits_an_escape():
 
 def test_focus_block_descriptions_show_single_backslash_n_sequences():
     span = PhaseWeekSpan(start=datetime.datetime(2027, 3, 1, tzinfo=UTC), phase_name="p", week_index=0)
-    event = generate_focus_blocks_for_week(span, label="Semester A (Seed)", phase_emoji="🌱")[1]
+    event = generate_focus_blocks_for_week(span, label="Semester A (Seed)", phase_emoji="🌱")[0]
 
     assert "\n" in event.description and "\\" not in event.description  # builders use real newlines
     (line,) = [x for x in event.to_ics() if x.startswith("DESCRIPTION:")]

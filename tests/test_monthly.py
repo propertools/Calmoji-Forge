@@ -86,13 +86,9 @@ def test_no_event_is_written_twice(tmp_path):
     assert len(uids) == len(events) == len(set(uids))
 
 
-def test_month_rows_count_focus_blocks_glyph_keys_and_meeting_slots():
-    focus = [
-        event(2027, 9, 1, name="block"),
-        event(2027, 9, 2, name="block 2"),
-        event(2027, 9, 6, name="key", all_day=True),
-    ]
+def test_month_rows_count_focus_blocks_and_meeting_slots():
+    focus = [event(2027, 9, 1, name="block"), event(2027, 9, 2, name="block 2")]
     meetings = [event(2027, 9, 7, name="m1"), event(2027, 10, 1, name="m2")]
 
-    assert month_rows(focus, meetings) == [MonthRow("2027-09", 2, 1, 1), MonthRow("2027-10", 0, 0, 1)]
+    assert month_rows(focus, meetings) == [MonthRow("2027-09", 2, 1), MonthRow("2027-10", 0, 1)]
     assert month_rows([], []) == []

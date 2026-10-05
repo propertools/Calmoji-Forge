@@ -233,7 +233,6 @@ def write_ebi48_layer(target_path: str | Path, year: int, alignment: str) -> Non
       HH:05 or HH:35 UTC on the alignment's anchor date for the year.
     - Each repeats daily: RRULE:FREQ=DAILY;UNTIL=<next anchor minus one second>.
       No COUNT, so the repeat limit some calendar apps impose never applies.
-    - One all-day 🗝️ EBI48 Glyph Key event on the anchor date.
 
     EBI48 is UTC-fixed. It should not shift with local time.
     """
@@ -249,19 +248,6 @@ def write_ebi48_layer(target_path: str | Path, year: int, alignment: str) -> Non
     ]
 
     events: list[Event] = []
-
-    # All-day glyph key marker
-    events.append(
-        Event(
-            start=anchor,
-            end=anchor + datetime.timedelta(days=1),
-            summary="EBI48 Glyph Key",
-            description="Symbolic marker: this calendar encodes canonical EBI48 slot glyphs (UTC-fixed).",
-            emoji="🗝️",
-            all_day=True,
-            uid=generate_uid(dt=anchor, label="glyph-key", namespace="ebi48"),
-        )
-    )
 
     for hour in range(24):
         for minute in (5, 35):

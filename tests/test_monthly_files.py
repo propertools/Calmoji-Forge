@@ -198,16 +198,6 @@ def test_a_mid_month_anchor_splits_the_edge_month_between_two_folders(outputs, a
     assert month_days == {(first + i * DAY).date() for i in range((next_month - first).days)}
 
 
-def test_a_glyph_key_goes_by_its_date(outputs):
-    # Monday 2027-11-01 is the first of the month: its Glyph Key belongs in focus_2027-11, not October.
-    november = read_events(outputs[("academic", 2027)] / "focus" / "focus_2027-11.ics")
-    october = read_events(outputs[("academic", 2027)] / "focus" / "focus_2027-10.ics")
-    key_date = datetime.datetime(2027, 11, 1, tzinfo=UTC)
-    assert key_date.weekday() == 0
-    assert any(is_all_day(e) and start_of(e) == key_date for e in november)
-    assert not any(is_all_day(e) and start_of(e) == key_date for e in october)
-
-
 # -----------------------------------------------------------------------------
 # Focus blocks: clipped to phases, a full set every day, no duplicates
 # -----------------------------------------------------------------------------
@@ -221,18 +211,14 @@ def test_focus_blocks_cover_every_day_of_the_year_exactly_once(outputs, alignmen
     days = [anchor + i * DAY for i in range((next_anchor - anchor).days)]
 
     events = [e for _, e in all_events(outputs[(alignment, year)], "focus")]
-    blocks = [e for e in events if not is_all_day(e)]
-    starts = [start_of(e) for e in blocks]
+    assert not any(is_all_day(e) for e in events), "focus files hold timed blocks only"
+    starts = [start_of(e) for e in events]
     assert len(starts) == len(set(starts)), "a focus-block start time appears twice"
 
     per_day = Counter(s.date() for s in starts)
     assert sorted(per_day) == [d.date() for d in days]
     assert set(per_day.values()) == {BLOCKS_PER_DAY}
-
-    mondays = [d for d in days if d.weekday() == 0]
-    keys = [start_of(e) for e in events if is_all_day(e)]
-    assert sorted(keys) == mondays
-    assert len(events) == BLOCKS_PER_DAY * len(days) + len(mondays)
+    assert len(events) == BLOCKS_PER_DAY * len(days)
 
 
 @pytest.mark.parametrize("alignment", ALIGNMENTS)
@@ -302,19 +288,20 @@ def test_dry_run_prints_a_monthly_summary_and_writes_nothing(tmp_path, capsys):
     run_cli(outdir, 2027, "academic", "--dry-run")
 
     shown = capsys.readouterr().out
-    assert "Month" in shown and "Focus blocks" in shown and "Glyph Keys" in shown and "Meeting slots" in shown
+    assert "Month" in shown and "Focus blocks" in shown and "Meeting slots" in shown
+    assert "Glyph" not in shown
     rows = {m: line.split() for line in shown.splitlines() for m in re.findall(r"^(\d{4}-\d{2})\b", line)}
     assert sorted(rows) == months_of_year(2027, "academic")
-    assert rows["2027-09"] == ["2027-09", "360", "4", "264"]  # 30 days x 12, four Mondays
+    assert rows["2027-09"] == ["2027-09", "360", "264"]  # 30 days x 12
     assert rows["2028-02"][1] == str(29 * BLOCKS_PER_DAY)
-    assert re.search(r"^Total\s+4392\s+52\s+2674$", shown, re.M)
+    assert re.search(r"^Total\s+4392\s+2674$", shown, re.M)
     assert not outdir.exists(), "dry-run must not write files"
 
 
 def test_dry_run_shows_a_dash_for_a_layer_that_is_switched_off(tmp_path, capsys):
     run_cli(tmp_path / "out", 2027, "academic", "--dry-run", "--no-meetings")
     shown = capsys.readouterr().out
-    assert re.search(r"^2027-09\s+360\s+4\s+-$", shown, re.M)
+    assert re.search(r"^2027-09\s+360\s+-$", shown, re.M)
 
 
 def test_no_focus_flag_skips_the_focus_folder(tmp_path):

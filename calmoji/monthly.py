@@ -26,7 +26,6 @@ from calmoji.types import Event
 class MonthRow(NamedTuple):
     month: str
     focus_blocks: int
-    glyph_keys: int
     meeting_slots: int
 
 
@@ -58,7 +57,7 @@ def write_monthly_files(events: Iterable[Event], directory: Path, prefix: str, c
 
 
 def month_rows(focus_events: Iterable[Event], meeting_events: Iterable[Event]) -> List[MonthRow]:
-    """Per-month counts for --dry-run: focus blocks, Glyph Keys and meeting slots."""
+    """Per-month counts for --dry-run: focus blocks and meeting slots."""
     focus = bucket_by_month(focus_events)
     meetings = bucket_by_month(meeting_events)
 
@@ -68,8 +67,7 @@ def month_rows(focus_events: Iterable[Event], meeting_events: Iterable[Event]) -
         rows.append(
             MonthRow(
                 month=key,
-                focus_blocks=sum(1 for e in month_focus if not e.all_day),
-                glyph_keys=sum(1 for e in month_focus if e.all_day),
+                focus_blocks=len(month_focus),
                 meeting_slots=len(meetings.get(key, [])),
             )
         )

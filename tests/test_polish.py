@@ -112,7 +112,7 @@ def test_the_emoji_finder_finds_emoji_and_ignores_punctuation():
     assert emojis_in("🐶 Dog Face — EBI48") == ["🐶"]
     assert emojis_in("🐶 🐶 Dog Face") == ["🐶", "🐶"]
     assert emojis_in("❄️ Winter Break → 🌾") == ["❄", "🌾"]
-    assert emojis_in("Glyph Key — Semester A — 2027-W49") == []
+    assert emojis_in("Focus Block 1 — Semester A — 2027-W49") == []
 
 
 def test_no_summary_contains_the_same_emoji_twice(generated):
@@ -131,3 +131,29 @@ def test_generated_files_use_the_new_file_names(generated):
         assert (year_dir / f"seasons_{year}.ics").is_file()
         assert (year_dir / f"emoji_clock_{year}.ics").is_file()
         assert not list(year_dir.glob("semester_phases_*")) and not list(year_dir.glob("ebi48_layer_*"))
+
+
+KEY = "\U0001f5dd"  # the old marker's emoji; the variation selector after it doesn't matter here
+
+
+def test_no_generated_file_in_any_layer_contains_a_glyph_key(generated):
+    """The 🗝️ Glyph Key events were retired in v0.1.3: not in Seasons, Focus, Meetings or the Emoji Clock."""
+    layers = defaultdict(int)
+    for path in sorted(generated.rglob("*.ics")):
+        text = path.read_bytes().decode("utf-8").replace("\r\n ", "")  # unfold
+        assert "Glyph Key" not in text, f"{path.name} mentions a Glyph Key"
+        assert KEY not in text, f"{path.name} contains the key emoji"
+        layers[layer_of(path)] += 1
+
+    # all four layers were really scanned
+    assert set(layers) == {"phases", "focus", "meetings", "ebi48"}
+
+
+def test_the_code_no_longer_builds_glyph_keys():
+    from pathlib import Path
+
+    import calmoji
+
+    for source in Path(calmoji.__file__).parent.glob("*.py"):
+        text = source.read_text(encoding="utf-8")
+        assert "Glyph Key" not in text and KEY not in text, source.name

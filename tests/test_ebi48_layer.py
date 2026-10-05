@@ -32,11 +32,11 @@ def layer(request, tmp_path):
     return alignment, year, path, read_events(path)
 
 
-def test_48_timed_events_and_one_all_day_event(layer):
+def test_exactly_48_events_all_timed_and_all_recurring_daily(layer):
     _, _, _, events = layer
-    assert sum(1 for e in events if not is_all_day(e)) == 48
-    assert sum(1 for e in events if is_all_day(e)) == 1
-    assert len(events) == 49
+    assert len(events) == 48
+    assert not any(is_all_day(e) for e in events)
+    assert all(RULE_RE.match(e["RRULE"]) for e in events)
 
 
 def test_timed_events_start_on_the_anchor_date_at_5_and_35_past(layer):
@@ -55,15 +55,12 @@ def test_every_rule_is_exactly_daily_until_just_before_the_next_anchor(layer):
     alignment, year, _, events = layer
     next_anchor = get_year_start_date(year + 1, alignment)
 
-    for e in (e for e in events if not is_all_day(e)):
+    for e in events:
         match = RULE_RE.match(e["RRULE"])
         assert match, e["RRULE"]
         until = datetime.datetime.strptime(match.group(1), "%Y%m%dT%H%M%SZ").replace(tzinfo=UTC)
         assert until == next_anchor - datetime.timedelta(seconds=1)
         assert until < next_anchor
-
-    # the glyph key does not repeat
-    assert not any("RRULE" in e for e in events if is_all_day(e))
 
 
 def test_the_clock_covers_every_day_of_the_year(layer):
@@ -91,13 +88,11 @@ def test_summary_shows_the_emoji_once_and_matches_the_table(layer):
         assert event["SUMMARY"].count(emoji) == 1
 
 
-def test_one_glyph_key_on_the_anchor_date(layer):
-    alignment, year, _, events = layer
-    keys = [e for e in events if is_all_day(e)]
-    assert len(keys) == 1
-    assert keys[0]["SUMMARY"] == "🗝️ EBI48 Glyph Key"
-    assert start_of(keys[0]) == get_year_start_date(year, alignment)
-    assert end_of(keys[0]) - start_of(keys[0]) == datetime.timedelta(days=1)
+def test_there_is_no_glyph_key(layer):
+    _, _, path, events = layer
+    text = path.read_bytes().decode("utf-8").replace("\r\n ", "")
+    assert "Glyph Key" not in text and "\U0001f5dd" not in text
+    assert not any("Glyph" in e["SUMMARY"] for e in events)
 
 
 def test_calendar_name_and_reference_link(layer):
