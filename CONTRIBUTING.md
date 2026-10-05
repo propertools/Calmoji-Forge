@@ -63,6 +63,11 @@ Core modules must remain import-safe and side-effect-free.
 * [ ] Harden malformed config parsing
 * [ ] Guard against malformed phase definitions
 * [ ] Validate user-supplied year bounds
+* [ ] A strict, well-specified input reader (later, and not in v0.1.x).
+  calmoji only writes `.ics` today. Files from elsewhere are untrusted input:
+  a reader should accept exactly one well-defined shape and reject the rest,
+  with resource limits, and with its own threat model in `SECURITY.md` before
+  the work begins.
 
 Calmoji should fail loudly and clearly — never silently drift.
 

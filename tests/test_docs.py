@@ -605,3 +605,29 @@ def test_the_readme_says_why_the_blocks_are_96_minutes():
     assert section.count("Why 96 minutes?") == 1
     assert "24-minute breather" in section
     assert 96 + 24 == 120  # block + breather = the two-hour cadence the blocks start on
+
+
+def test_the_roadmap_states_the_intent_for_a_strict_input_reader_without_sensationalism():
+    readme = " ".join(read("README.md").split())
+    roadmap = readme[readme.index("## 📍 Roadmap") : readme.index("## 🧪 Test discipline")]
+    assert "Further out, and explicitly not in v0.1.x:" in roadmap
+    assert "**A strict, well-specified input reader.**" in roadmap
+    assert "calmoji only writes `.ics` today." in roadmap
+    assert "untrusted input" in roadmap
+    assert "recognise exactly the shape it accepts and reject anything else, rather than guessing" in roadmap
+    assert "predictable, boring, interoperable behaviour" in roadmap
+    assert "resource limits and its own threat model in [`SECURITY.md`](SECURITY.md) when the work begins" in roadmap
+    # a statement of intent: no exploit examples, payloads or catalogue of tricks
+    entry = roadmap[roadmap.index("**A strict, well-specified input reader.**") :]
+    for word in ("exploit", "payload", "CVE", "injection", "smuggl", "bypass", "attack"):
+        assert word not in entry.lower(), word
+    # the v0.2 items are still there, and the reader is not among them
+    assert roadmap.index("Releases built automatically") < roadmap.index("A strict, well-specified input reader")
+
+
+def test_contributing_mirrors_the_strict_reader_one_liner_in_its_roadmap():
+    text = " ".join(read("CONTRIBUTING.md").split())
+    roadmap = text[text.index("# 🔧 Roadmap") : text.index("# 🧪 Testing Standards")]
+    assert "A strict, well-specified input reader (later, and not in v0.1.x)." in roadmap
+    assert "threat model in `SECURITY.md`" in roadmap
+    assert "Atomic file writes" in roadmap  # neighbours untouched

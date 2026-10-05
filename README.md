@@ -381,6 +381,16 @@ for v0.2, in no promised order:
 * **Releases built automatically** from a git tag, with byte-identical
   output checked in CI.
 
+Further out, and explicitly not in v0.1.x:
+
+* **A strict, well-specified input reader.** calmoji only writes `.ics`
+  today. A reader is a bigger, careful piece of work: calendar files arriving
+  from elsewhere are untrusted input, and a safe reader should recognise
+  exactly the shape it accepts and reject anything else, rather than guessing
+  at malformed or ambiguous input. The aim is predictable, boring,
+  interoperable behaviour, with resource limits and its own threat model in
+  [`SECURITY.md`](SECURITY.md) when the work begins.
+
 Ideas and calendar-app quirks are very welcome in
 [issues](https://github.com/propertools/Calmoji-Forge/issues).
 
