@@ -303,7 +303,9 @@ def test_readme_is_filled_in_and_describes_the_monthly_layout(built):
     assert "focus_<YYYY-MM>.ics" in text and "meetings_<YYYY-MM>.ics" in text
     assert "Months are in **UTC**" in text
     assert f"under {MAX_EVENTS_PER_FILE} events and {MAX_BYTES_PER_FILE // 1024} KB" in text
-    assert "Proton accepts events only up to 2037" in text
+    assert "Proton Calendar accepts events only up to the end of 2037" in text
+    assert "Proton users can use 2026–2036, plus 2037 in the `calendar` alignment" in " ".join(text.split())
+    assert "stops at 2036" not in text
     assert "Start with this month and next" in text
     assert "Upgrading from v0.1.0" in text
     assert "fixed in UTC all year" in text and "every day" in text

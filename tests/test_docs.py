@@ -45,10 +45,14 @@ def test_readme_states_the_size_budget_from_the_constants():
     assert f"under {MAX_EVENTS_PER_FILE} events and {MAX_BYTES_PER_FILE // 1024} KB" in read("README.md")
 
 
-def test_readme_covers_the_bundle_years_and_why():
-    text = read("README.md")
-    assert "**2026–2036**" in text
-    assert "Proton accepts events only up to 2037" in text
+def test_readme_covers_the_bundle_years_and_states_protons_limit_precisely():
+    text = " ".join(read("README.md").split())
+    assert "ready-made calendars for **2026–2039**" in text
+    assert "**2026–2036**" not in text
+    assert "Proton Calendar accepts events only up to the end of 2037." in text
+    assert "Proton users can use the 2026–2036 folders, plus 2037 in the `calendar` alignment." in text
+    assert "2037 `academic` runs into 2038, and 2038–2039 are past Proton's limit." in text
+    assert "Every other app should take them all" in text
 
 
 def test_readme_has_the_upgrade_note_and_the_monthly_tips():
@@ -428,3 +432,63 @@ def test_the_changelog_says_who_could_have_been_affected_and_who_could_not():
     for tool in ("ChatGPT", "Claude", "Codex", "Copilot", "Gemini", "GPT"):
         assert tool not in section
     assert "[0.1.3]: https://github.com/propertools/Calmoji-Forge/compare/v0.1.2...v0.1.3" in text
+
+
+# -----------------------------------------------------------------------------
+# v0.1.3: year-2038 section, Proper Tools, no Glyph Keys
+# -----------------------------------------------------------------------------
+
+YEAR_2038_HEADING = "### 🕰 Testing for the year-2038 problem"
+YEAR_2038_ANCHOR = "#-testing-for-the-year-2038-problem"
+
+
+def year_2038_section() -> str:
+    text = read("README.md")
+    start = text.index(YEAR_2038_HEADING)
+    return text[start : text.index("\n---\n", start)]
+
+
+def test_the_year_2038_section_has_a_stable_linkable_heading():
+    readme = read("README.md")
+    assert readme.splitlines().count(YEAR_2038_HEADING) == 1
+    headings = [line for line in readme.splitlines() if line.startswith("#")]
+    slugs = [github_slug(h) for h in headings]
+    assert slugs.count("-testing-for-the-year-2038-problem") == 1
+    assert f"({YEAR_2038_ANCHOR})" in readme  # linked from the Proton tip
+    assert YEAR_2038_ANCHOR in read("scripts/bundle_README.md.in")  # and from the bundle README
+
+
+def test_the_year_2038_section_says_what_to_import_and_what_to_report():
+    section = " ".join(year_2038_section().split())
+    assert "signed 32-bit number of seconds since 1970" in section
+    assert "03:14:07 UTC on 19 January 2038" in section
+    assert "`2038/calendar/focus/focus_2038-01.ics`" in section
+    assert "`2037/academic/emoji_clock_2037.ics`" in section
+    assert "🧪 Sandbox calendar" in section
+    assert "Events missing, at the wrong time, or an import error mean the app has a problem." in section
+    assert "[open an issue](https://github.com/propertools/Calmoji-Forge/issues)" in section
+    assert "its version and what you saw" in section
+    assert "Proton Calendar's documented limit (events only up to the end of 2037) doesn't count." in section
+    # short and concrete
+    assert len(section.split()) < 330
+
+
+def test_proper_tools_is_credited_with_a_link():
+    readme = read("README.md")
+    lines = readme.splitlines()
+    tagline = lines.index("**Calendar rituals for people who drift off task.**")
+    assert lines[tagline + 1] == ""
+    assert lines[tagline + 2] == "*A [Proper Tools](https://propertools.be) production, made in Brussels.*"
+
+    credits = readme[readme.index("## 🙌 Credits") :].splitlines()
+    assert credits[2] == "* Made by [Proper Tools SRL](https://propertools.be)"
+    assert credits[3] == "* Ritual design: Trey Darley"
+
+    assert "calmoji is part of the [Proper Tools](https://propertools.be) toolchain." in readme
+    assert "* Publisher: [Proper Tools SRL](https://propertools.be), Brussels" in read("scripts/bundle_README.md.in")
+
+
+@pytest.mark.parametrize("name", ["README.md", "docs/PLAYBOOK.md", "scripts/bundle_README.md.in", "EBI48-README.md"])
+def test_user_facing_docs_no_longer_mention_the_glyph_key(name):
+    text = read(name)
+    assert "Glyph Key" not in text and "\U0001f5dd" not in text, name
