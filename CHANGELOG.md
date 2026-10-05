@@ -9,7 +9,7 @@ they do.
 
 ## [Unreleased]
 
-## [0.1.3] — 2026-10-04
+## [0.1.3] — 2026-10-05
 
 **The calendar files are unchanged.** v0.1.3 produces byte-for-byte the same
 `.ics` files as v0.1.2, so there is nothing to re-import. It makes calmoji's
