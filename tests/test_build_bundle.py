@@ -4,7 +4,7 @@ Tests for scripts/build_bundle.py, the release-archive builder.
 
 The script lives outside the package, so it is loaded by path. Bundles are built
 for a couple of years only; scripts/preflight.sh builds two years (2026-2027),
-and only the release process runs the full default build (2026-2036).
+and only the release process runs the full default build (2026-2039).
 """
 
 from __future__ import annotations
@@ -102,21 +102,37 @@ def test_parse_years_rejects_bad_input(spec):
         bb.parse_years(spec)
 
 
-def test_default_years_are_2026_to_2036():
-    assert bb.DEFAULT_YEARS == "2026-2036"
-    assert bb.parse_years(bb.DEFAULT_YEARS) == list(range(2026, 2037))
+def test_default_years_are_2026_to_2039():
+    assert bb.DEFAULT_YEARS == "2026-2039"
+    assert bb.parse_years(bb.DEFAULT_YEARS) == list(range(2026, 2040))
 
 
-@pytest.mark.parametrize("alignment", ["academic", "calendar"])
-def test_default_years_end_where_proton_stops_accepting_events(alignment):
-    # Proton Calendar only accepts events up to the end of 2037.
-    limit = datetime.datetime(2038, 1, 1, tzinfo=datetime.timezone.utc)
-    last_default = bb.parse_years(bb.DEFAULT_YEARS)[-1]
+def test_the_default_years_are_the_years_the_budget_test_covers():
+    # tests/test_budget.py generates every alignment for exactly these years and checks every file
+    # against MAX_EVENTS_PER_FILE and MAX_BYTES_PER_FILE, so the whole default bundle is within budget.
+    source = (REPO_ROOT / "tests" / "test_budget.py").read_text(encoding="utf-8")
+    assert "range(2026, 2040)" in source
+    assert bb.parse_years(bb.DEFAULT_YEARS) == list(range(2026, 2040))
 
-    assert get_semester_phases(last_default, alignment)[-1].end <= limit
-    # ...and the next year would not fit for 'academic', which is why the defaults stop here.
-    if alignment == "academic":
-        assert get_semester_phases(last_default + 1, alignment)[-1].end > limit
+
+PROTON_LIMIT = datetime.datetime(2038, 1, 1, tzinfo=datetime.timezone.utc)  # events only up to the end of 2037
+
+
+def ends_by_proton_limit(year: int, alignment: str) -> bool:
+    return get_semester_phases(year, alignment)[-1].end <= PROTON_LIMIT
+
+
+def test_which_default_years_fit_inside_protons_limit():
+    """The README's claim: 2026-2036 everywhere, plus 2037 in `calendar`; the rest is past Proton's limit."""
+    years = bb.parse_years(bb.DEFAULT_YEARS)
+    for alignment in ("academic", "calendar"):
+        fits = [y for y in years if ends_by_proton_limit(y, alignment)]
+        assert fits == [y for y in years if y <= (2036 if alignment == "academic" else 2037)], alignment
+
+    # 2037 academic runs into 2038, and 2038-2039 start after the limit in both alignments
+    assert not ends_by_proton_limit(2037, "academic")
+    assert get_semester_phases(2037, "academic")[-1].end > PROTON_LIMIT
+    assert all(not ends_by_proton_limit(y, a) for y in (2038, 2039) for a in ("academic", "calendar"))
 
 
 def test_parse_alignments():
@@ -287,7 +303,9 @@ def test_readme_is_filled_in_and_describes_the_monthly_layout(built):
     assert "focus_<YYYY-MM>.ics" in text and "meetings_<YYYY-MM>.ics" in text
     assert "Months are in **UTC**" in text
     assert f"under {MAX_EVENTS_PER_FILE} events and {MAX_BYTES_PER_FILE // 1024} KB" in text
-    assert "Proton accepts events only up to 2037" in text
+    assert "Proton Calendar accepts events only up to the end of 2037" in text
+    assert "Proton users can use 2026–2036, plus 2037 in the `calendar` alignment" in " ".join(text.split())
+    assert "stops at 2036" not in text
     assert "Start with this month and next" in text
     assert "Upgrading from v0.1.0" in text
     assert "fixed in UTC all year" in text and "every day" in text

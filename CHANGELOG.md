@@ -9,6 +9,101 @@ they do.
 
 ## [Unreleased]
 
+## [0.1.3] — 2026-10-05
+
+**The only change to calendar content is that the 🗝️ Glyph Key events are
+gone.** Every other event, and every file name, is byte-for-byte what v0.1.2
+produced. **If you already imported calmoji files,** the old 🗝️ markers stay
+in your calendars until you re-import. To drop them, delete the 🧠 Focus —
+Open and 🧿 Emoji Clock calendars and import fresh. Nothing else changed, so
+nothing else needs re-importing. v0.1.3 also makes calmoji's output-folder
+safety do what its docs promised, finishes the two small fixes the README
+listed, and adds 2037–2039 to the release bundle, after an external review.
+
+### Added
+
+- **2037, 2038 and 2039 in the release bundle**, so people can test their
+  calendar apps for the year-2038 problem (32-bit time runs out on 19 January
+  2038). The bundle now covers 2026–2039. 2026–2036 import everywhere. **Proton
+  Calendar accepts events only up to the end of 2037**, so Proton users can use
+  the 2026–2036 folders, plus 2037 in the `calendar` alignment: 2037 `academic`
+  runs into 2038, and 2038–2039 are past Proton's limit. Every other app
+  should take them all. Every file in every one of those years stays within
+  the size budget.
+
+### Removed
+
+- **The 🗝️ Glyph Key events.** Both kinds are gone: the weekly all-day
+  `🗝️ Glyph Key — <phase> — <YYYY-Www>` events in the focus files, and the
+  yearly all-day `🗝️ EBI48 Glyph Key` event in the Emoji Clock file. They were
+  leftovers from an earlier attempt at the EBI48 layer and carry no
+  information people need. The Emoji Clock is now exactly its 48 events, all
+  recurring daily, and still carries its `COMMENT` that links to
+  `EBI48-README.md`. No other event changed: the same summaries, descriptions
+  and UIDs, and the same file names. For anyone using the Python API, the
+  `include_glyph_key` and `include_weekly_glyph_keys` options are gone, and
+  the `--dry-run` table no longer has a Glyph Keys column. See the note at the
+  top about re-importing.
+
+### Fixed
+
+- **calmoji now deletes only files it can prove are its own.** In v0.1.2, a
+  re-run into a calmoji output folder deleted every `.ics` file at the top
+  level and every `.ics` file in `focus/` and `meetings/`, whatever its name:
+  a `family.ics` kept next to calmoji's files was lost. It also treated a
+  `.calmoji-output` marker that was a symlink as genuine, and rewrote the
+  marker through it, overwriting the file the link pointed to. **Who could
+  have been affected:** only people who generate files themselves with v0.1.2
+  and kept their own `.ics` files (or a symlinked marker) in a folder calmoji
+  had written to. **The downloadable calendars and the release bundle are
+  unaffected.** Ownership is now exact:
+  - calmoji's files are recognised by name alone, and only if they are regular
+    files, never symlinks: `seasons_<YYYY>.ics`, `emoji_clock_<YYYY>.ics` and
+    the marker at the top level, `focus/focus_<YYYY>-<MM>.ics` and
+    `meetings/meetings_<YYYY>-<MM>.ics`. Any year is fine, so re-running for
+    another year still cleans up the old one. The names are defined once, in
+    `calmoji/filenames.py`, and every writer builds its names there.
+  - Everything else is foreign: another `.ics` file, any symlink at any level
+    (including `focus/` and `meetings/` themselves), any subfolder inside
+    them. If anything foreign is present, calmoji refuses, deletes nothing,
+    and names the paths.
+  - The marker must be genuine: a regular file, not a symlink, with exactly
+    calmoji's own text. Otherwise the folder is treated like any non-empty
+    folder without a marker, and refused untouched.
+  - Cleaning unlinks calmoji's files one at a time and removes `focus/` and
+    `meetings/` only once they are empty. There is no recursive delete. The
+    marker is written without following a link.
+- **`unfold_ics_lines` splits only where iCalendar does** (CRLF, or a bare
+  LF), not on U+2028, U+2029, U+0085 and the other characters Python's
+  `splitlines()` treats as line breaks, and it unfolds a line that starts with
+  a tab as well as a space. This affects reading files back in, never writing
+  them.
+- **`escape_ics_text` rejects control characters.** RFC 5545 allows none in a
+  text value except tab, so a value containing one (U+0000 to U+001F other
+  than TAB, CR and LF, or U+007F) raises `ValueError` naming the code point,
+  for example `U+0007`. calmoji's own text never contained one.
+
+### Documentation
+
+- The README, `TEST_STRATEGY.md` and the CI workflow no longer say Python
+  "ships with macOS" or run on "stock macOS". On a fresh Mac,
+  `/usr/bin/python3` is a stub: the first run offers to install Apple's
+  Command Line Tools, and the real Python 3.9 comes with them. **The CI job
+  that tests it is renamed to `macOS /usr/bin/python3`**; a branch ruleset
+  that lists the old name (`stock macOS python3`) as a required check must be
+  updated on GitHub.
+- The README says calmoji recognises its own files by name, and that anything
+  else in its folder, including another `.ics` file, makes it refuse without
+  deleting anything.
+- A new README section, "Testing for the year-2038 problem", explains what the
+  limit is, which files span 19 January 2038, how to import them into a
+  Sandbox calendar to test your own calendar app, and how to report one that
+  fails (Proton's documented limit doesn't count). Every fact in it is checked
+  against the generated files by a test.
+- The README and the bundle README now credit
+  [Proper Tools SRL](https://propertools.be) with a link, and both have an
+  "Upgrading from v0.1.1 or v0.1.2" note.
+
 ## [0.1.2] — 2026-10-04
 
 **The calendar files are unchanged.** v0.1.2 produces byte-for-byte the same
@@ -235,7 +330,8 @@ audit.
 - No known security issues at the time of this release. Reporting channel
   documented in `SECURITY.md`.
 
-[Unreleased]: https://github.com/propertools/Calmoji-Forge/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/propertools/Calmoji-Forge/compare/v0.1.3...HEAD
+[0.1.3]: https://github.com/propertools/Calmoji-Forge/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/propertools/Calmoji-Forge/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/propertools/Calmoji-Forge/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/propertools/Calmoji-Forge/releases/tag/v0.1.0

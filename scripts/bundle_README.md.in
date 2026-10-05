@@ -35,7 +35,9 @@ on the last day of a month may be in the next month's file.
 
 Every file is kept under @MAX_EVENTS@ events and @MAX_KIB@ KB, so it fits the
 import limits reported for Google, Outlook and Proton. This bundle covers
-@YEARS@, and stops at 2036 because Proton accepts events only up to 2037.
+@YEARS@. Proton Calendar accepts events only up to the end of 2037, so Proton
+users can use 2026–2036, plus 2037 in the `calendar` alignment: 2037
+`academic` runs into 2038, and 2038–2039 are past Proton's limit.
 
 ---
 
@@ -68,6 +70,14 @@ identifiers changed (see the
 [changelog](https://github.com/propertools/Calmoji-Forge/blob/main/CHANGELOG.md)),
 so importing over the old ones would leave you with duplicates.
 
+### Upgrading from v0.1.1 or v0.1.2
+
+Only one thing changed in the calendars you already have: the old 🗝️ markers
+(one a week in 🧠 Focus — Open, one a year in 🧿 Emoji Clock) are gone from
+the new files, but they stay in your calendars until you re-import. To drop
+them, delete the 🧠 Focus — Open and 🧿 Emoji Clock calendars and import
+fresh. Nothing else changed, so nothing else needs re-importing.
+
 ---
 
 ## Good to know in v@VERSION@
@@ -76,6 +86,11 @@ so importing over the old ones would leave you with duplicates.
   them in your local time. In cities with daylight saving time (Brussels,
   Havana, Seattle) a slot's local time is an hour earlier in winter than in
   summer. Each slot's description says exactly when it falls locally.
+* **2037–2039 are here to test your calendar app for the year-2038 problem**
+  (32-bit time runs out on 19 January 2038). Every app except Proton should
+  take them all. See
+  [Testing for the year-2038 problem](https://github.com/propertools/Calmoji-Forge#-testing-for-the-year-2038-problem)
+  in the calmoji README for what to import and what to look for.
 * **The 🧿 Emoji Clock (EBI48) appears every day**, one event per half-hour
   that repeats daily through the year.
 * **Months are in UTC**, as above.
@@ -114,7 +129,7 @@ diff -r --exclude=.calmoji-output check /path/to/this/folder/2027/academic
 ## Provenance and license
 
 * Generator: [calmoji v@VERSION@](https://github.com/propertools/Calmoji-Forge/releases/tag/v@VERSION@)
-* Publisher: Proper Tools SRL, Brussels
+* Publisher: [Proper Tools SRL](https://propertools.be), Brussels
 * Generator code: MIT. EBI48 mapping table and these `.ics` files: CC0 1.0.
 
 Problems or ideas: <https://github.com/propertools/Calmoji-Forge/issues>

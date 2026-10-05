@@ -2,6 +2,8 @@
 
 **Calendar rituals for people who drift off task.**
 
+*A [Proper Tools](https://propertools.be) production, made in Brussels.*
+
 [![CI](https://github.com/propertools/Calmoji-Forge/actions/workflows/ci.yml/badge.svg)](https://github.com/propertools/Calmoji-Forge/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
@@ -53,7 +55,7 @@ with you.
 
 The details follow.
 
-Download the ready-made calendars for **2026–2036** from the
+Download the ready-made calendars for **2026–2039** from the
 [latest release](https://github.com/propertools/Calmoji-Forge/releases/latest):
 grab **`calmoji-artifacts-vX.Y.Z.zip`** (X.Y.Z is the release's version
 number) and unzip it.
@@ -100,18 +102,16 @@ Tips for v0.1:
 * **Months are in UTC.** If you're west of UTC, an event late in the
   evening on the last day of a month may be in the next month's file.
 * **Every file is kept under 600 events and 512 KB**, so it fits the
-  import limits reported for Google, Outlook and Proton. The ready-made
-  calendars cover 2026–2036 because Proton accepts events only up to 2037;
-  any other year you can
+  import limits reported for Google, Outlook and Proton.
+* **Proton Calendar accepts events only up to the end of 2037.** Proton
+  users can use the 2026–2036 folders, plus 2037 in the `calendar`
+  alignment. 2037 `academic` runs into 2038, and 2038–2039 are past
+  Proton's limit. Every other app should take them all, and
+  [the year-2038 section below](#-testing-for-the-year-2038-problem) asks
+  you to check exactly that. Any other year you can
   [generate yourself](#-regenerating-the-calendars-yourself).
 * To refresh a layer later, delete that calendar, recreate it and import
   again. Your own plans live in your own calendars and are untouched.
-
-### Upgrading from v0.1.0
-
-Delete the old calmoji calendars and import fresh. Event times and
-identifiers changed (see the [changelog](CHANGELOG.md)), so importing over
-the old ones would leave you with duplicates.
 
 Subscribable feeds that update themselves, and a website to browse and
 download individual files, are coming in v0.2. See the
@@ -120,6 +120,45 @@ download individual files, are coming in v0.2. See the
 Calendar apps differ in small ways. If something doesn't work in yours,
 please [open an issue](https://github.com/propertools/Calmoji-Forge/issues);
 we'll fold what we learn into these docs.
+
+### Upgrading from v0.1.0
+
+Delete the old calmoji calendars and import fresh. Event times and
+identifiers changed (see the [changelog](CHANGELOG.md)), so importing over
+the old ones would leave you with duplicates.
+
+### Upgrading from v0.1.1 or v0.1.2
+
+Only one thing changed in the calendars you already have: the old 🗝️
+markers (one a week in 🧠 Focus — Open, one a year in 🧿 Emoji Clock) are
+gone from the new files, but they stay in your calendars until you
+re-import. To drop them, delete the 🧠 Focus — Open and 🧿 Emoji Clock
+calendars and import fresh. Nothing else changed, so nothing else needs
+re-importing.
+
+### 🕰 Testing for the year-2038 problem
+
+Many systems count time as a signed 32-bit number of seconds since 1970, and
+that number runs out at 03:14:07 UTC on 19 January 2038: the next second
+doesn't fit. Software built on it can lose or misplace events after that
+moment. The ready-made calendars run to 2039 so you can check your own
+calendar app.
+
+* The 2037 `academic` and 2038 `calendar` folders contain January 2038. On
+  19 January 2038, ✍️ Focus Block 2 (02:00–03:36 UTC) and the Emoji Clock's
+  🦝 Raccoon slot (03:05–03:30 UTC) span that exact second.
+* The 2037 `academic` Emoji Clock also tests recurring events: its daily
+  repeats run on into August 2038.
+
+**How to test:** import `2038/calendar/focus/focus_2038-01.ics` and
+`2037/academic/emoji_clock_2037.ics` into a 🧪 Sandbox calendar, then look at
+19 January 2038. Events missing, at the wrong time, or an import error mean
+the app has a problem.
+
+If you find a calendar app that fails, please
+[open an issue](https://github.com/propertools/Calmoji-Forge/issues) naming
+the app, its version and what you saw. Proton Calendar's documented limit
+(events only up to the end of 2037) doesn't count.
 
 ---
 
@@ -179,8 +218,7 @@ every day of the week, with a 24-minute breather between them. Each has a
 theme glyph: 🧠 deep thinking, ✍️ writing, 📚 reading, 🔧 technical,
 🧾 admin, 📞 comms, 🪞 reflection, 📈 analysis, 🎨 creative,
 🛠️ maintenance, ⚖️ decisions, ⛩️ closure. You'll only ever use the few
-that fall in your waking hours. Each week also gets an all-day 🗝️ Glyph
-Key marker. They come one file per month.
+that fall in your waking hours. They come one file per month.
 
 ### 🕒 Meetings — Open
 
@@ -262,7 +300,8 @@ cd Calmoji-Forge
 ```
 
 Generate. Nothing to install, no third-party packages: any Python 3.9 or
-newer works, including the `python3` that ships with macOS.
+newer works, including the `python3` from Apple's Command Line Tools (a Mac
+offers to install them the first time you run `python3`).
 
 ```bash
 python3 calmoji.py --year=2027 --calendar-alignment=academic
@@ -271,7 +310,9 @@ python3 calmoji.py --year=2027 --calendar-alignment=academic
 By default the files go to `output/<year>/<alignment>/`, so different years
 and alignments never mix. calmoji only writes into a folder that is empty or
 that it made itself (it leaves a `.calmoji-output` file there), and re-running
-replaces its own files in that folder. Any other non-empty folder is refused,
+replaces its own files in that folder. calmoji recognises its own files by
+name. Anything else in its folder, including another `.ics` file, makes it
+refuse without deleting anything. Any other non-empty folder is refused,
 untouched.
 
 Alignments: `academic`, `calendar`, `fiscal_us`, `fiscal_eu`,
@@ -303,7 +344,8 @@ output/2027/academic/
 ```
 
 Optionally, install it as a package to get a `calmoji` command. Use a
-virtual environment, and upgrade pip first (macOS ships an old one):
+virtual environment, and upgrade pip first (the pip that comes with Apple's
+Python is old):
 
 ```bash
 python3 -m venv .venv
@@ -317,7 +359,7 @@ Working on calmoji itself? `python3 -m pip install -e '.[dev]'` adds the
 test, lint and type-check tools, and `bash scripts/preflight.sh` runs CI's
 main checks on your machine (tests with coverage, ruff, black, mypy) plus a
 reproducible release-bundle build. CI also tests Python 3.9 through 3.13,
-compares output across Python versions, and runs on stock macOS.
+compares output across Python versions, and runs on macOS's `/usr/bin/python3`.
 
 If you regenerate a year we publish and get a different file, that's a
 bug. Please open an issue.
@@ -337,15 +379,6 @@ for v0.2, in no promised order:
   archive.
 * **Releases built automatically** from a git tag, with byte-identical
   output checked in CI.
-
-Small fixes planned for v0.1.3 (they touch only the Python API, not the
-calendar files):
-
-* **Reading `.ics` files back in** (`unfold_ics_lines`) splits lines on more
-  characters than the iCalendar format does. It doesn't affect the files
-  calmoji writes.
-* **Control characters in text.** RFC 5545 doesn't allow most of them in text
-  values, so the escaper should reject them.
 
 Ideas and calendar-app quirks are very welcome in
 [issues](https://github.com/propertools/Calmoji-Forge/issues).
@@ -369,7 +402,7 @@ This is a calendar system that proves its invariants.
 
 ## 🧭 Design philosophy
 
-calmoji is part of the Proper Tools toolchain.
+calmoji is part of the [Proper Tools](https://propertools.be) toolchain.
 
 It is designed to:
 
@@ -388,6 +421,7 @@ If nothing survives but glyphs and dates, it still makes sense.
 
 ## 🙌 Credits
 
+* Made by [Proper Tools SRL](https://propertools.be)
 * Ritual design: Trey Darley
 * Engineering discipline: Trey Darley
 * AI pair engineering: ChatGPT, Claude

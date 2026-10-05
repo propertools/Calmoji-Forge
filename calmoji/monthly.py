@@ -18,6 +18,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, Iterable, List, NamedTuple
 
+from calmoji.filenames import monthly_filename
 from calmoji.ics_writer import write_events_to_ics
 from calmoji.types import Event
 
@@ -25,7 +26,6 @@ from calmoji.types import Event
 class MonthRow(NamedTuple):
     month: str
     focus_blocks: int
-    glyph_keys: int
     meeting_slots: int
 
 
@@ -50,14 +50,14 @@ def write_monthly_files(events: Iterable[Event], directory: Path, prefix: str, c
     """
     written: List[Path] = []
     for key, month_events in bucket_by_month(events).items():
-        path = directory / f"{prefix}_{key}.ics"
+        path = directory / monthly_filename(prefix, key)
         write_events_to_ics(month_events, path, calname=calname)
         written.append(path)
     return written
 
 
 def month_rows(focus_events: Iterable[Event], meeting_events: Iterable[Event]) -> List[MonthRow]:
-    """Per-month counts for --dry-run: focus blocks, Glyph Keys and meeting slots."""
+    """Per-month counts for --dry-run: focus blocks and meeting slots."""
     focus = bucket_by_month(focus_events)
     meetings = bucket_by_month(meeting_events)
 
@@ -67,8 +67,7 @@ def month_rows(focus_events: Iterable[Event], meeting_events: Iterable[Event]) -
         rows.append(
             MonthRow(
                 month=key,
-                focus_blocks=sum(1 for e in month_focus if not e.all_day),
-                glyph_keys=sum(1 for e in month_focus if e.all_day),
+                focus_blocks=len(month_focus),
                 meeting_slots=len(meetings.get(key, [])),
             )
         )

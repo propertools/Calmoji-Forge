@@ -17,8 +17,8 @@ concurrency:
 jobs:
   lint:
     # Lint and type-check against the oldest supported Python (3.9, the
-    # python3 that ships with macOS), so local runs on a stock Mac resolve
-    # the same tool versions as CI.
+    # python3 in Apple's Command Line Tools), so local runs on a Mac with
+    # those tools resolve the same tool versions as CI.
     name: lint + types (Python 3.9)
     runs-on: ubuntu-latest
     steps:
@@ -90,19 +90,20 @@ jobs:
           diff -r run-a run-39
           echo "Determinism: OK"
 
-  stock-macos:
-    # The promise: works with the python3 every Mac already has.
-    name: stock macOS python3
+  macos-usr-bin-python3:
+    # The promise: works with the /usr/bin/python3 on a Mac (on a fresh Mac that is a
+    # stub, and the real Python 3.9 arrives with Apple's Command Line Tools).
+    name: macOS /usr/bin/python3
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Generate with system python3, no install
+      - name: Generate with /usr/bin/python3, no install
         run: |
           set -euo pipefail
           /usr/bin/python3 --version
           /usr/bin/python3 calmoji.py --year=2030 --calendar-alignment=academic --output-dir=run-mac
           test -n "$(ls run-mac)"
-      - name: Test suite on system python3
+      - name: Test suite on /usr/bin/python3
         run: |
           /usr/bin/python3 -m venv .venv
           . .venv/bin/activate

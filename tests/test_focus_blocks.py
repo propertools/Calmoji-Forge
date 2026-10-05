@@ -1,6 +1,7 @@
 # tests/test_focus_blocks.py
 
-from datetime import datetime, timedelta, timezone
+import inspect
+from datetime import datetime, timezone
 
 import pytest
 
@@ -16,39 +17,24 @@ from calmoji.types import Phase, PhaseWeekSpan
 UTC = timezone.utc
 
 
-def test_generate_focus_block_events_and_glyph_key():
+def test_generate_focus_block_events_for_a_week():
     # 2039-W01 starts on Monday 2038-12-27 (UTC)
     week_start = datetime(2038, 12, 27, 0, 0, tzinfo=UTC)
     span = PhaseWeekSpan(start=week_start, phase_name="Deep Focus", week_index=0)
 
-    events = generate_focus_blocks_for_week(
-        span,
-        label="Deep Focus",
-        phase_emoji="🔥",
-        include_glyph_key=True,
-    )
+    events = generate_focus_blocks_for_week(span, label="Deep Focus", phase_emoji="🔥")
 
     assert events, "No focus block events generated"
 
-    # Expect 1 all-day glyph key + focus blocks for each active day
+    # Focus blocks for each active day, and nothing else: no all-day markers
     active_days = ACTIVE_WEEKDAYS if ACTIVE_WEEKDAYS is not None else DEFAULT_ACTIVE_WEEKDAYS
     expected_blocks = len(active_days) * len(FOCUS_BLOCKS)
-    expected_total = expected_blocks + 1  # glyph key
+    assert len(events) == expected_blocks
 
-    assert len(events) == expected_total
-
-    # First event should be the all-day Glyph Key marker for the week
-    first = events[0]
-    assert "Glyph Key" in first.summary
-    assert first.all_day is True
-    assert first.start == week_start
-    assert first.end == week_start + timedelta(days=1)
-
-    # All other events should be timed focus blocks
-    blocks = [e for e in events if not e.all_day]
-    assert len(blocks) == expected_blocks
-    assert all("Focus Block" in e.summary for e in blocks)
+    assert not any(e.all_day for e in events)
+    assert all("Focus Block" in e.summary for e in events)
     assert all(e.start.tzinfo is UTC for e in events)
+    assert events[0].start == week_start
     assert events == sorted(events, key=lambda e: e.start)
 
 
@@ -79,26 +65,14 @@ def test_phase_focus_blocks_are_clipped_to_the_phase():
     assert events == sorted(events, key=lambda e: e.start)
 
 
-def test_phase_emits_glyph_key_only_on_mondays_inside_the_phase():
-    # The same Wed..Mon phase contains exactly one Monday (2025-01-13, ISO week 3);
-    # Monday 2025-01-06 belongs to the week before the phase started.
-    phase = _phase("Clip Test", "2025-01-08", "2025-01-14")
-
-    keys = [e for e in generate_focus_blocks_for_phase(phase) if e.all_day]
-
-    assert [k.start for k in keys] == [datetime(2025, 1, 13, 0, 0, tzinfo=UTC)]
-    assert "2025-W03" in keys[0].summary
-    assert "Glyph Key" in keys[0].summary
-
-
-def test_phase_without_a_monday_has_no_glyph_key():
-    # Saturday 2025-01-04 only.
-    phase = _phase("Saturday Only", "2025-01-04", "2025-01-05")
-
-    events = generate_focus_blocks_for_phase(phase)
-
-    assert len(events) == len(FOCUS_BLOCKS)
-    assert not any(e.all_day for e in events)
+def test_a_phase_holds_only_timed_focus_blocks():
+    # No all-day markers of any kind (the weekly Glyph Keys were retired in v0.1.3), whatever the weekday.
+    for start, end in (("2025-01-08", "2025-01-14"), ("2025-01-04", "2025-01-05"), ("2025-01-06", "2025-01-13")):
+        events = generate_focus_blocks_for_phase(_phase("Clip Test", start, end))
+        assert events
+        assert not any(e.all_day for e in events)
+        assert all(e.summary.startswith(tuple(b[5] for b in FOCUS_BLOCKS)) for e in events)
+        assert all("Focus Block" in e.summary and "Glyph" not in e.summary for e in events)
 
 
 def test_phase_end_is_exclusive():
@@ -107,17 +81,14 @@ def test_phase_end_is_exclusive():
 
     events = generate_focus_blocks_for_phase(phase)
 
-    assert len(events) == len(FOCUS_BLOCKS) + 1  # blocks + Glyph Key
+    assert len(events) == len(FOCUS_BLOCKS)
     assert max(e.start for e in events) == datetime(2025, 1, 6, 22, 0, tzinfo=UTC)
 
 
-def test_glyph_keys_can_be_switched_off():
-    phase = _phase("Keyless", "2025-01-06", "2025-01-13")
-
-    events = generate_focus_blocks_for_phase(phase, include_weekly_glyph_keys=False)
-
-    assert not any(e.all_day for e in events)
-    assert len(events) == 7 * len(FOCUS_BLOCKS)
+def test_the_glyph_key_options_are_gone():
+    for function in (generate_focus_blocks_for_week, generate_focus_blocks_for_phase, generate_focus_blocks_for_phases):
+        assert not [name for name in inspect.signature(function).parameters if "glyph" in name], function.__name__
+    assert not hasattr(focus_blocks, "_glyph_key_event")
 
 
 def test_phases_that_split_a_week_do_not_duplicate_blocks():
@@ -127,15 +98,14 @@ def test_phases_that_split_a_week_do_not_duplicate_blocks():
 
     events = generate_focus_blocks_for_phases([alpha, beta])
 
-    starts = [e.start for e in events if not e.all_day]
+    starts = [e.start for e in events]
     assert len(starts) == len(set(starts))
     assert len(starts) == 19 * len(FOCUS_BLOCKS)  # Jan 1..Jan 19
 
-    # Each Monday gets exactly one Glyph Key, from whichever phase it falls in.
-    keys = [(e.start.day, e.summary) for e in events if e.all_day]
-    assert [day for day, _ in keys] == [6, 13]
-    assert "Alpha" in keys[0][1]
-    assert "Beta" in keys[1][1]
+    # Each block carries the name of the phase it falls in, and only that phase.
+    for e in events:
+        assert ("Alpha" in e.summary) == (e.start < datetime(2025, 1, 9, tzinfo=UTC))
+        assert ("Beta" in e.summary) == (e.start >= datetime(2025, 1, 9, tzinfo=UTC))
 
 
 def test_phase_events_match_week_events_for_a_whole_week():
@@ -157,11 +127,8 @@ def test_phase_generation_honours_active_weekdays(monkeypatch):
 
     events = generate_focus_blocks_for_phase(phase)
 
-    blocks = [e for e in events if not e.all_day]
-    assert len(blocks) == 5 * len(FOCUS_BLOCKS)
-    assert all(e.start.weekday() < 5 for e in blocks)
-    # The Monday Glyph Key marks the week regardless of which weekdays are active.
-    assert sum(1 for e in events if e.all_day) == 1
+    assert len(events) == 5 * len(FOCUS_BLOCKS)
+    assert all(e.start.weekday() < 5 for e in events)
 
 
 def test_phase_without_dates_is_rejected():

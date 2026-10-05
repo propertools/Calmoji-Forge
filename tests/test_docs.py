@@ -45,10 +45,14 @@ def test_readme_states_the_size_budget_from_the_constants():
     assert f"under {MAX_EVENTS_PER_FILE} events and {MAX_BYTES_PER_FILE // 1024} KB" in read("README.md")
 
 
-def test_readme_covers_the_bundle_years_and_why():
-    text = read("README.md")
-    assert "**2026–2036**" in text
-    assert "Proton accepts events only up to 2037" in text
+def test_readme_covers_the_bundle_years_and_states_protons_limit_precisely():
+    text = " ".join(read("README.md").split())
+    assert "ready-made calendars for **2026–2039**" in text
+    assert "**2026–2036**" not in text
+    assert "Proton Calendar accepts events only up to the end of 2037." in text
+    assert "Proton users can use the 2026–2036 folders, plus 2037 in the `calendar` alignment." in text
+    assert "2037 `academic` runs into 2038, and 2038–2039 are past Proton's limit." in text
+    assert "Every other app should take them all" in text
 
 
 def test_readme_has_the_upgrade_note_and_the_monthly_tips():
@@ -215,7 +219,8 @@ def test_readme_does_not_claim_preflight_runs_every_ci_check():
     assert "runs every check CI runs" not in text
     assert "runs CI's main checks on your machine" in text
     assert (
-        "CI also tests Python 3.9 through 3.13, compares output across Python versions, and runs on stock macOS" in text
+        "CI also tests Python 3.9 through 3.13, compares output across Python versions, "
+        "and runs on macOS's `/usr/bin/python3`" in text
     )
 
 
@@ -335,15 +340,207 @@ def test_the_readme_points_at_the_steward_section_and_the_anchor_resolves():
     assert github_slug(STEWARD_HEADING) == "optional-an-ai-agenda-steward"
 
 
-def test_the_v0_1_3_todos_are_written_down_where_future_work_lives():
+def test_the_v0_1_3_todos_are_done_and_no_longer_listed():
     readme = " ".join(read("README.md").split())
     contributing = " ".join(read("CONTRIBUTING.md").split())
 
-    assert "Small fixes planned for v0.1.3" in readme
-    assert "`unfold_ics_lines`) splits lines on more characters than the iCalendar format does" in readme
-    assert "RFC 5545 doesn't allow most of them in text values, so the escaper should reject them" in readme
-
-    assert "**v0.1.3:** `unfold_ics_lines` uses `str.splitlines()`" in contributing
-    assert "**v0.1.3:** RFC 5545 doesn't allow most control characters in TEXT values" in contributing
-    # the existing roadmap entries are still there
+    assert "Small fixes planned for v0.1.3" not in readme
+    assert "**v0.1.3:**" not in contributing
+    assert "`unfold_ics_lines`) splits lines on more characters" not in readme
+    # the roadmap items that are still open are still there
     assert "Subscribable calendars" in readme and "Atomic file writes" in contributing
+
+
+# -----------------------------------------------------------------------------
+# Where macOS's python3 really comes from (v0.1.3)
+# -----------------------------------------------------------------------------
+
+OLD_MACOS_WORDING = (
+    "ships with macOS",
+    "ship with macOS",
+    "stock macOS",
+    "stock Mac",
+    "macOS ships",
+    "every Mac already has",
+)
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "README.md",
+        "TEST_STRATEGY.md",
+        "CONTRIBUTING.md",
+        ".github/workflows/ci.yml",
+        "scripts/bundle_README.md.in",
+        "docs/PLAYBOOK.md",
+    ],
+)
+def test_no_file_claims_python_ships_with_macos(name):
+    text = " ".join(read(name).split())
+    for old in OLD_MACOS_WORDING:
+        assert old not in text, f"{name} still says {old!r}"
+
+
+def test_readme_says_the_python3_comes_from_apples_command_line_tools():
+    text = " ".join(read("README.md").split())
+    assert (
+        "including the `python3` from Apple's Command Line Tools (a Mac offers to install them the first time you run `python3`)"
+        in text
+    )
+    assert "upgrade pip first (the pip that comes with Apple's Python is old)" in text
+    assert "runs on macOS's `/usr/bin/python3`" in text
+
+
+def test_the_ci_job_is_named_for_what_it_really_tests():
+    ci = read(".github/workflows/ci.yml")
+    assert "name: macOS /usr/bin/python3" in ci
+    assert "stock macOS python3" not in ci and "stock-macos" not in ci
+    assert "Apple's Command Line Tools" in ci
+    assert "/usr/bin/python3 calmoji.py --year=2030" in ci  # and it still runs that interpreter
+
+
+def test_test_strategy_names_the_macos_interpreter_exactly():
+    assert "on macOS's `/usr/bin/python3`" in read("TEST_STRATEGY.md")
+
+
+def test_readme_says_calmoji_recognises_its_own_files_by_name():
+    text = " ".join(read("README.md").split())
+    assert (
+        "calmoji recognises its own files by name. Anything else in its folder, including another `.ics` file, makes it refuse without deleting anything."
+        in text
+    )
+    assert "refused, untouched" in text
+    assert "re-running replaces its own files" in text
+
+
+def test_the_bundle_readme_template_makes_no_claim_about_deleting_calmojis_folder():
+    text = read("scripts/bundle_README.md.in")
+    assert "deletes" not in text and "recognises its own files" not in text
+    assert "--exclude=.calmoji-output" in text  # the marker is still explained where it matters
+
+
+def test_the_changelog_says_who_could_have_been_affected_and_who_could_not():
+    text = " ".join(read("CHANGELOG.md").split())
+    section = text[text.index("## [0.1.3]") : text.index("## [0.1.2]")]
+    assert "The only change to calendar content is that the 🗝️ Glyph Key events are gone" in section
+    assert "The calendar files are unchanged" not in section
+    assert "delete the 🧠 Focus — Open and 🧿 Emoji Clock calendars and import fresh" in section
+    assert "Nothing else changed, so nothing else needs re-importing." in section
+    assert "family.ics" in section and "symlink" in section
+    assert "only people who generate files themselves with v0.1.2" in section
+    assert "The downloadable calendars and the release bundle are unaffected" in section
+    assert "`macOS /usr/bin/python3`" in section and "required check" in section
+    assert "an external review" in section
+    for tool in ("ChatGPT", "Claude", "Codex", "Copilot", "Gemini", "GPT"):
+        assert tool not in section
+    assert "[0.1.3]: https://github.com/propertools/Calmoji-Forge/compare/v0.1.2...v0.1.3" in text
+
+
+# -----------------------------------------------------------------------------
+# v0.1.3: year-2038 section, Proper Tools, no Glyph Keys
+# -----------------------------------------------------------------------------
+
+YEAR_2038_HEADING = "### 🕰 Testing for the year-2038 problem"
+YEAR_2038_ANCHOR = "#-testing-for-the-year-2038-problem"
+
+
+def year_2038_section() -> str:
+    text = read("README.md")
+    start = text.index(YEAR_2038_HEADING)
+    return text[start : text.index("\n---\n", start)]
+
+
+def test_the_year_2038_section_has_a_stable_linkable_heading():
+    readme = read("README.md")
+    assert readme.splitlines().count(YEAR_2038_HEADING) == 1
+    headings = [line for line in readme.splitlines() if line.startswith("#")]
+    slugs = [github_slug(h) for h in headings]
+    assert slugs.count("-testing-for-the-year-2038-problem") == 1
+    assert f"({YEAR_2038_ANCHOR})" in readme  # linked from the Proton tip
+    assert YEAR_2038_ANCHOR in read("scripts/bundle_README.md.in")  # and from the bundle README
+
+
+def test_the_year_2038_section_says_what_to_import_and_what_to_report():
+    section = " ".join(year_2038_section().split())
+    assert "signed 32-bit number of seconds since 1970" in section
+    assert "03:14:07 UTC on 19 January 2038" in section
+    assert "`2038/calendar/focus/focus_2038-01.ics`" in section
+    assert "`2037/academic/emoji_clock_2037.ics`" in section
+    assert "🧪 Sandbox calendar" in section
+    assert "Events missing, at the wrong time, or an import error mean the app has a problem." in section
+    assert "[open an issue](https://github.com/propertools/Calmoji-Forge/issues)" in section
+    assert "its version and what you saw" in section
+    assert "Proton Calendar's documented limit (events only up to the end of 2037) doesn't count." in section
+    # short and concrete
+    assert len(section.split()) < 330
+
+
+def test_proper_tools_is_credited_with_a_link():
+    readme = read("README.md")
+    lines = readme.splitlines()
+    tagline = lines.index("**Calendar rituals for people who drift off task.**")
+    assert lines[tagline + 1] == ""
+    assert lines[tagline + 2] == "*A [Proper Tools](https://propertools.be) production, made in Brussels.*"
+
+    credits = readme[readme.index("## 🙌 Credits") :].splitlines()
+    assert credits[2] == "* Made by [Proper Tools SRL](https://propertools.be)"
+    assert credits[3] == "* Ritual design: Trey Darley"
+
+    assert "calmoji is part of the [Proper Tools](https://propertools.be) toolchain." in readme
+    assert "* Publisher: [Proper Tools SRL](https://propertools.be), Brussels" in read("scripts/bundle_README.md.in")
+
+
+@pytest.mark.parametrize("name", ["README.md", "docs/PLAYBOOK.md", "scripts/bundle_README.md.in", "EBI48-README.md"])
+def test_user_facing_docs_no_longer_mention_the_glyph_key(name):
+    text = read(name)
+    assert "Glyph Key" not in text, name
+
+    # The key emoji may appear only where the upgrade note names the old markers.
+    outside_the_upgrade_note = re.sub(
+        r"### Upgrading from v0\.1\.1 or v0\.1\.2\n.*?(?=\n###? |\Z)", "", text, flags=re.S
+    )
+    assert "\U0001f5dd" not in outside_the_upgrade_note, name
+
+
+@pytest.mark.parametrize("name", ["README.md", "scripts/bundle_README.md.in"])
+def test_the_upgrade_note_for_people_who_already_imported(name):
+    text = " ".join(read(name).split())
+    assert "### Upgrading from v0.1.1 or v0.1.2" in text
+    assert "the old 🗝️ markers" in text and "stay in your calendars until you re-import" in text
+    assert "delete the 🧠 Focus — Open and 🧿 Emoji Clock calendars and import fresh" in text
+    assert "Nothing else changed, so nothing else needs re-importing." in text
+
+
+def test_the_0_1_3_changelog_has_the_new_sections_and_keeps_the_old_content():
+    text = " ".join(read("CHANGELOG.md").split())
+    section = text[text.index("## [0.1.3]") : text.index("## [0.1.2]")]
+
+    # new in this revision
+    assert "### Added" in section and "### Removed" in section and "### Documentation" in section
+    assert "2037, 2038 and 2039 in the release bundle" in section
+    assert "year-2038 problem" in section
+    assert "Proton Calendar accepts events only up to the end of 2037" in section
+    assert "2026–2036 folders, plus 2037 in the `calendar` alignment" in section
+    assert "2038–2039 are past Proton's limit" in section
+    assert "The 🗝️ Glyph Key events." in section
+    assert "leftovers from an earlier attempt at the EBI48 layer" in section
+    assert "exactly its 48 events" in section
+    assert "`include_glyph_key` and `include_weekly_glyph_keys` options are gone" in section
+    assert 'A new README section, "Testing for the year-2038 problem"' in section
+    assert "[Proper Tools SRL](https://propertools.be)" in section
+
+    # still there from the first revision
+    assert "calmoji now deletes only files it can prove are its own" in section
+    assert "only people who generate files themselves with v0.1.2" in section
+    assert "`unfold_ics_lines` splits only where iCalendar does" in section
+    assert "`escape_ics_text` rejects control characters" in section
+    assert "`macOS /usr/bin/python3`" in section and "required check" in section
+
+    # the order Keep a Changelog likes: additions first, then removals, then fixes
+    assert (
+        section.index("### Added")
+        < section.index("### Removed")
+        < section.index("### Fixed")
+        < section.index("### Documentation")
+    )

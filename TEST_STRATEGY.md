@@ -127,7 +127,7 @@ CI fails if:
   (`fail_under` in `pyproject.toml`)
 * `ruff`, `black --check` or `mypy calmoji` fail
 * A sample year generated twice, and on Python 3.9 and 3.13, isn't byte-identical
-* The package can't generate a year, or its test suite fails, on the stock macOS `python3`
+* The package can't generate a year, or its test suite fails, on macOS's `/usr/bin/python3`
 
 Nothing else is gated. In particular there is no per-module coverage floor and no
 automatic check that tests avoid local-timezone behaviour; those are targets and

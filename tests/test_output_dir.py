@@ -9,11 +9,13 @@ from typing import Dict
 
 import pytest
 
+from calmoji import filenames, output_dir
 from calmoji.cli import main, parse_args
 from calmoji.constants import OUTPUT_MARKER_NAME, OUTPUT_MARKER_TEXT
 from calmoji.output_dir import OutputDirError, check_output_dir, default_output_dir, prepare_output_dir
 
 MARKER = OUTPUT_MARKER_NAME
+ROOT = Path(__file__).resolve().parent.parent
 
 
 def run(outdir: Path, *extra: str, year: int = 2027, alignment: str = "academic") -> None:
@@ -21,13 +23,22 @@ def run(outdir: Path, *extra: str, year: int = 2027, alignment: str = "academic"
 
 
 def snapshot(root: Path) -> Dict[str, object]:
-    """Every path under root, with the bytes of files: equal snapshots mean nothing changed."""
+    """
+    Every path under root: file bytes, folders, and where symlinks point (never followed).
+    Equal snapshots mean nothing changed.
+    """
     if not root.exists():
         return {"<missing>": None}
-    return {
-        p.relative_to(root).as_posix() + ("/" if p.is_dir() else ""): (None if p.is_dir() else p.read_bytes())
-        for p in sorted(root.rglob("*"))
-    }
+    shot: Dict[str, object] = {}
+    for p in sorted(root.rglob("*")):
+        rel = p.relative_to(root).as_posix()
+        if p.is_symlink():
+            shot[rel] = ("symlink to", os.readlink(p))
+        elif p.is_dir():
+            shot[rel + "/"] = None
+        else:
+            shot[rel] = p.read_bytes()
+    return shot
 
 
 def focus_files(outdir: Path):
@@ -96,16 +107,12 @@ def test_rerunning_the_same_command_gives_the_same_folder(tmp_path):
     assert snapshot(out) == first
 
 
-def test_a_rerun_removes_stale_top_level_ics_files_from_older_versions(tmp_path):
+def test_a_rerun_removes_the_previous_runs_files_for_any_year_but_nothing_else(tmp_path):
     out = tmp_path / "out"
-    run(out)
-    (out / "semester_phases_2027.ics").write_text("old", encoding="utf-8")
-    (out / "ebi48_layer_2027.ics").write_text("old", encoding="utf-8")
-
-    run(out)
-
-    assert not (out / "semester_phases_2027.ics").exists()
-    assert not (out / "ebi48_layer_2027.ics").exists()
+    run(out, year=2026)
+    run(out, year=2027)  # switching year: 2026's files are calmoji's own, so they go
+    assert sorted(p.name for p in out.glob("*.ics")) == ["emoji_clock_2027.ics", "seasons_2027.ics"]
+    assert sorted(p.name for p in (out / "focus").iterdir())[0] == "focus_2027-09.ics"
 
 
 def test_an_explicit_output_dir_is_used_as_given(tmp_path):
@@ -169,7 +176,7 @@ def test_a_marked_folder_with_an_unexpected_file_is_refused_and_nothing_is_delet
 
     message = str(excinfo.value)
     assert "my-notes.txt" in message and "focus/extra.txt" in message and "photos/" in message
-    assert "calmoji won't delete anything" in message
+    assert "won't delete anything" in message
     assert snapshot(out) == before  # the old meetings/ and focus files are all still there
 
 
@@ -317,3 +324,354 @@ def test_help_describes_the_default_and_the_marker(capsys):
     text = " ".join(capsys.readouterr().out.split())
     assert "output/<year>/<alignment>/" in text
     assert ".calmoji-output" in text
+
+
+# =============================================================================
+# Exact ownership (v0.1.3): calmoji deletes only what it can prove is its own
+# =============================================================================
+
+
+def marked(tmp_path: Path, name: str = "out", **kwargs) -> Path:
+    out = tmp_path / name
+    run(out, **kwargs)
+    return out
+
+
+def assert_refused_and_untouched(out: Path, *extra: str, mentions: tuple = ()) -> str:
+    before = snapshot(out)
+    with pytest.raises(SystemExit) as excinfo:
+        run(out, *extra)
+    message = str(excinfo.value)
+    assert message.startswith("error:")
+    for text in mentions:
+        assert text in message, f"{text!r} not named in: {message}"
+    assert snapshot(out) == before, "something was deleted or changed"
+    return message
+
+
+# ── another .ics file is foreign ────────────────────────────────────────────
+
+
+def test_a_marked_folder_with_another_ics_file_is_refused_and_it_survives(tmp_path):
+    out = marked(tmp_path)
+    (out / "family.ics").write_text("BEGIN:VCALENDAR\nEND:VCALENDAR\n", encoding="utf-8")
+
+    assert_refused_and_untouched(out, mentions=("family.ics",))
+
+    assert (out / "family.ics").read_text(encoding="utf-8") == "BEGIN:VCALENDAR\nEND:VCALENDAR\n"
+    assert (out / "focus" / "focus_2027-09.ics").is_file()  # nor was calmoji's own cleaned
+
+
+def test_a_marked_folder_with_another_ics_file_in_focus_is_refused_and_it_survives(tmp_path):
+    out = marked(tmp_path)
+    (out / "focus" / "my-calendar.ics").write_text("mine", encoding="utf-8")
+
+    assert_refused_and_untouched(out, mentions=("focus/my-calendar.ics",))
+    assert (out / "focus" / "my-calendar.ics").read_text(encoding="utf-8") == "mine"
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "semester_phases_2027.ics",  # a retired name
+        "ebi48_layer_2027.ics",
+        "seasons_2027.ics.bak",
+        "seasons_27.ics",
+        "seasons_2027x.ics",
+        "Seasons_2027.ics",
+        "seasons_2027.ICS",
+        "emoji_clock_2027_old.ics",
+        "family.ics",
+    ],
+)
+def test_only_exact_names_are_calmojis(tmp_path, name):
+    out = marked(tmp_path)
+    if (out / name).exists():
+        pytest.skip("case-insensitive filesystem: this name is the same file as calmoji's own")
+    (out / name).write_text("not calmoji's", encoding="utf-8")
+    assert_refused_and_untouched(out, mentions=(name,))
+
+
+@pytest.mark.parametrize(
+    ("folder", "name"),
+    [
+        ("focus", "focus_2027-13.ics"),  # no such month
+        ("focus", "focus_2027-00.ics"),
+        ("focus", "focus_2027-9.ics"),
+        ("focus", "focus_2027-09.ics.orig"),
+        ("focus", "meetings_2027-09.ics"),  # right pattern, wrong folder
+        ("meetings", "focus_2027-09.ics"),
+        ("meetings", "meetings_2027.ics"),
+        ("meetings", "notes.txt"),
+    ],
+)
+def test_only_exact_names_are_calmojis_in_the_subfolders(tmp_path, folder, name):
+    out = marked(tmp_path)
+    (out / folder / name).write_text("not calmoji's", encoding="utf-8")
+    assert_refused_and_untouched(out, mentions=(f"{folder}/{name}",))
+
+
+# ── the marker must be genuine ──────────────────────────────────────────────
+
+
+def test_a_marker_that_is_a_symlink_to_an_outside_file_is_refused_and_the_file_is_untouched(tmp_path):
+    out = marked(tmp_path)
+    outside = tmp_path / "precious.txt"
+    outside.write_text("precious, do not touch", encoding="utf-8")
+    (out / MARKER).unlink()
+    os.symlink(outside, out / MARKER)
+
+    message = assert_refused_and_untouched(out)
+
+    assert "isn't empty, and calmoji didn't create it" in message
+    assert outside.read_text(encoding="utf-8") == "precious, do not touch"
+
+
+def test_a_symlinked_marker_pointing_at_a_genuine_marker_text_is_still_refused(tmp_path):
+    out = marked(tmp_path)
+    twin = tmp_path / "twin-marker"
+    twin.write_text(OUTPUT_MARKER_TEXT, encoding="utf-8")  # same content, but it is a link, not the real thing
+    (out / MARKER).unlink()
+    os.symlink(twin, out / MARKER)
+
+    assert_refused_and_untouched(out)
+    assert twin.read_text(encoding="utf-8") == OUTPUT_MARKER_TEXT
+
+
+@pytest.mark.parametrize(
+    "content",
+    ["something else\n", "", OUTPUT_MARKER_TEXT + "extra", OUTPUT_MARKER_TEXT.rstrip("\n"), OUTPUT_MARKER_TEXT.upper()],
+)
+def test_a_marker_with_different_content_is_refused(tmp_path, content):
+    out = marked(tmp_path)
+    (out / MARKER).write_text(content, encoding="utf-8")
+    assert_refused_and_untouched(out)
+
+
+def test_a_marker_that_is_a_folder_is_refused(tmp_path):
+    out = marked(tmp_path)
+    (out / MARKER).unlink()
+    (out / MARKER).mkdir()
+    assert_refused_and_untouched(out)
+
+
+def test_the_marker_is_written_without_following_a_symlink(tmp_path):
+    out = tmp_path / "out"
+    out.mkdir()
+    outside = tmp_path / "outside.txt"
+    outside.write_text("untouched", encoding="utf-8")
+    os.symlink(outside, out / MARKER)
+
+    with pytest.raises(OutputDirError):
+        output_dir._write_marker(out)
+
+    assert outside.read_text(encoding="utf-8") == "untouched"
+    assert (out / MARKER).is_symlink()
+
+
+@pytest.mark.skipif(not hasattr(os, "O_NOFOLLOW"), reason="this platform has no O_NOFOLLOW")
+def test_a_symlink_swapped_in_after_the_check_is_still_not_followed(tmp_path, monkeypatch):
+    out = tmp_path / "out"
+    out.mkdir()
+    outside = tmp_path / "outside.txt"
+    outside.write_text("untouched", encoding="utf-8")
+    os.symlink(outside, out / MARKER)
+    # Pretend the pre-check saw nothing there (the swap happened afterwards): O_NOFOLLOW is the backstop.
+    monkeypatch.setattr(output_dir, "_mode", lambda path: None)
+
+    with pytest.raises(OutputDirError, match="safely"):
+        output_dir._write_marker(out)
+
+    assert outside.read_text(encoding="utf-8") == "untouched"
+
+
+def test_a_genuine_marker_is_rewritten_in_place(tmp_path):
+    out = marked(tmp_path)
+    run(out)
+    assert (out / MARKER).read_text(encoding="utf-8") == OUTPUT_MARKER_TEXT
+    assert not (out / MARKER).is_symlink()
+
+
+# ── symlinks are foreign at every level ─────────────────────────────────────
+
+
+def test_a_symlinked_seasons_file_is_refused_and_its_target_is_untouched(tmp_path):
+    out = marked(tmp_path)
+    target = tmp_path / "elsewhere.ics"
+    target.write_text("elsewhere", encoding="utf-8")
+    (out / "seasons_2027.ics").unlink()
+    os.symlink(target, out / "seasons_2027.ics")
+
+    message = assert_refused_and_untouched(out, mentions=("seasons_2027.ics (a symlink)",))
+
+    assert target.read_text(encoding="utf-8") == "elsewhere"
+    assert "seasons_2027.ics" in message
+
+
+def test_a_symlinked_emoji_clock_is_refused(tmp_path):
+    out = marked(tmp_path)
+    target = tmp_path / "elsewhere.ics"
+    target.write_text("elsewhere", encoding="utf-8")
+    (out / "emoji_clock_2027.ics").unlink()
+    os.symlink(target, out / "emoji_clock_2027.ics")
+    assert_refused_and_untouched(out, mentions=("emoji_clock_2027.ics (a symlink)",))
+    assert target.read_text(encoding="utf-8") == "elsewhere"
+
+
+@pytest.mark.parametrize("folder", ["focus", "meetings"])
+def test_a_symlinked_focus_or_meetings_folder_is_refused_and_its_target_is_untouched(tmp_path, folder):
+    out = marked(tmp_path)
+    elsewhere = tmp_path / "elsewhere"
+    elsewhere.mkdir()
+    (elsewhere / "focus_2027-09.ics").write_text("precious", encoding="utf-8")
+    for child in sorted((out / folder).iterdir()):
+        child.unlink()
+    (out / folder).rmdir()
+    os.symlink(elsewhere, out / folder)
+
+    assert_refused_and_untouched(out, mentions=(f"{folder} (a symlink)",))
+
+    assert (elsewhere / "focus_2027-09.ics").read_text(encoding="utf-8") == "precious"
+
+
+def test_a_symlinked_file_inside_focus_is_refused_even_with_a_calmoji_name(tmp_path):
+    out = marked(tmp_path)
+    target = tmp_path / "elsewhere.ics"
+    target.write_text("elsewhere", encoding="utf-8")
+    (out / "focus" / "focus_2027-09.ics").unlink()
+    os.symlink(target, out / "focus" / "focus_2027-09.ics")
+
+    assert_refused_and_untouched(out, mentions=("focus/focus_2027-09.ics (a symlink)",))
+    assert target.read_text(encoding="utf-8") == "elsewhere"
+
+
+def test_a_dangling_symlink_is_foreign_too(tmp_path):
+    out = marked(tmp_path)
+    os.symlink(tmp_path / "nowhere", out / "meetings" / "meetings_2027-01.ics.link")
+    assert_refused_and_untouched(out, mentions=("meetings/meetings_2027-01.ics.link (a symlink)",))
+
+
+def test_a_symlinked_ds_store_inside_focus_is_not_removable(tmp_path):
+    out = marked(tmp_path)
+    target = tmp_path / "elsewhere"
+    target.write_text("elsewhere", encoding="utf-8")
+    os.symlink(target, out / "focus" / ".DS_Store")
+    assert_refused_and_untouched(out, mentions=("focus/.DS_Store (a symlink)",))
+
+
+# ── subfolders and other shapes ─────────────────────────────────────────────
+
+
+@pytest.mark.parametrize("folder", ["focus", "meetings"])
+def test_a_subfolder_inside_focus_or_meetings_is_refused(tmp_path, folder):
+    out = marked(tmp_path)
+    (out / folder / "archive").mkdir()
+    (out / folder / "archive" / "old.ics").write_text("old", encoding="utf-8")
+
+    assert_refused_and_untouched(out, mentions=(f"{folder}/archive/",))
+    assert (out / folder / "archive" / "old.ics").read_text(encoding="utf-8") == "old"
+
+
+def test_focus_that_is_a_regular_file_is_refused(tmp_path):
+    out = marked(tmp_path)
+    for child in sorted((out / "focus").iterdir()):
+        child.unlink()
+    (out / "focus").rmdir()
+    (out / "focus").write_text("a file named focus", encoding="utf-8")
+    assert_refused_and_untouched(out, mentions=("focus",))
+
+
+def test_every_foreign_path_is_named_at_once(tmp_path):
+    out = marked(tmp_path)
+    (out / "family.ics").write_text("x", encoding="utf-8")
+    (out / "focus" / "mine.ics").write_text("x", encoding="utf-8")
+    (out / "meetings" / "sub").mkdir()
+    (out / "notes").mkdir()
+
+    message = assert_refused_and_untouched(out, mentions=("family.ics", "focus/mine.ics", "meetings/sub/", "notes/"))
+    assert "only deletes files it recognises by name" in message
+
+
+# ── what must still work ────────────────────────────────────────────────────
+
+
+def test_switching_year_cleans_the_old_years_files_and_leaves_no_stragglers(tmp_path):
+    out = marked(tmp_path, year=2027)
+    run(out, year=2028)
+    assert sorted(p.name for p in out.iterdir()) == [
+        MARKER,
+        "emoji_clock_2028.ics",
+        "focus",
+        "meetings",
+        "seasons_2028.ics",
+    ]
+    assert sorted(p.name for p in (out / "focus").iterdir())[0] == "focus_2028-09.ics"
+    assert not [p for p in out.rglob("*") if p.is_file() and "2027" in p.name and "2028" not in p.name]
+
+
+def test_a_no_focus_rerun_leaves_no_focus_folder_even_if_it_held_a_ds_store(tmp_path):
+    out = marked(tmp_path)
+    (out / "focus" / ".DS_Store").write_bytes(b"finder")
+
+    run(out, "--no-focus")
+
+    assert not (out / "focus").exists()
+    assert (out / "meetings").is_dir()
+
+
+def test_a_ds_store_inside_meetings_is_cleaned_with_it(tmp_path):
+    out = marked(tmp_path)
+    (out / "meetings" / ".DS_Store").write_bytes(b"finder")
+    run(out, "--no-meetings")
+    assert not (out / "meetings").exists()
+
+
+def test_clean_unlinks_file_by_file_and_never_uses_rmtree():
+    source = (ROOT / "calmoji" / "output_dir.py").read_text(encoding="utf-8")
+    assert "shutil" not in source and "rmtree" not in source.replace("no recursive delete", "")
+    assert ".unlink()" in source and ".rmdir()" in source
+
+
+# ── the patterns and the writers can't drift apart ──────────────────────────
+
+
+def test_every_file_name_calmoji_generates_matches_an_ownership_pattern(tmp_path):
+    out = tmp_path / "out"
+    run(out, "--include-oceania")
+    run(out, year=2028, alignment="calendar")  # a clean re-run also proves every name was recognised
+
+    names = [p for p in out.rglob("*") if p.is_file()]
+    assert len(names) > 20
+    for path in names:
+        rel = path.relative_to(out)
+        if rel.name == MARKER:
+            continue
+        if len(rel.parts) == 1:
+            assert filenames.is_top_level_calmoji_file(rel.name), rel
+        else:
+            assert len(rel.parts) == 2, rel
+            assert filenames.is_subfolder_calmoji_file(rel.parts[0], rel.name), rel
+
+
+def test_the_builders_and_the_patterns_agree():
+    assert filenames.SEASONS_FILE.fullmatch(filenames.seasons_filename(2027))
+    assert filenames.EMOJI_CLOCK_FILE.fullmatch(filenames.emoji_clock_filename(2027))
+    assert filenames.FOCUS_FILE.fullmatch(filenames.monthly_filename(filenames.FOCUS_PREFIX, "2027-09"))
+    assert filenames.MEETINGS_FILE.fullmatch(filenames.monthly_filename(filenames.MEETINGS_PREFIX, "2027-12"))
+    assert filenames.FOCUS_DIR == filenames.FOCUS_PREFIX and filenames.MEETINGS_DIR == filenames.MEETINGS_PREFIX
+
+
+def test_the_year_pattern_is_exactly_four_digits_and_no_unicode_digits():
+    assert not filenames.SEASONS_FILE.fullmatch("seasons_٢٠٢٧.ics")  # Arabic-Indic digits
+    assert not filenames.SEASONS_FILE.fullmatch("seasons_20271.ics")
+
+
+def test_the_writers_use_the_shared_builders():
+    for module in ("cli.py", "monthly.py"):
+        source = (ROOT / "calmoji" / module).read_text(encoding="utf-8")
+        assert 'f"seasons_' not in source and 'f"emoji_clock_' not in source, module
+
+
+@pytest.mark.parametrize("name", ["Seasons_2027.ics", "seasons_2027.ICS", "SEASONS_2027.ics", "Emoji_Clock_2027.ics"])
+def test_the_patterns_are_case_sensitive(name):
+    assert not filenames.is_top_level_calmoji_file(name)

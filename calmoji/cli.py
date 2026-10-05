@@ -20,6 +20,14 @@ from calmoji.calendar_config import ALIGNMENT_MODES, DEFAULT_ALIGNMENT
 from calmoji.calendar_phases import get_semester_phases
 from calmoji.constants import CALNAME_FOCUS, CALNAME_MEETINGS
 from calmoji.dry_run import dry_run_months
+from calmoji.filenames import (
+    FOCUS_DIR,
+    FOCUS_PREFIX,
+    MEETINGS_DIR,
+    MEETINGS_PREFIX,
+    emoji_clock_filename,
+    seasons_filename,
+)
 from calmoji.focus_blocks import generate_focus_blocks_for_phases
 from calmoji.ics_writer import write_ebi48_layer, write_semester_blocks
 from calmoji.monthly import month_rows, write_monthly_files
@@ -124,21 +132,21 @@ def main(argv: list[str] | None = None) -> None:
             raise SystemExit(f"error: {exc}") from exc
 
         # 1) Seasons (one all-day marker per phase)
-        phases_path = outdir / f"seasons_{args.year}.ics"
+        phases_path = outdir / seasons_filename(args.year)
         write_semester_blocks(phases, filename=str(phases_path))
         print(f"✅ Wrote: {phases_path}")
 
         # 2) Focus blocks, one file per month
-        for path in write_monthly_files(focus_events, outdir / "focus", "focus", CALNAME_FOCUS):
+        for path in write_monthly_files(focus_events, outdir / FOCUS_DIR, FOCUS_PREFIX, CALNAME_FOCUS):
             print(f"✅ Wrote: {path}")
 
         # 3) Meeting slots, one file per month
-        for path in write_monthly_files(meeting_events, outdir / "meetings", "meetings", CALNAME_MEETINGS):
+        for path in write_monthly_files(meeting_events, outdir / MEETINGS_DIR, MEETINGS_PREFIX, CALNAME_MEETINGS):
             print(f"✅ Wrote: {path}")
 
     # 4) Emoji Clock (EBI48)
     if not args.no_ebi48:
-        ebi48_path = outdir / f"emoji_clock_{args.year}.ics"
+        ebi48_path = outdir / emoji_clock_filename(args.year)
         if args.dry_run:
             print("\n🧿 Emoji Clock: (skipping file writes in dry-run)")
         else:

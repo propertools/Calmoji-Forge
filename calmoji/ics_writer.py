@@ -15,6 +15,7 @@ from calmoji.constants import (
     MAX_EVENTS_PER_FILE,
 )
 from calmoji.ebi48 import get_emoji_for_time
+from calmoji.filenames import seasons_filename
 from calmoji.ics_text import escape_ics_text
 from calmoji.types import Event, Phase
 from calmoji.uid import generate_uid
@@ -95,14 +96,20 @@ def fold_lines(lines: Sequence[str]) -> str:
 
 def unfold_ics_lines(content: str) -> list[str]:
     """
-    Unfold ICS text by joining continuation lines.
-    Lines beginning with a single space are continuations of the prior line.
-    """
-    raw_lines = content.splitlines()
-    unfolded: list[str] = []
+    Unfold ICS text into logical lines (RFC 5545 §3.1).
 
-    for i, line in enumerate(raw_lines):
-        if line.startswith(" "):
+    Lines are split where iCalendar splits them: on CRLF, and, for leniency, on a bare LF.
+    Nothing else is a line break, whatever Python's str.splitlines() thinks: a value may
+    safely contain U+2028, U+2029, U+0085, and so on. A line that starts with a single space
+    or tab is a continuation of the previous line, and that one character is dropped.
+    """
+    physical = content.replace("\r\n", "\n").split("\n")
+    if physical and physical[-1] == "":
+        physical.pop()  # the newline that ends the last line doesn't start another
+
+    unfolded: list[str] = []
+    for i, line in enumerate(physical):
+        if line.startswith((" ", "\t")):
             if not unfolded:
                 raise ValueError(f"Malformed ICS: continuation line on line {i + 1} with no prior content.")
             unfolded[-1] += line[1:]
@@ -191,7 +198,7 @@ def write_semester_blocks(phases: Sequence[Phase], filename: Optional[str] = Non
 
     if filename is None:
         anchor_year = phases[0].start.year if phases[0].start else "unknown"
-        filename = f"output/seasons_{anchor_year}.ics"
+        filename = f"output/{seasons_filename(anchor_year)}"
 
     events: list[Event] = []
     for phase in phases:
@@ -226,7 +233,6 @@ def write_ebi48_layer(target_path: str | Path, year: int, alignment: str) -> Non
       HH:05 or HH:35 UTC on the alignment's anchor date for the year.
     - Each repeats daily: RRULE:FREQ=DAILY;UNTIL=<next anchor minus one second>.
       No COUNT, so the repeat limit some calendar apps impose never applies.
-    - One all-day 🗝️ EBI48 Glyph Key event on the anchor date.
 
     EBI48 is UTC-fixed. It should not shift with local time.
     """
@@ -242,19 +248,6 @@ def write_ebi48_layer(target_path: str | Path, year: int, alignment: str) -> Non
     ]
 
     events: list[Event] = []
-
-    # All-day glyph key marker
-    events.append(
-        Event(
-            start=anchor,
-            end=anchor + datetime.timedelta(days=1),
-            summary="EBI48 Glyph Key",
-            description="Symbolic marker: this calendar encodes canonical EBI48 slot glyphs (UTC-fixed).",
-            emoji="🗝️",
-            all_day=True,
-            uid=generate_uid(dt=anchor, label="glyph-key", namespace="ebi48"),
-        )
-    )
 
     for hour in range(24):
         for minute in (5, 35):

@@ -43,7 +43,6 @@ def test_focus_blocks_respect_active_weekdays():
         week,
         label="Week Check",
         phase_emoji="📆",
-        include_glyph_key=False,
     )
 
     active_days = set(ACTIVE_WEEKDAYS or DEFAULT_ACTIVE_WEEKDAYS)
@@ -67,7 +66,6 @@ def test_each_active_day_has_expected_focus_block_count():
         week,
         label="Two Day",
         phase_emoji="📆",
-        include_glyph_key=False,
     )
 
     events_by_day: dict[datetime.date, list] = {}
@@ -115,7 +113,6 @@ def test_last_focus_block_is_block_12_with_torii_in_summary():
         week,
         label="Final Block",
         phase_emoji="🌀",
-        include_glyph_key=False,
     )
 
     final_event = sorted(events, key=lambda e: e.start)[-1]
