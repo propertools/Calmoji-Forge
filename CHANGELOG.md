@@ -20,6 +20,31 @@ nothing else needs re-importing. v0.1.3 also makes calmoji's output-folder
 safety do what its docs promised, finishes the two small fixes the README
 listed, and adds 2037–2039 to the release bundle, after an external review.
 
+### Added
+
+- **2037, 2038 and 2039 in the release bundle**, so people can test their
+  calendar apps for the year-2038 problem (32-bit time runs out on 19 January
+  2038). The bundle now covers 2026–2039. 2026–2036 import everywhere. **Proton
+  Calendar accepts events only up to the end of 2037**, so Proton users can use
+  the 2026–2036 folders, plus 2037 in the `calendar` alignment: 2037 `academic`
+  runs into 2038, and 2038–2039 are past Proton's limit. Every other app
+  should take them all. Every file in every one of those years stays within
+  the size budget.
+
+### Removed
+
+- **The 🗝️ Glyph Key events.** Both kinds are gone: the weekly all-day
+  `🗝️ Glyph Key — <phase> — <YYYY-Www>` events in the focus files, and the
+  yearly all-day `🗝️ EBI48 Glyph Key` event in the Emoji Clock file. They were
+  leftovers from an earlier attempt at the EBI48 layer and carry no
+  information people need. The Emoji Clock is now exactly its 48 events, all
+  recurring daily, and still carries its `COMMENT` that links to
+  `EBI48-README.md`. No other event changed: the same summaries, descriptions
+  and UIDs, and the same file names. For anyone using the Python API, the
+  `include_glyph_key` and `include_weekly_glyph_keys` options are gone, and
+  the `--dry-run` table no longer has a Glyph Keys column. See the note at the
+  top about re-importing.
+
 ### Fixed
 
 - **calmoji now deletes only files it can prove are its own.** In v0.1.2, a
@@ -70,6 +95,14 @@ listed, and adds 2037–2039 to the release bundle, after an external review.
 - The README says calmoji recognises its own files by name, and that anything
   else in its folder, including another `.ics` file, makes it refuse without
   deleting anything.
+- A new README section, "Testing for the year-2038 problem", explains what the
+  limit is, which files span 19 January 2038, how to import them into a
+  Sandbox calendar to test your own calendar app, and how to report one that
+  fails (Proton's documented limit doesn't count). Every fact in it is checked
+  against the generated files by a test.
+- The README and the bundle README now credit
+  [Proper Tools SRL](https://propertools.be) with a link, and both have an
+  "Upgrading from v0.1.1 or v0.1.2" note.
 
 ## [0.1.2] — 2026-10-04
 

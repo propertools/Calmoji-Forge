@@ -510,3 +510,37 @@ def test_the_upgrade_note_for_people_who_already_imported(name):
     assert "the old 🗝️ markers" in text and "stay in your calendars until you re-import" in text
     assert "delete the 🧠 Focus — Open and 🧿 Emoji Clock calendars and import fresh" in text
     assert "Nothing else changed, so nothing else needs re-importing." in text
+
+
+def test_the_0_1_3_changelog_has_the_new_sections_and_keeps_the_old_content():
+    text = " ".join(read("CHANGELOG.md").split())
+    section = text[text.index("## [0.1.3]") : text.index("## [0.1.2]")]
+
+    # new in this revision
+    assert "### Added" in section and "### Removed" in section and "### Documentation" in section
+    assert "2037, 2038 and 2039 in the release bundle" in section
+    assert "year-2038 problem" in section
+    assert "Proton Calendar accepts events only up to the end of 2037" in section
+    assert "2026–2036 folders, plus 2037 in the `calendar` alignment" in section
+    assert "2038–2039 are past Proton's limit" in section
+    assert "The 🗝️ Glyph Key events." in section
+    assert "leftovers from an earlier attempt at the EBI48 layer" in section
+    assert "exactly its 48 events" in section
+    assert "`include_glyph_key` and `include_weekly_glyph_keys` options are gone" in section
+    assert 'A new README section, "Testing for the year-2038 problem"' in section
+    assert "[Proper Tools SRL](https://propertools.be)" in section
+
+    # still there from the first revision
+    assert "calmoji now deletes only files it can prove are its own" in section
+    assert "only people who generate files themselves with v0.1.2" in section
+    assert "`unfold_ics_lines` splits only where iCalendar does" in section
+    assert "`escape_ics_text` rejects control characters" in section
+    assert "`macOS /usr/bin/python3`" in section and "required check" in section
+
+    # the order Keep a Changelog likes: additions first, then removals, then fixes
+    assert (
+        section.index("### Added")
+        < section.index("### Removed")
+        < section.index("### Fixed")
+        < section.index("### Documentation")
+    )
