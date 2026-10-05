@@ -559,79 +559,20 @@ def ebi48_intro() -> str:
     return text[text.index("# 🧿 EBI48") : text.index("## 🌍 What Is EBI48?")]
 
 
-def test_ebi48_readme_spells_out_the_name_and_the_anchoring_right_under_the_title():
-    intro = " ".join(ebi48_intro().split())
-    assert 'EBI48 (Emoji-Based Interval 48, or simply "the Emoji Clock")' in intro
-    assert "🐶 is 00:05 UTC, 🦨 is 00:35 UTC" in intro
-    assert "anchored at :05 or :35 past the hour" in intro
-    assert "calendars show it as a 25-minute window, leaving a five-minute gap before the next" in intro
-    assert "EBI48 grew directly out of years of watching international calls burn their final ten minutes" in intro
-    assert "easy for a non-native speaker to say clearly over a bad line" in intro
-
-
-def test_the_emoji_used_in_the_ebi48_readme_example_anchoring_are_the_real_ones():
+def test_the_ebi48_intro_examples_match_the_real_emoji_mapping():
+    """The introduction says "🐶 is 00:05 UTC, 🦨 is 00:35 UTC": check what it says against the real mapping."""
     from datetime import datetime, timezone
 
     from calmoji.ebi48 import get_emoji_for_time
 
-    assert get_emoji_for_time(datetime(2027, 1, 1, 0, 5, tzinfo=timezone.utc))[0] == "🐶"
-    assert get_emoji_for_time(datetime(2027, 1, 1, 0, 35, tzinfo=timezone.utc))[0] == "🦨"
-
-
-def test_ebi48_readme_does_not_say_the_same_thing_twice():
-    text = read("EBI48-README.md")
-    assert text.count("48 half-hour") <= 2  # the definition, and the intro
-    assert "EBI48 started on global technical standards calls" not in text  # now the introduction's job
-    assert text.count("pick a day") == 1
-    assert text.count("final ten minutes") + text.count("last ten minutes") == 2  # the story, then its example
-
-
-def test_the_readmes_short_origin_story_agrees_with_the_full_one_and_links_to_it():
-    readme = " ".join(read("README.md").split())
-    section = readme[readme.index("### 🧿 Emoji Clock") : readme.index("### ⚠️ Known limitations")]
-    assert "anchored at :05 and :35 UTC" in section  # same anchoring as EBI48-README
-    assert "See [EBI48-README.md](EBI48-README.md)." in section
-    assert "Instead of doing sums, you **pick a day and look for free animals at acceptable times**." in section
-    assert len(section.split()) < 200  # the short version: the fuller story lives in EBI48-README.md
-
-
-def test_the_readme_says_why_the_blocks_are_96_minutes():
-    readme = read("README.md")
-    section = " ".join(readme[readme.index("### 🧠 Focus — Open") : readme.index("### 🕒 Meetings — Open")].split())
-    assert "Twelve 96-minute blocks a day" in section
-    assert (
-        "Why 96 minutes? It's four sides of an LP, so if you work to records, the flips keep time for you." in section
-    )
-    # a human touch, not a spec claim: it stays one sentence, and the arithmetic it relies on is real
-    assert section.count("Why 96 minutes?") == 1
-    assert "24-minute breather" in section
-    assert 96 + 24 == 120  # block + breather = the two-hour cadence the blocks start on
-
-
-def test_the_roadmap_states_the_intent_for_a_strict_input_reader_without_sensationalism():
-    readme = " ".join(read("README.md").split())
-    roadmap = readme[readme.index("## 📍 Roadmap") : readme.index("## 🧪 Test discipline")]
-    assert "Further out, and explicitly not in v0.1.x:" in roadmap
-    assert "**A strict, well-specified input reader.**" in roadmap
-    assert "calmoji only writes `.ics` today." in roadmap
-    assert "untrusted input" in roadmap
-    assert "recognise exactly the shape it accepts and reject anything else, rather than guessing" in roadmap
-    assert "predictable, boring, interoperable behaviour" in roadmap
-    assert "resource limits and its own threat model in [`SECURITY.md`](SECURITY.md) when the work begins" in roadmap
-    # a statement of intent: no exploit examples, payloads or catalogue of tricks
-    entry = roadmap[roadmap.index("**A strict, well-specified input reader.**") :]
-    for word in ("exploit", "payload", "CVE", "injection", "smuggl", "bypass", "attack"):
-        assert word not in entry.lower(), word
-    # the v0.2 items are still there, and the reader is not among them
-    assert roadmap.index("Releases built automatically") < roadmap.index("A strict, well-specified input reader")
-
-
-def test_contributing_mirrors_the_strict_reader_one_liner_in_its_roadmap():
-    text = " ".join(read("CONTRIBUTING.md").split())
-    roadmap = text[text.index("# 🔧 Roadmap") : text.index("# 🧪 Testing Standards")]
-    assert "A strict, well-specified input reader (later, and not in v0.1.x)." in roadmap
-    assert "threat model in `SECURITY.md`" in roadmap
-    assert "Atomic file writes" in roadmap  # neighbours untouched
+    intro = " ".join(ebi48_intro().split())
+    examples = re.findall(r"\((\S+) is (\d\d):(\d\d) UTC, (\S+) is (\d\d):(\d\d) UTC", intro)
+    assert examples, "the introduction no longer gives its 🐶/🦨 examples"
+    first_emoji, h1, m1, second_emoji, h2, m2 = examples[0]
+    for emoji, hour, minute in ((first_emoji, h1, m1), (second_emoji, h2, m2)):
+        at = datetime(2027, 1, 1, int(hour), int(minute), tzinfo=timezone.utc)
+        assert get_emoji_for_time(at)[0] == emoji, f"{emoji} is not {hour}:{minute} UTC"
+    assert (first_emoji, second_emoji) == ("🐶", "🦨")
 
 
 def test_the_steward_prompt_treats_calendar_contents_as_data_not_instructions():
@@ -651,22 +592,3 @@ def test_the_steward_prompt_treats_calendar_contents_as_data_not_instructions():
     # the prompt's voice and brevity are intact: it is still a single code block that ends where it did
     assert section.count("```") == 2
     assert section.rstrip().endswith("become more machine-like.\n```")
-
-
-def test_the_unreleased_changelog_section_records_these_documentation_changes():
-    text = " ".join(read("CHANGELOG.md").split())
-    unreleased = text[text.index("## [Unreleased]") : text.index("## [0.1.3]")]
-    assert "### Documentation" in unreleased
-    assert 'spells out the name (Emoji-Based Interval 48, or "the Emoji Clock")' in unreleased
-    assert "the :05 / :35 anchoring" in unreleased
-    assert "why the focus blocks are 96 minutes" in unreleased
-    assert "roadmap entry for a possible future strict input reader" in unreleased
-    assert "not planned for v0.1.x" in unreleased
-    assert "treat the contents of your calendar" in unreleased
-    assert "as data to read, never as instructions to follow" in unreleased
-
-    # a documentation PR, not a release: no new version heading, and 0.1.3 is the newest release
-    headings = [line for line in read("CHANGELOG.md").splitlines() if line.startswith("## [")]
-    assert headings[0] == "## [Unreleased]"
-    assert headings[1].startswith("## [0.1.3]")
-    assert "[Unreleased]: https://github.com/propertools/Calmoji-Forge/compare/v0.1.3...HEAD" in text

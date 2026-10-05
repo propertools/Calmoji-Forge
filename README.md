@@ -215,8 +215,8 @@ know which mode you're in. Names come from the academic year; in the
 
 Twelve 96-minute blocks a day, starting every two hours on the hour (UTC),
 every day of the week, with a 24-minute breather between them. Why 96
-minutes? It's four sides of an LP, so if you work to records, the flips keep
-time for you. Each block has a theme glyph: 🧠 deep thinking, ✍️ writing,
+minutes? That's four sides of vinyl, a double album, so if you work to
+records, the flips keep time for you. Each block has a theme glyph: 🧠 deep thinking, ✍️ writing,
 📚 reading, 🔧 technical, 🧾 admin, 📞 comms, 🪞 reflection, 📈 analysis,
 🎨 creative, 🛠️ maintenance, ⚖️ decisions, ⛩️ closure. You'll only ever use
 the few that fall in your waking hours. They come one file per month.
