@@ -11,10 +11,14 @@ they do.
 
 ## [0.1.3] — 2026-10-05
 
-**The calendar files are unchanged.** v0.1.3 produces byte-for-byte the same
-`.ics` files as v0.1.2, so there is nothing to re-import. It makes calmoji's
-output-folder safety do what its docs promised, and finishes the two small
-fixes the README listed, after an external review.
+**The only change to calendar content is that the 🗝️ Glyph Key events are
+gone.** Every other event, and every file name, is byte-for-byte what v0.1.2
+produced. **If you already imported calmoji files,** the old 🗝️ markers stay
+in your calendars until you re-import. To drop them, delete the 🧠 Focus —
+Open and 🧿 Emoji Clock calendars and import fresh. Nothing else changed, so
+nothing else needs re-importing. v0.1.3 also makes calmoji's output-folder
+safety do what its docs promised, finishes the two small fixes the README
+listed, and adds 2037–2039 to the release bundle, after an external review.
 
 ### Fixed
 

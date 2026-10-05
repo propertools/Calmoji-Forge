@@ -70,6 +70,14 @@ identifiers changed (see the
 [changelog](https://github.com/propertools/Calmoji-Forge/blob/main/CHANGELOG.md)),
 so importing over the old ones would leave you with duplicates.
 
+### Upgrading from v0.1.1 or v0.1.2
+
+Only one thing changed in the calendars you already have: the old 🗝️ markers
+(one a week in 🧠 Focus — Open, one a year in 🧿 Emoji Clock) are gone from
+the new files, but they stay in your calendars until you re-import. To drop
+them, delete the 🧠 Focus — Open and 🧿 Emoji Clock calendars and import
+fresh. Nothing else changed, so nothing else needs re-importing.
+
 ---
 
 ## Good to know in v@VERSION@

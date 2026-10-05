@@ -113,12 +113,6 @@ Tips for v0.1:
 * To refresh a layer later, delete that calendar, recreate it and import
   again. Your own plans live in your own calendars and are untouched.
 
-### Upgrading from v0.1.0
-
-Delete the old calmoji calendars and import fresh. Event times and
-identifiers changed (see the [changelog](CHANGELOG.md)), so importing over
-the old ones would leave you with duplicates.
-
 Subscribable feeds that update themselves, and a website to browse and
 download individual files, are coming in v0.2. See the
 [roadmap](#-roadmap).
@@ -126,6 +120,21 @@ download individual files, are coming in v0.2. See the
 Calendar apps differ in small ways. If something doesn't work in yours,
 please [open an issue](https://github.com/propertools/Calmoji-Forge/issues);
 we'll fold what we learn into these docs.
+
+### Upgrading from v0.1.0
+
+Delete the old calmoji calendars and import fresh. Event times and
+identifiers changed (see the [changelog](CHANGELOG.md)), so importing over
+the old ones would leave you with duplicates.
+
+### Upgrading from v0.1.1 or v0.1.2
+
+Only one thing changed in the calendars you already have: the old 🗝️
+markers (one a week in 🧠 Focus — Open, one a year in 🧿 Emoji Clock) are
+gone from the new files, but they stay in your calendars until you
+re-import. To drop them, delete the 🧠 Focus — Open and 🧿 Emoji Clock
+calendars and import fresh. Nothing else changed, so nothing else needs
+re-importing.
 
 ### 🕰 Testing for the year-2038 problem
 

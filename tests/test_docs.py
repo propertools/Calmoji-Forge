@@ -423,7 +423,10 @@ def test_the_bundle_readme_template_makes_no_claim_about_deleting_calmojis_folde
 def test_the_changelog_says_who_could_have_been_affected_and_who_could_not():
     text = " ".join(read("CHANGELOG.md").split())
     section = text[text.index("## [0.1.3]") : text.index("## [0.1.2]")]
-    assert "The calendar files are unchanged" in section
+    assert "The only change to calendar content is that the 🗝️ Glyph Key events are gone" in section
+    assert "The calendar files are unchanged" not in section
+    assert "delete the 🧠 Focus — Open and 🧿 Emoji Clock calendars and import fresh" in section
+    assert "Nothing else changed, so nothing else needs re-importing." in section
     assert "family.ics" in section and "symlink" in section
     assert "only people who generate files themselves with v0.1.2" in section
     assert "The downloadable calendars and the release bundle are unaffected" in section
@@ -491,4 +494,19 @@ def test_proper_tools_is_credited_with_a_link():
 @pytest.mark.parametrize("name", ["README.md", "docs/PLAYBOOK.md", "scripts/bundle_README.md.in", "EBI48-README.md"])
 def test_user_facing_docs_no_longer_mention_the_glyph_key(name):
     text = read(name)
-    assert "Glyph Key" not in text and "\U0001f5dd" not in text, name
+    assert "Glyph Key" not in text, name
+
+    # The key emoji may appear only where the upgrade note names the old markers.
+    outside_the_upgrade_note = re.sub(
+        r"### Upgrading from v0\.1\.1 or v0\.1\.2\n.*?(?=\n###? |\Z)", "", text, flags=re.S
+    )
+    assert "\U0001f5dd" not in outside_the_upgrade_note, name
+
+
+@pytest.mark.parametrize("name", ["README.md", "scripts/bundle_README.md.in"])
+def test_the_upgrade_note_for_people_who_already_imported(name):
+    text = " ".join(read(name).split())
+    assert "### Upgrading from v0.1.1 or v0.1.2" in text
+    assert "the old 🗝️ markers" in text and "stay in your calendars until you re-import" in text
+    assert "delete the 🧠 Focus — Open and 🧿 Emoji Clock calendars and import fresh" in text
+    assert "Nothing else changed, so nothing else needs re-importing." in text
