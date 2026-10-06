@@ -13,8 +13,7 @@ they do.
 
 - `EBI48-README.md` gains a short "Cultural sensitivity" note on how the
   symbol set was screened, what the symbols do and don't stand for, and an
-  invitation to send corrections and informed objections. The overlapping
-  items in its "Design Constraints" lists are folded into it.
+  invitation to send corrections and informed objections.
 - `EBI48-README.md` now spells out the name (Emoji-Based Interval 48, or "the
   Emoji Clock"), where EBI48 came from and how its emoji were chosen, and the
   :05 / :35 anchoring: each interval shows in a calendar as a 25-minute window

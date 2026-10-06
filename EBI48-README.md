@@ -157,17 +157,20 @@ This makes it safe for:
 
 The glyph set was curated to ensure:
 
+- Shapes and colours that stay clearly apart, whatever the screen
 - Low semantic collision
+- Meanings that travel, with nothing awkward waiting for you in another
+  language
 - Clear Unicode support across major platforms
 
 Avoided:
 
 - Skin-tone modifiers
 - Flag sequences
+- Symbols tied to a party, cause or campaign
 - Lookalike duplicates
 
-Cultural meaning, pronounceability and visual distinctiveness are covered
-under Cultural sensitivity, below.
+How the set was screened for culture is described just below.
 
 ### Cultural sensitivity
 
