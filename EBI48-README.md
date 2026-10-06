@@ -169,6 +169,20 @@ Avoided:
 - Politicized symbols
 - Lookalike duplicates
 
+### Cultural sensitivity
+
+The EBI48 symbol set was chosen with cultural sensitivity in mind. Symbols
+were screened for obvious religious, political, sexual, derogatory or
+culturally loaded meanings; for pronounceability across languages; and for
+visual distinctiveness across common emoji renderings. No finite review can
+guarantee that a symbol is neutral in every culture or context, so
+corrections and informed objections are welcome: please
+[open an issue](https://github.com/propertools/Calmoji-Forge/issues). The
+symbols identify UTC intervals, not places, peoples or cultures. When a
+symbol appears beside a city in calmoji's meeting slots, that's the clock,
+not a comment: 🐸 sits beside Brussels only because it's the 12:05 UTC slot
+(14:05 local time in summer), not as a remark on anyone's cuisine.
+
 ---
 
 ## 🛠 Developer Notes
