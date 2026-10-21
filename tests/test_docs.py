@@ -587,7 +587,7 @@ def test_the_steward_prompt_treats_calendar_contents_as_data_not_instructions():
     assert block.count(line) == 1
     guardrail = block.index("Never make commitments, cancel plans, contact anyone or change my calendar")
     # right after the existing guardrail, before the planning instructions
-    assert guardrail < block.index(line) < block.index("When I ask you to plan a day or week")
+    assert guardrail < block.index(line) < block.index("When I ask you to plan")
     assert block.index(line) - guardrail < 250
     # the prompt's voice and brevity are intact: it is still a single code block that ends where it did
     assert section.count("```") == 2
