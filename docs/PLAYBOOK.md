@@ -203,6 +203,9 @@ calmoji's events are marked *free*, so they don't make you look busy. Your
 app may copy that setting when you duplicate; if you want others to see
 you as unavailable, set the claimed copy to *busy*.
 
+Work that needs several blocks? Claim them as a chain, all with the same
+title, so the whole thread shows up when you search.
+
 ![One day with The Map on: the open 09:00 focus block beside its claimed copy, renamed 🎯 Write the volunteer onboarding guide, and the Havana 🦉 meeting slot beside the call booked from it](img/claiming.png)
 *Claiming: the open 09:00 block has been duplicated into
 🎯 Focus — Claimed and renamed to the task. The Havana 🦉 slot at 18:35
@@ -234,11 +237,25 @@ If you decide not to do something after all, change its 🎯 to 🕊️:
 Released, not failed. Letting something go on purpose is a decision, and
 it's worth as much as a ✅.
 
+If you worked on it and it continues, change its 🎯 to 🧵 and claim the
+next block straight away, with the same title:
+
+> 🧵 Draft the grant budget
+
+In the new block's description, leave a breadcrumb: where you stopped, and
+the first thing to do next. A thread is easy to pick up when it tells you
+where to pull.
+
 ### Roll forward
 Search for 🎯. Anything in the past that still has a 🎯 slipped. That's
 fine: move it to a free focus block, or release it. If the same 🎯 keeps
 slipping, it's telling you something: make it smaller, hand it to someone,
 or let it go. No guilt, just rescheduling.
+
+Search for 🧵 too. Every 🧵 should have a 🎯 after it with the same title;
+one that doesn't is a dropped thread. And a thread that runs on for weeks
+is a project in disguise: break it into steps, or ask whether it's still
+worth it.
 
 ### Review
 Search for ✅ to see everything you finished this week. Mark notable wins
@@ -256,7 +273,8 @@ counts. On a bad day, those are the ones worth finding.
 Sometimes the calendar goes untouched for weeks, or months. Nothing is
 broken; the past simply stopped being updated.
 
-When you come back, search for 🎯 and sort what's left into four piles:
+When you come back, search for 🎯 and 🧵 and sort what's left into four
+piles:
 
 * **Done:** mark it ✅.
 * **Merge:** fold it into something you're doing now.
@@ -364,8 +382,8 @@ How calmoji works:
   time zones).
 - Commitments hold what I've chosen. I claim time by copying an open block
   into 🎯 Focus — Claimed or one of my meetings calendars.
-- Titles carry status: 🎯 planned, ✅ done, 🕊️ released (deliberately let
-  go), 🏆 a win worth remembering.
+- Titles carry status: 🎯 planned, 🧵 worked on and continuing, ✅ done,
+  🕊️ released (deliberately let go), 🏆 a win worth remembering.
 - The rule underneath: small loose ends that take a few minutes get done
   today; commitments get a time.
 
@@ -394,6 +412,8 @@ When we plan:
   borrowing capacity from tomorrow.
 - When a 🎯 keeps slipping, help me resize, delegate, defer or deliberately
   drop it, rather than carrying it forward forever.
+- When a 🧵 has no next 🎯, or the same 🧵 runs on for weeks, point it out
+  and help me break it down, reschedule it or let it go.
 - When I'm stuck or overwhelmed, shrink the next step until it's easy to
   start.
 - Check the plan for collisions: overlapping events, missing meals, travel
