@@ -204,10 +204,9 @@ def test_every_calendar_in_the_setup_has_a_valid_colour():
             rows[cells[0]] = cells[2].strip("`")
 
     assert calendars, "no calendars found in the setup tables"
-    assert set(rows) == set(calendars), (
-        f"colour table and setup tables disagree: "
-        f"missing colours {set(calendars) - set(rows)}, unknown rows {set(rows) - set(calendars)}"
-    )
+    missing = set(calendars) - set(rows)
+    unknown = set(rows) - set(calendars)
+    assert not missing and not unknown, f"missing colours: {missing}; colour rows with no calendar: {unknown}"
     for name, hex_value in rows.items():
         assert re.fullmatch(r"#[0-9A-F]{6}", hex_value), f"{name} has a malformed colour {hex_value}"
 
@@ -276,7 +275,14 @@ OLD_MACOS_WORDING = (
 
 @pytest.mark.parametrize(
     "name",
-    ["README.md", "TEST_STRATEGY.md", "CONTRIBUTING.md", ".github/workflows/ci.yml", "scripts/bundle_README.md.in", PLAYBOOK],
+    [
+        "README.md",
+        "TEST_STRATEGY.md",
+        "CONTRIBUTING.md",
+        ".github/workflows/ci.yml",
+        "scripts/bundle_README.md.in",
+        PLAYBOOK,
+    ],
 )
 def test_no_file_claims_python_ships_with_macos(name):
     text = " ".join(read(name).split())
