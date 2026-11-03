@@ -74,6 +74,7 @@ you thinking about it.
 | ✈️ Travel | Trips and time away |
 | 🪷 Feast Days | Birthdays, anniversaries, days worth marking |
 | ⚖️ Hard Deadlines | Legal, tax, regulatory: the truly immovable |
+| 🌿 For Me | Rest, recovery, and things that refill you |
 
 ### Sandbox
 
@@ -106,6 +107,7 @@ their own palettes, so pick the nearest match to each hex value.
 | ✈️ Travel | Carrot | `#E88A33` |
 | 🪷 Feast Days | Cobalt | `#2C3DAB` |
 | ⚖️ Hard Deadlines | Raspberry | `#AB2F56` |
+| 🌿 For Me | Honey | `#D4A017` |
 | 🧪 Sandbox | Olive | `#7E7323` |
 
 In Proton Calendar, the whole set looks like this:
@@ -120,6 +122,8 @@ The thinking behind it, if you'd rather choose your own:
   share one blue on purpose: what you've chosen should look steady.
 * **Life is warm:** people, places and favours in purple, pink, rose and
   orange.
+* **Rest gets the one warm gold nothing else uses,** so it's impossible
+  to miss, and hard to quietly book over.
 * **Deep red is only for the truly immovable.** Use alarm colours
   sparingly, so they keep their meaning.
 * **The sandbox gets a colour you use nowhere else,** so you notice when
@@ -165,6 +169,30 @@ later that the afternoon has gone.
 
 ---
 
+## Early or late
+
+**There are only two choices: early or late. On time is an accident.**
+
+Plans built for the case where everything goes right are built on
+wishful thinking. The train is late, the call runs over, the form times
+out, the last ten per cent takes as long as the first ninety. If your
+plan only works when nothing goes wrong, it doesn't work.
+
+So plan for early, on purpose:
+
+* **Submit before the deadline,** not at it. A day early is a day of
+  margin for whatever breaks.
+* **Plan travel for the slower option,** and arrive with time to spare.
+* **Leave gaps between blocks,** so one thing running over doesn't topple
+  the rest of the day.
+
+Being early costs a few minutes. Being late costs the thing you were
+late for, and often the next thing too. calmoji's meeting slots already
+start at :05 for this reason; the same idea runs through the whole
+pattern.
+
+---
+
 ## The weekly loop
 
 ### Plan
@@ -193,6 +221,12 @@ and a daily stop marker that says, loudly, that work is done. Make them
 recurring and set them to *busy*, so ad hoc invitations can't quietly eat
 them. Focus fills what's left, not the other way round.
 
+Anchors include people too: a standing call with friends is as fixed as a
+meal, not slack to borrow from. After a hard deadline, put a rest day on
+the calendar as firmly as the deadline itself, in 🌿 For Me. And anything
+that needs recovery, like training runs, works better spread out than
+stacked.
+
 ### Claim focus
 Pick an open focus block in your waking hours and **duplicate** it into
 🎯 Focus — Claimed. Rename it to the task, starting with 🎯:
@@ -217,6 +251,10 @@ Duplicate an open meeting slot into 🤝 Meetings — One-off or
 people, the agenda and the call link. Slots are fixed in UTC, so your
 calendar shows them in your local time; open a slot's description to see
 when it falls in that city, summer and winter.
+
+For anything in person, plan to be early: block the travel both ways,
+using the slower option (bad weather, public transport) plus ten
+minutes. On a good day, you get the time back.
 
 ### Work
 Switch The Map off. Your calendar now shows only what you've
@@ -353,6 +391,9 @@ Two things worth checking in any app:
 * **Hidden layers.** When you share a view of your calendar, with a person
   or an assistant, remember what you've switched off. A hidden
   👨‍👩‍👧 Family layer looks exactly like free time.
+* **Optional events.** Some events are drop-ins, like a working group you
+  only sometimes join. Mark them *free*, or add ◌ to the title, so they
+  don't look like clashes when you plan.
 
 When you find a quirk, or a workaround, please
 [open an issue](https://github.com/propertools/Calmoji-Forge/issues) and
@@ -386,6 +427,8 @@ How calmoji works:
   🕊️ released (deliberately let go), 🏆 a win worth remembering.
 - The rule underneath: small loose ends that take a few minutes get done
   today; commitments get a time.
+- There are only two choices, early or late; on time is an accident. Plan
+  for early.
 
 Your job is not to get more work out of me. It's to help me use time
 deliberately, keep my commitments legible, and stay well enough to do good
@@ -418,6 +461,12 @@ When we plan:
   start.
 - Check the plan for collisions: overlapping events, missing meals, travel
   time, and anything after my stop marker.
+- For anything in person, ask for both the usual and the bad-weather
+  travel time, and block the slower one.
+- Treat standing time with friends as an anchor, not as slack.
+- After a hard deadline, protect a recovery day before filling the gap.
+- When you propose changes, list them per day as create, change or
+  delete, so I can apply them one at a time.
 - If I've set a budget for a kind of work, ask at the weekly review how I
   did against it.
 - State times in my local time zone, and label them.
