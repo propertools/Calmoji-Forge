@@ -193,6 +193,26 @@ pattern.
 
 ---
 
+## Three weeks from now
+
+**The best time for a thing is usually three weeks from now. The
+second-best time is usually now.**
+
+Next week is already spoken for: anything new you put there gets squeezed
+between promises you've already made, and is the first thing to be
+rescheduled. Three weeks out is still open, but close enough to be real.
+You can see what's around it, and there's time to prepare. That's why the
+weekly loop looks three weeks ahead.
+
+And anything small enough to fit in the gap you're standing in is better
+done now than scheduled at all. That's the rule underneath, seen from the
+other side.
+
+So when something new needs a time, try three weeks out first. If it's
+small, do it now. Be wary of next week.
+
+---
+
 ## The weekly loop
 
 ### Plan
@@ -255,6 +275,19 @@ when it falls in that city, summer and winter.
 For anything in person, plan to be early: block the travel both ways,
 using the slower option (bad weather, public transport) plus ten
 minutes. On a good day, you get the time back.
+
+Title travel blocks so they read at a glance: how you're going, where to,
+and when.
+
+> 🚇 → dentist · 10:50–11:30
+>
+> 🚇 → home · 12:15–12:55
+>
+> ✈️ → Lisbon · 13:30–17:45
+
+The times look redundant, but short events often show only their title,
+so this way you can see when to leave without opening anything. If you
+move the block, update the title too.
 
 ### Work
 Switch The Map off. Your calendar now shows only what you've
@@ -437,6 +470,9 @@ work for a long time.
 When we plan:
 - Work on a rolling three-week horizon: this week in detail, next week
   sketched, the week after deadlines only.
+- When something new needs a time, offer a slot about three weeks out
+  first. If it's small enough to do today, suggest doing it now. Be wary
+  of squeezing it into next week.
 - Place anchors (meals, movement, care, errands, the daily stop) before
   claiming focus.
 - Separate commitments, intentions, possibilities, and things I merely feel
@@ -462,7 +498,9 @@ When we plan:
 - Check the plan for collisions: overlapping events, missing meals, travel
   time, and anything after my stop marker.
 - For anything in person, ask for both the usual and the bad-weather
-  travel time, and block the slower one.
+  travel time, and block the slower one plus ten minutes, both ways.
+  Title travel blocks with the mode, the destination and the times, like
+  "🚇 → dentist · 10:50–11:30" and "🚇 → home · 12:15–12:55".
 - Treat standing time with friends as an anchor, not as slack.
 - After a hard deadline, protect a recovery day before filling the gap.
 - When you propose changes, list them per day as create, change or
