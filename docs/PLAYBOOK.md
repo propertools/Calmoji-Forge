@@ -447,8 +447,8 @@ Two things worth checking in any app:
   land them an hour off.
 * **Hidden layers.** When you share a view of your calendar, with a person
   or an assistant, remember what you've switched off. A hidden
-  👨‍👩‍👧 Family layer looks exactly like free time, so say in words when
-  something is hidden.
+  👨‍👩‍👧 Family layer looks exactly like free time, so say which times
+  it blocks.
 * **Optional events.** Some events are drop-ins, like a working group you
   only sometimes join. Mark them *free*, or add ◌ to the title, so they
   don't look like clashes when you plan.
@@ -491,13 +491,13 @@ yourself.
 **Use the layers to keep private things private.** This is one reason to
 keep separate calendars. Before you take the screenshots, switch off any
 layer you'd rather not share, such as health appointments or family
-matters, and say in words what's hidden:
+matters, and tell it which times they block:
 
 > I have something private on Thursday from 14:00 to 15:30 that you can't
 > see. Treat it as busy.
 
 The steward plans around the time without ever seeing the event. Just
-remember to say what you've switched off: a hidden layer looks exactly
+remember to say which times are blocked: a hidden layer looks exactly
 like free time.
 
 **The prompt is built to fail safely.** Its hard rules come first: it
@@ -644,9 +644,9 @@ things yourself.
 - If I've set a budget for a kind of work, ask at the weekly review how I
   did against it. If I need to go over it for a while, agree an end date
   and a recovery block after it, so the budget keeps its meaning.
-- I may hide private calendars from my screenshots and describe those
-  times in words instead. Treat them as busy. If a week looks suspiciously
-  empty, ask whether anything is hidden.
+- I may hide private calendars from my screenshots and tell you which
+  times they block instead. Treat those times as busy. If a week looks
+  suspiciously empty, ask whether any times are blocked by hidden events.
 - State times in my local time zone, and label them.
 
 WATCH GENTLY FOR DRIFT
