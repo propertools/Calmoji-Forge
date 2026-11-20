@@ -14,13 +14,18 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Linux jobs are pinned to ubuntu-24.04 rather than ubuntu-latest:
+# ubuntu-latest moved to 26.04, which has no Python 3.9 build, and we keep
+# 3.9 because it is the python3 in Apple's Command Line Tools. Pinning also
+# stops the build image changing underneath us.
+
 jobs:
   lint:
     # Lint and type-check against the oldest supported Python (3.9, the
     # python3 in Apple's Command Line Tools), so local runs on a Mac with
     # those tools resolve the same tool versions as CI.
     name: lint + types (Python 3.9)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -41,7 +46,7 @@ jobs:
 
   test:
     name: test (Python ${{ matrix.python-version }})
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -71,7 +76,7 @@ jobs:
     # Same inputs -> byte-identical output: run twice, and across the
     # oldest and newest supported Pythons. Straight from source, no install.
     name: determinism check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: test
     steps:
       - uses: actions/checkout@v4
@@ -93,6 +98,7 @@ jobs:
   macos-usr-bin-python3:
     # The promise: works with the /usr/bin/python3 on a Mac (on a fresh Mac that is a
     # stub, and the real Python 3.9 arrives with Apple's Command Line Tools).
+    # Deliberately macos-latest: the promise is about a current Mac.
     name: macOS /usr/bin/python3
     runs-on: macos-latest
     steps:
