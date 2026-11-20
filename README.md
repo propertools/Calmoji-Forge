@@ -177,14 +177,20 @@ The short version:
    calendars, you can delete and re-import calmoji's layers any time.
    Nothing you've claimed is lost.
 5. **Layers are privacy controls.** When scheduling with someone, show only
-   the layers they should see.
+   the layers they should see. The same goes for screenshots you share
+   with an AI assistant: switch off what's private, and describe the time
+   in words instead.
 
 The full pattern, with a suggested set of calendars and the weekly loop,
 is in **[docs/PLAYBOOK.md](docs/PLAYBOOK.md)**. It's a starting point, not a
 rulebook: start small and adapt it.
 
-Prefer to plan with an AI assistant? See the
-[playbook](docs/PLAYBOOK.md#optional-an-ai-agenda-steward).
+Prefer to plan with an AI assistant? The
+[playbook](docs/PLAYBOOK.md#optional-an-ai-agenda-steward) has a steward
+prompt you can paste in. The first time, it checks how far you've got
+with the setup and helps you finish, one step at a time. If something
+doesn't work for you, or you have an idea, it can help you write it up
+as an issue.
 
 ---
 
