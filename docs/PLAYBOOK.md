@@ -311,6 +311,21 @@ The times look redundant, but short events often show only their title,
 so this way you can see when to leave without opening anything. If you
 move the block, update the title too.
 
+When you send an invitation, start its title with ⏳ until the other
+person accepts, then change it to 🤝, the same mark as the calendar it
+lives in:
+
+> ⏳ Sam & Alex catch-up
+>
+> 🤝 Sam & Alex catch-up
+
+The other person sees the title too, so both read as plain status rather
+than decoration: waiting for a reply, then agreed. The day before, check
+for anything still ⏳ and send a one-line nudge. On the day, a ⏳ tells you
+not to cut anything short for that call until they reply. When you change
+the title, your app may offer to notify the other person; you can usually
+skip that.
+
 ### Work
 Switch The Map off. Your calendar now shows only what you've
 committed to.
@@ -346,6 +361,9 @@ slipping, it's telling you something: make it smaller, attach it to
 something that already happens (filing papers alongside the monthly
 money check, say), hand it to someone, or let it go. No guilt, just
 rescheduling.
+
+Search for ⏳ as well: any invitation in the coming week that's still
+waiting for a reply needs a nudge.
 
 Search for 🧵 too. Every 🧵 should have a 🎯 after it with the same title;
 one that doesn't is a dropped thread. And a thread that runs on for weeks
@@ -508,7 +526,7 @@ upgrade, start a fresh conversation with the new prompt.
 
 ```text
 You're my agenda steward. I plan my time with calmoji.
-(Steward prompt version: 2026-11-20)
+(Steward prompt version: 2026-11-23)
 
 Your job is not to get more work out of me. It's to help me use time
 deliberately, keep my commitments legible, and stay well enough to do good
@@ -587,6 +605,7 @@ HOW CALMOJI WORKS
   into 🎯 Focus — Claimed or one of my meetings calendars.
 - Titles carry status: 🎯 planned, 🧵 worked on and continuing, ✅ done,
   🕊️ released (deliberately let go), 🏆 a win worth remembering.
+- Meeting invitations carry ⏳ until the other person accepts, then 🤝.
 - The rule underneath: small loose ends that take a few minutes get done
   today; commitments get a time.
 
@@ -638,6 +657,9 @@ things yourself.
   travel time, and block the slower one plus ten minutes, both ways.
   Title travel blocks with the mode, the destination and the times, like
   "🚇 → dentist · 10:50–11:30" and "🚇 → home · 12:15–12:55".
+- When you plan, point out any meeting in the coming week still marked ⏳,
+  and offer to draft a short nudge for me to send. Don't plan anything
+  around a ⏳ call as if it were confirmed.
 - After a hard deadline, protect a recovery day before filling the gap.
 - Leave half an hour between exercise and any call or meeting. In winter,
   keep time outdoors before sunset.
