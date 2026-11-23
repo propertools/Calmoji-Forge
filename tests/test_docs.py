@@ -260,6 +260,17 @@ def test_the_steward_prompt_puts_its_hard_rules_before_its_defaults():
     assert "calmoji needs no AI" in " ".join(section.split())
 
 
+def test_the_playbook_and_the_prompt_agree_on_the_invitation_markers():
+    text = read(PLAYBOOK)
+    guide = " ".join(text[: text.index(STEWARD_HEADING)].split())
+    section = steward_section()
+    block = " ".join(section[section.index("```text\n") : section.rindex("```")].split())
+    assert "> ⏳ Sam & Alex catch-up" in text and "> 🤝 Sam & Alex catch-up" in text
+    assert "start its title with ⏳ until the other person accepts, then change it to 🤝" in guide
+    assert block.count("Meeting invitations carry ⏳ until the other person accepts, then 🤝.") == 1
+    assert block.count("still marked ⏳") == 1
+
+
 def test_the_steward_prompt_carries_a_dated_version():
     section = steward_section()
     block = section[section.index("```text\n") : section.rindex("```")]
