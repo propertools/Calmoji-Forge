@@ -269,6 +269,8 @@ def test_the_playbook_and_the_prompt_agree_on_the_invitation_markers():
     assert "start its title with ⏳ until the other person accepts, then change it to 🤝" in guide
     assert block.count("Meeting invitations carry ⏳ until the other person accepts, then 🤝.") == 1
     assert block.count("still marked ⏳") == 1
+    assert "confirmed or freed by the end of the day before" in guide
+    assert block.count("confirmed or freed by the end of the day before") == 1
 
 
 def test_the_steward_prompt_carries_a_dated_version():
