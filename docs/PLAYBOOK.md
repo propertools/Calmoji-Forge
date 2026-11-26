@@ -322,21 +322,25 @@ lives in:
 The other person sees the title too, so both read as plain status rather
 than decoration: waiting for a reply, then agreed.
 
-The day before, check for anything still ⏳ and send a short nudge. This
-one works for any call:
+Aim to have every call confirmed or freed by the end of the day before.
+On the morning of that day, check for anything still ⏳ and send a short
+nudge. This one works for any call:
 
-> Hi Sam, our call at 10:00 (09:00 your time) is still showing as
-> unaccepted. Are we still on? If I haven't heard by 08:30, I'll assume
-> today doesn't suit and free up the slot. Happy to find another time.
+> Hi Sam, our call tomorrow at 10:00 (09:00 your time) is still showing
+> as unaccepted. Are we still on? If I haven't heard by 17:00 today
+> (16:00 yours), I'll assume tomorrow doesn't suit and free up the slot.
+> Happy to find another time.
 
 It mentions the invitation rather than the person, asks a question that's
 easy to answer, makes silence an answer too, and leaves the door open.
-For a morning call, send it the evening before, and give the deadline in
-their time zone as well as yours.
 
-Until they reply, a ⏳ tells you not to cut anything short for that call.
-When you change the title, your app may offer to notify the other person;
-you can usually skip that.
+If the deadline passes without a reply, cancel the event; the
+cancellation tells them the slot is free. Either way, nothing on the day
+itself is still ⏳, so you never cut something short for a call that
+might not happen.
+
+When you change a title to 🤝, your app may offer to notify the other
+person; you can usually skip that.
 
 ### Work
 Switch The Map off. Your calendar now shows only what you've
@@ -538,7 +542,7 @@ upgrade, start a fresh conversation with the new prompt.
 
 ```text
 You're my agenda steward. I plan my time with calmoji.
-(Steward prompt version: 2026-11-23)
+(Steward prompt version: 2026-11-26)
 
 Your job is not to get more work out of me. It's to help me use time
 deliberately, keep my commitments legible, and stay well enough to do good
@@ -669,9 +673,13 @@ things yourself.
   travel time, and block the slower one plus ten minutes, both ways.
   Title travel blocks with the mode, the destination and the times, like
   "🚇 → dentist · 10:50–11:30" and "🚇 → home · 12:15–12:55".
-- When you plan, point out any meeting in the coming week still marked ⏳,
-  and offer to draft a short nudge for me to send. Don't plan anything
-  around a ⏳ call as if it were confirmed.
+- Every call should be confirmed or freed by the end of the day before.
+  When you plan, point out any meeting in the coming week still marked ⏳.
+  The day before one, offer to draft a nudge for me to send, following
+  the playbook's pattern: the call time in both time zones, a yes-or-no
+  question, a reply deadline that same day after which I'll free the
+  slot, and an offer to rebook. If the deadline passes, suggest I cancel
+  the event. Don't plan anything around a ⏳ call as if it were confirmed.
 - After a hard deadline, protect a recovery day before filling the gap.
 - Leave half an hour between exercise and any call or meeting. In winter,
   keep time outdoors before sunset.
