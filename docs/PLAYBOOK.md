@@ -320,11 +320,23 @@ lives in:
 > 🤝 Sam & Alex catch-up
 
 The other person sees the title too, so both read as plain status rather
-than decoration: waiting for a reply, then agreed. The day before, check
-for anything still ⏳ and send a one-line nudge. On the day, a ⏳ tells you
-not to cut anything short for that call until they reply. When you change
-the title, your app may offer to notify the other person; you can usually
-skip that.
+than decoration: waiting for a reply, then agreed.
+
+The day before, check for anything still ⏳ and send a short nudge. This
+one works for any call:
+
+> Hi Sam, our call at 10:00 (09:00 your time) is still showing as
+> unaccepted. Are we still on? If I haven't heard by 08:30, I'll assume
+> today doesn't suit and free up the slot. Happy to find another time.
+
+It mentions the invitation rather than the person, asks a question that's
+easy to answer, makes silence an answer too, and leaves the door open.
+For a morning call, send it the evening before, and give the deadline in
+their time zone as well as yours.
+
+Until they reply, a ⏳ tells you not to cut anything short for that call.
+When you change the title, your app may offer to notify the other person;
+you can usually skip that.
 
 ### Work
 Switch The Map off. Your calendar now shows only what you've
